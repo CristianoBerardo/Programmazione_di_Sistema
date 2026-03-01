@@ -31,8 +31,6 @@ _minted*/
 # latexmk
 *.pdfsync
 
-# Output PDF
-Programmazione_di_Sistema.pdf
 
 # VS Code
 .vscode/
