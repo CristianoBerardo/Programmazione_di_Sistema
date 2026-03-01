@@ -32,9 +32,6 @@ _minted*/
 *.pdfsync
 
 
-# VS Code
-.vscode/
-
 # OS
 Thumbs.db
 .DS_Store
