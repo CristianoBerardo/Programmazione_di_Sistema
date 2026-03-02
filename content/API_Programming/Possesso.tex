@@ -74,7 +74,7 @@ Quando una variabile viene inizializzata, essa prende il possesso del relativo v
      \item La variabile originale cessa di possedere il valore, ovvero non è più responsabile della sua distruzione ed il possesso passa alla variabile di destinazione, o parametro della funzione invocata
      \item La variabile originale rimane allocata fino a quando non termina la sua visibilità, ovvero al chiusura del blocco in cui è stata definita
      \item Accessi in \textbf{lettura} porteranno ad \textbf{errori di compilazione}
-     \item Accessi in \textbf{scrittura}
+     \item Accessi in \textbf{scrittura} alla variabile originale avranno successo e ne riabiliteranno la lettura (si crea un nuovo oggetto)
      \item La variabile destinazione conterrà una copia bit a bit del valore originale, ammesso che il compilatore non riesca a riusare i dati originali al loro posto
  \end{itemize}
 
@@ -217,7 +217,7 @@ println!("s2: {}", s2); //hi
 
 \section{Box<T> - Puntatore con possesso}
 
-Una variabile locale è SEMPRE allocata sullo stack. Questo si estende di una quantità pari alla dimensione del valore che deve essere memorizzato nella variabile. Quando la variabile esce dal proprio scope sintattico, lo stack di contrae ed il valore viene rilasciato.
+Una variabile locale è SEMPRE allocata sullo stack. Questo si estende di una quantità pari alla dimensione del valore che deve essere memorizzato nella variabile. Quando la variabile esce dal proprio scope sintattico, lo stack si contrae ed il valore viene rilasciato.
 
 In alcune situazioni:
 
@@ -354,7 +354,7 @@ Mentre esiste un riferimento mutabile
 I riferimenti sono implementati diversamente in base al tipo puntato
 
 \begin{itemize}
-    \item Puntatori semplici, se il compratole conosce la dimensione del dato puntato
+    \item Puntatori semplici, se il compilatore conosce la dimensione del dato puntato
     \item Puntatore + dimensione (fat pointer), se la dimensione del dato è solo nota in fase di esecuzione. Nelle stringhe tolgo il problema di inserire il terminatore.
     \item Puntatore doppio, se il tipo di dato puntato è noto solo per l'insieme di tratti che implementa. Esempi File o Socket.
 \end{itemize}

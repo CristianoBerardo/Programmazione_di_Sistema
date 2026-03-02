@@ -16,7 +16,9 @@
     "**/*.glo": true,
     "**/*.glo-abr": true,
     "**/*.gls": true,
+    "**/*.gls-abr": true,
     "**/*.glg": true,
+    "**/*.glg-abr": true,
     "**/*.ist": true,
     "**/*.data.minted": true,
     "_minted*/": true
@@ -56,5 +58,9 @@
       "tools": ["pdflatex", "pdflatex"]
     }
   ],
-  "latex-workshop.latex.recipe.default": "pdflatex -> biber -> makeglossaries -> pdflatex x2"
+  "latex-workshop.latex.recipe.default": "pdflatex -> biber -> makeglossaries -> pdflatex x2",
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
+  "latex-workshop.latex.search.rootFiles.include": [
+    "Programmazione_di_Sistema.tex"
+  ]
 }

@@ -1,0 +1,112 @@
+\section{Memoria}
+
+Processo: eseguibile in esecuzione
+
+\section{Address binding}
+
+Chi scrive il sw non vuole vedere l'indizzzo di memoria, vogliamo utilizzare 
+indirzzi simboloci e solo il compilatore poi li trasformerà in indirizzi relativi.
+
+Il linker decide di riallocare a valori assoluti.
+
+\section{Binding di instruzoni e dati in memoria}
+
+\begin{itemize}
+  \item compile time: Codice assoluto, si se lo sai già, altrimetni ricolabile. Sto generando l'eseguibile.
+  \item Load time: Fare il binding se gli inidirzzi non sono ancora decisi, generare un indirizzo assoluto o rilocabile e usato in fase di esecuzione. 
+  \item Execution time: Facciamo il binding sono quando il codice viene eseguito fino a che il processo viene mandato in esecuzione ed eventualmente spostato. La CPU al minimo deve offrire il Base register + limit register, deve dare supporto.
+\end{itemize}
+
+\section{Memory Managment Unit - MMU}
+Ho bisogno di un metodo per passare dalla memoria virtuale alla memoria hardware e viceversa, il processo di binding.
+
+
+Hanno senso quando sono diversi in fase di esecuzione.
+
+Address space porzione di memoria in cui un programma può utilizzare
+
+\subsection{Logico}
+
+
+\subsection{Fisico}
+
+\section{MMU}
+
+La MMU è all'interno della CPU. Se si legge l'assembler leggiamo indizzi logici.
+
+Ci sono diversi tipi di MMU dipende da chi hai assunto e da quando vuoi pagare un chip.
+
+\subsection{Relocatin register}
+Se abbiamo una MMU basta su Relocation register, gli ind logici sono bound al volo, quando hai ritatrsato il binding all'esecuzione.
+è un sommatore + un comparatore per bloccare se usi ind troppo gandi.
+
+
+Ma non tutto funziona così. Dynamic loading e dynamic loading
+
+\subsection{dynamic loading}
+il pgm non è detto che può stare tutto in memoria. e non è detto che lo voglio tutto subito in memoria.
+perché? spero una parte o tutto non mi serva più (è fatta in sequenza cencetto di località soazione e temprale).
+
+Non solo, 10K istruzioni, e parti completamente non utilizzate! ho deciso di sottoutilizzare il pgm oppure per righe di codice per errori etc
+
+perché non carichiamo solo quando una routine viene chiamata? 
+
+Poi ci consenza di non caricare le cose che non ci servo, ma il loader deve intervenire qunado serve e il file deve essere possibile caricarlo in momenti diversi(vedi il formato)
+Utile quanndo il codice è grande e quando statisticamente alcune parti non venfono utilizzate.
+
+
+Per quanto riguarda il linking, cosa significa? Il linker fa statico o dimatico?
+
+\subsection{static linking}
+
+Le lib se sono statiche le agganci tutte. Difetto eseguibili grossi.
+
+\subsection{dynamic linking}
+Non fai tutto i link, ti tieni degli indizizzi non risolti (eg non sai la pintf etc) quando li saprai in fase di load o fase di esecuzione.
+
+cosa c'è al posto di printf, si mette un indizzo ad una routine , stoub, che fa finta di essere la routne e una volta arrivata li viene rimpizzata con la printf vera.
+
+Utile per le librerie! è utile per le shared librery, una sola copia in memoria e tutti la vedono: tutti la trovano già caricata MA spazio di indirizzamento condiviso!!
+Problema del versioning delle liberie shared, normalmente basta aggiornare.
+
+\section{Excutable file}
+
+è un file binario e non di testo, con 1 header, codice e dati e sa symbol table
+
+Linking: prndi un insieme di pgm (file oggetto) e crea un file caricabile (image) nel fare questo risolvi i simboli
+Loading: copiare l'eseguibile in memoria e magari agganciarlo con pezzo già caricate (eg shared library) e aggiorarre gli indizzi se sevono.
+
+\section{Classic unix}
+
+Unix usa gcc.
+Il linker vive dentro gcc
+il loader è parte di una system call Exec
+ static loading
+
+\section{Dynaimc loading} 
+
+
+\section{Programm-controlled dynamic loading}
+Il programma si gestisce il load e sostituisce lui. Serve solo la LOAD e non la printf!
+Eg la printf nella prima chiamata carica la printf e tutte le altre volte invece già presa dalla memoria.
+
+
+\subsection{linker assidted dynamic loading}
+
+Lo stab myPrintf fa subito la load e in qualche modo il loader/linker verrà poi sostituita in esecuzione, l'indirizzo cambia e c'è più inerzione con il sistema operativo.
+Cmabia la responsabilità di chi fa qualcosa
+
+\section{shared library}
+Alcuni pgm usano la stessa fuznone, quindi facciamo un load automatico e il linker non la risolve. se il loader è già in memoria la carico altrimenti lo eseguito
+
+
+\section{dynamic linking}
+Il linking non è fatto in memoria completo e verrà fatto quello completo a livello di esecuzione.
+
+Solo dire caricamenot dinamico degli indizii un po' alla volta. 
+il dynamic loading significa solo che il programma non è caricato tutto in una botta ma un po' alla volta.
+
+
+\section{Dynamic shared library}
+sono le dll che usano sia dynamic loading e linking. Che sono l'altro apsetto della medaglia diq aundo abbiamo deciso che ci sono delgi indizii fisici e logici.
+
