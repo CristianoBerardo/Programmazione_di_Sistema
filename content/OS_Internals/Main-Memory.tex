@@ -1,112 +1,1144 @@
-\section{Memoria}
+\section{Memoria principale}
 
-Processo: eseguibile in esecuzione
+Questa sezione illustra un modo efficace per sfruttare al meglio le potenzialità dell'hardware acquistato; il focus principale è sulla \textbf{memoria principale}.
+
+Abbiamo visto all'inizio del corso che un programma, memorizzato su disco, diventa un processo quando viene caricato dal disco nella memoria principale.
+
+La memoria principale e i registri sono gli unici supporti di memorizzazione a cui la CPU può accedere direttamente. L'unità di memoria vede solo un flusso di:
+
+\begin{itemize}
+    \item indirizzi + richieste di lettura, oppure
+    \item indirizzo + dati e richieste di scrittura
+\end{itemize}
+
+La CPU può accedere ai registri in uno, o meno, cicli di clock. Tuttavia, quando la CPU preleva dati dalla memoria principale utilizza molti cicli di clock, causando uno \textbf{stall}.
+
+La cache si trova tra la memoria principale e i registri e funge da buffer per i dati necessari; non vogliamo un collo di bottiglia.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/memory.png}
+    \caption{Le memorie in sintesi: prezzi e latenze superiori al 2024}
+\end{figure}
+
+Tutti questi livelli contengono una copia dello stesso sottoinsieme di dati.
+
+\subsection{Località spaziale e località temporale}
+
+\paragraph{Località spaziale:} La località spaziale significa che se leggo una variabile o un'istruzione in memoria, tutti i dati vicini hanno un'alta probabilità di essere prelevati; pertanto quando leggo, leggo in blocchi e memorizzo tutti i dati in una memoria più veloce.
+
+\paragraph{Località temporale:} La località temporale significa che se leggo una variabile, la probabilità di riutilizzarla è alta; pertanto la mantengo nella memoria cache.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/spatial.png}
+\end{figure}
+
+\section{Relocation problem}
+
+Si presenta il problem rialocation: l'indirizzo deve essere scalato a quello reale.
+Come si può risolvere?
+
+\begin{itemize}
+  \item Si guardando i riferimenti e calcolo l'indirizzo. Difficile
+  \item Carico gli indirizzi così come sono. Fattibile utilizzando l'hardware.
+\end{itemize}
+
+Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un sommatore e in assembly non cambia nulla. 
+
+\section{Protezione} 
+
+Quando un programma è diventato un processo, tutti o gran parte dei suoi dati sono memorizzati nella memoria principale. Abbiamo bisogno di un modo per:
+
+\begin{itemize}
+    \item Suddividere la memoria tra tutti i processi;
+    \item Garantire che un processo possa accedere solo agli indirizzi del proprio spazio di indirizzamento\footnote{Lo spazio di indirizzamento, o address space, è una porzione di memoria cui un programma può utilizzare}.
+\end{itemize}
+
+Possiamo risolvere questi problemi utilizzando una coppia di registri \textbf{base} e \textbf{limite} che definiscono lo spazio di indirizzamento logico di un processo.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/adsfcv.png}
+\end{figure}
+
+\newpage
+\subsection{Protezione degli indirizzi hardware}
+La CPU/OS deve verificare ogni accesso alla memoria generato in modalità utente per
+assicurarsi che sia compreso tra base e limite per quell'utente.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/ikadsuhc.png}
+\end{figure}
+
+Le istruzioni per caricare i registri base e limite sono privilegiate.
+
 
 \section{Address binding}
 
-Chi scrive il sw non vuole vedere l'indizzzo di memoria, vogliamo utilizzare 
-indirzzi simboloci e solo il compilatore poi li trasformerà in indirizzi relativi.
-
+Quando scriviamo un programma C, vogliamo utilizzare indirizzi simbolici e vogliamo che sia il compilatore a trasformarlo in indirizzi relativi. 
 Il linker decide di riallocare a valori assoluti.
 
-\section{Binding di instruzoni e dati in memoria}
+Inoltre non ci vogliamo preoccupare di dove si trovi la variabile in memoria, sappiamo solo che è in memoria.
 
 \begin{itemize}
-  \item compile time: Codice assoluto, si se lo sai già, altrimetni ricolabile. Sto generando l'eseguibile.
-  \item Load time: Fare il binding se gli inidirzzi non sono ancora decisi, generare un indirizzo assoluto o rilocabile e usato in fase di esecuzione. 
-  \item Execution time: Facciamo il binding sono quando il codice viene eseguito fino a che il processo viene mandato in esecuzione ed eventualmente spostato. La CPU al minimo deve offrire il Base register + limit register, deve dare supporto.
+    \item Gli indirizzi nel codice sorgente sono tipicamente simbolici;
+    \item Gli indirizzi nel codice compilato vengono legati a indirizzi rilocabili, es. «14 byte dall'inizio di questo modulo» invece di «byte 14»;
+    \item Il linker o il loader legherà gli indirizzi rilocabili ad indirizzi assoluti;
+    \item Ogni binding mappa uno spazio di indirizzamento in un altro.
 \end{itemize}
 
+Nel codice compilato vediamo quanta memoria è necessaria e non l'indirizzo codificato in modo fisso. Vogliamo un binding dinamico e non statico.
+
+
+\subsubsection{Binding di istruzioni e dati in memoria}
+
+% \begin{itemize}
+%   \item compile time: Codice assoluto, si se lo sai già, altrimetni ricolabile. Sto generando l'eseguibile.
+%   \item Load time: Fare il binding se gli inidirzzi non sono ancora decisi, generare un indirizzo assoluto o rilocabile e usato in fase di esecuzione. 
+%   \item Execution time: Facciamo il binding sono quando il codice viene eseguito fino a che il processo viene mandato in esecuzione ed eventualmente spostato. La CPU al minimo deve offrire il Base register + limit register, deve dare supporto.
+% \end{itemize}
+
+Quando un programma viene avviato, il SO assegna una quantità di spazio al programma.
+
+Il binding degli indirizzi di istruzioni e dati agli indirizzi di memoria può avvenire in tre momenti diversi:
+
+\begin{itemize}
+    \item \textbf{Tempo di compilazione:} Se la posizione in memoria è nota a priori, può essere generato codice assoluto; è necessario ricompilare il codice se la posizione iniziale cambia. Utilizzato nei sistemi embedded o nei sistemi in cui i task sono noti a priori e sono in numero ridotto. Sto generando l'eseguibile;
+
+    \item \textbf{Tempo di caricamento:} Deve essere generato codice rilocabile se la posizione in memoria non è nota al momento della compilazione. Strategia ampiamente utilizzata nei vecchi SO o in sistemi semplici come le lavastoviglie...
+
+    \item \textbf{Tempo di esecuzione:} Il binding viene ritardato al runtime se il processo può essere spostato durante l'esecuzione da un segmento di memoria a un altro; richiede supporto hardware (es. registri base e limite) ed è lo standard de facto per i SO moderni.
+
+\end{itemize}
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/rwefbg.png}
+    \caption{Elaborazione in più fasi di un programma utente}
+\end{figure}
+
 \section{Memory Managment Unit - MMU}
-Ho bisogno di un metodo per passare dalla memoria virtuale alla memoria hardware e viceversa, il processo di binding.
+Ho bisogno di un modo per passare dalla memoria virtuale alla memoria hardware e viceversa, soprattutto quando gli indirizzi sono diversi in fase di esecuzione. Introduciamo il concetto di \textbf{processo di binding}.
 
 
-Hanno senso quando sono diversi in fase di esecuzione.
+\subsection{Spazio di indirizzamento logico vs. fisico}
+Il concetto di spazio di indirizzamento logico legato a un separato \textbf{spazio di indirizzamento fisico} è centrale per una corretta gestione della memoria.
 
-Address space porzione di memoria in cui un programma può utilizzare
+\begin{itemize}
+    \item \textbf{Indirizzo logico} - generato dalla CPU; detto anche \textbf{indirizzo virtuale};
+    \item \textbf{Indirizzo fisico} - indirizzo visto dall'unità di memoria.
+\end{itemize}
 
-\subsection{Logico}
+Gli indirizzi logici e fisici coincidono negli schemi di binding al tempo di compilazione e di caricamento, ma differiscono nello schema di binding al tempo di esecuzione.
 
-
-\subsection{Fisico}
 
 \section{MMU}
 
-La MMU è all'interno della CPU. Se si legge l'assembler leggiamo indizzi logici.
 
-Ci sono diversi tipi di MMU dipende da chi hai assunto e da quando vuoi pagare un chip.
+Dispositivo hardware, all'interno della CPU, che al runtime mappa gli indirizzi virtuali, che troviamo nel codice assembler, in indirizzi fisici.
+Vi sono diverse tipologie di MMU, anche in base a quanto vogliamo far pagare il chip.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/hnter.png}
+\end{figure}
+
+Il registro base ora si chiama registro di rilocazione. Il valore nel registro di rilocazione viene aggiunto a ogni indirizzo
+generato da un processo utente nel momento in cui viene inviato alla memoria.
+
+Questo componente è composto da un sommatore ed un comparatore per bloccare il programma se vuole utilizzare spazi non facenti parti della sua address space.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/mmuu.png}
+\end{figure}
+
+Il programma utente lavora con indirizzi logici; \textbf{non vede mai i veri indirizzi fisici}. Se si stampa l'indirizzo di una variabile in un programma C, viene stampato il valore logico e non il valore fisico reale!
 
 \subsection{Relocatin register}
-Se abbiamo una MMU basta su Relocation register, gli ind logici sono bound al volo, quando hai ritatrsato il binding all'esecuzione.
-è un sommatore + un comparatore per bloccare se usi ind troppo gandi.
+Se abbiamo una MMU basta su Relocation register, gli indirizzi logici sono calcolati al volo. Viene utilizzato quando si vuole ritardare il binding fino alla fase di esecuzione.
+
+Oltre che al relocation register ci sono anche altri modi per caricare nuovi processi in memoria: \textbf{Dynamic loading}  e \textbf{dynamic loading}
+
+\subsection{Dynamic loading}
+% il pgm non è detto che può stare tutto in memoria. e non è detto che lo voglio tutto subito in memoria.
+% perché? spero una parte o tutto non mi serva più (è fatta in sequenza cencetto di località soazione e temprale).
+
+% Non solo, 10K istruzioni, e parti completamente non utilizzate! ho deciso di sottoutilizzare il pgm oppure per righe di codice per errori etc
+
+% perché non carichiamo solo quando una routine viene chiamata? 
+
+% Poi ci consenza di non caricare le cose che non ci servo, ma il loader deve intervenire qunado serve e il file deve essere possibile caricarlo in momenti diversi(vedi il formato)
+% Utile quanndo il codice è grande e quando statisticamente alcune parti non venfono utilizzate.
 
 
-Ma non tutto funziona così. Dynamic loading e dynamic loading
+% Per quanto riguarda il linking, cosa significa? Il linker fa statico o dimatico?\newline
 
-\subsection{dynamic loading}
-il pgm non è detto che può stare tutto in memoria. e non è detto che lo voglio tutto subito in memoria.
-perché? spero una parte o tutto non mi serva più (è fatta in sequenza cencetto di località soazione e temprale).
+L'intero programma non deve necessariamente essere tutto in memoria per essere eseguito. Una routine, parte del programma, non vorremmo venisse caricata finché non viene chiamata.
+Questo migliora l'utilizzo dello spazio in memoria. Il loader perciò deve intervenire quando vogliamo caricare nuove porzioni di codice. 
+Questo fa si che il programma deve essere organizzato ed avere un formato specifico. 
 
-Non solo, 10K istruzioni, e parti completamente non utilizzate! ho deciso di sottoutilizzare il pgm oppure per righe di codice per errori etc
-
-perché non carichiamo solo quando una routine viene chiamata? 
-
-Poi ci consenza di non caricare le cose che non ci servo, ma il loader deve intervenire qunado serve e il file deve essere possibile caricarlo in momenti diversi(vedi il formato)
-Utile quanndo il codice è grande e quando statisticamente alcune parti non venfono utilizzate.
+Il SO può aiutare fornendo librerie per implementare il caricamento dinamico.
 
 
-Per quanto riguarda il linking, cosa significa? Il linker fa statico o dimatico?
+% \subsection{static linking}
 
-\subsection{static linking}
+% Le lib se sono statiche le agganci tutte. Difetto eseguibili grossi.
 
-Le lib se sono statiche le agganci tutte. Difetto eseguibili grossi.
+% \subsection{dynamic linking}
+% Non fai tutto i link, ti tieni degli indizizzi non risolti (eg non sai la pintf etc) quando li saprai in fase di load o fase di esecuzione.
 
-\subsection{dynamic linking}
-Non fai tutto i link, ti tieni degli indizizzi non risolti (eg non sai la pintf etc) quando li saprai in fase di load o fase di esecuzione.
+% cosa c'è al posto di printf, si mette un indizzo ad una routine , stoub, che fa finta di essere la routne e una volta arrivata li viene rimpizzata con la printf vera.
 
-cosa c'è al posto di printf, si mette un indizzo ad una routine , stoub, che fa finta di essere la routne e una volta arrivata li viene rimpizzata con la printf vera.
+% Utile per le librerie! è utile per le shared librery, una sola copia in memoria e tutti la vedono: tutti la trovano già caricata MA spazio di indirizzamento condiviso!!
+% Problema del versioning delle liberie shared, normalmente basta aggiornare.
 
-Utile per le librerie! è utile per le shared librery, una sola copia in memoria e tutti la vedono: tutti la trovano già caricata MA spazio di indirizzamento condiviso!!
-Problema del versioning delle liberie shared, normalmente basta aggiornare.
+\subsection{Static vs Dynamic Linking}
+\textbf{Linking statico} - librerie di sistema e codice di programma sono tutti combinati dal loader nell'immagine del programma binario in fase di compilazione. Problema: grandi eseguibili.
 
-\section{Excutable file}
+\noindent\textbf{Linking dinamico} - il linking è rinviato fino alla fase di esecuzione del programma.\newline
 
-è un file binario e non di testo, con 1 header, codice e dati e sa symbol table
+Non tutti gli indirizzi sono risolti prima dell'esecuzione, pensiamo ad esempio alla printf, possiamo assumere che molti porgrammi in esecuzione possono volerla utilizzare.
+Per questo motivo teniamo ancora indirizzi non risolti e inseriamo piccolo frammento di codice, chiamati \textit{stub}, utilizzato per individuare la routine di libreria residente in memoria.
+A runtime lo stub, che faceva finta di essere la routine corretta, viene sostituita con l'indirizzo della routine corretta e la esegue a runtime.
 
-Linking: prndi un insieme di pgm (file oggetto) e crea un file caricabile (image) nel fare questo risolvi i simboli
-Loading: copiare l'eseguibile in memoria e magari agganciarlo con pezzo già caricate (eg shared library) e aggiorarre gli indizzi se sevono.
+Il sistema operativo verifica se la routine si trova nello spazio di indirizzamento del processo e, in caso contrario, la aggiunge.
 
-\section{Classic unix}
+\paragraph{}
+\textbf{Vantaggio}: Il dynamic linking è particolarmente utile per le librerie, il sistema è anche visto come ``shared libraries'' (librerie condivise); questo consente di ottenere programmi di dimensioni ridotte poiché le librerie sono condivise tra più programmi.
+Tutti i programmi, tranne il primo che la caricherà, la troveranno già in memoria.
 
-Unix usa gcc.
-Il linker vive dentro gcc
-il loader è parte di una system call Exec
- static loading
-
-\section{Dynaimc loading} 
-
-
-\section{Programm-controlled dynamic loading}
-Il programma si gestisce il load e sostituisce lui. Serve solo la LOAD e non la printf!
-Eg la printf nella prima chiamata carica la printf e tutte le altre volte invece già presa dalla memoria.
+Questo metodo offre inoltre un ulteriore vantaggio: quando Windows aggiorna una libreria, è necessario ricompilare solamente quella e non tutte le altre applicazioni che la utilizzano.
 
 
-\subsection{linker assidted dynamic loading}
+\textbf{Problemi}: Spazio condiviso e versioning delle librerie, normalmente viene risolto tramite l'aggiornamento di queste ultime.
 
-Lo stab myPrintf fa subito la load e in qualche modo il loader/linker verrà poi sostituita in esecuzione, l'indirizzo cambia e c'è più inerzione con il sistema operativo.
-Cmabia la responsabilità di chi fa qualcosa
-
-\section{shared library}
-Alcuni pgm usano la stessa fuznone, quindi facciamo un load automatico e il linker non la risolve. se il loader è già in memoria la carico altrimenti lo eseguito
-
-
-\section{dynamic linking}
-Il linking non è fatto in memoria completo e verrà fatto quello completo a livello di esecuzione.
-
-Solo dire caricamenot dinamico degli indizii un po' alla volta. 
-il dynamic loading significa solo che il programma non è caricato tutto in una botta ma un po' alla volta.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/ddl.png}
+    \caption{File .dll}
+\end{figure}
 
 
-\section{Dynamic shared library}
-sono le dll che usano sia dynamic loading e linking. Che sono l'altro apsetto della medaglia diq aundo abbiamo deciso che ci sono delgi indizii fisici e logici.
+% ------------- inizio BOH ----------
 
+% \section{Excutable file}
+
+% è un file binario e non di testo, con 1 header, codice e dati e sa symbol table
+
+% Linking: prndi un insieme di pgm (file oggetto) e crea un file caricabile (image) nel fare questo risolvi i simboli
+% Loading: copiare l'eseguibile in memoria e magari agganciarlo con pezzo già caricate (eg shared library) e aggiorarre gli indizzi se sevono.
+
+% \section{Classic unix}
+
+% Unix usa gcc.
+% Il linker vive dentro gcc
+% il loader è parte di una system call Exec
+%  static loading
+
+% \section{Dynaimc loading} 
+
+
+% \section{Programm-controlled dynamic loading}
+% Il programma si gestisce il load e sostituisce lui. Serve solo la LOAD e non la printf!
+% Eg la printf nella prima chiamata carica la printf e tutte le altre volte invece già presa dalla memoria.
+
+
+% \subsection{linker assidted dynamic loading}
+
+% Lo stab myPrintf fa subito la load e in qualche modo il loader/linker verrà poi sostituita in esecuzione, l'indirizzo cambia e c'è più inerzione con il sistema operativo.
+% Cmabia la responsabilità di chi fa qualcosa
+
+% \section{shared library}
+% Alcuni pgm usano la stessa fuznone, quindi facciamo un load automatico e il linker non la risolve. se il loader è già in memoria la carico altrimenti lo eseguito
+
+
+% \section{dynamic linking}
+% Il linking non è fatto in memoria completo e verrà fatto quello completo a livello di esecuzione.
+
+% Solo dire caricamenot dinamico degli indizii un po' alla volta. 
+% il dynamic loading significa solo che il programma non è caricato tutto in una botta ma un po' alla volta.
+
+
+% \section{Dynamic shared library}
+% sono le dll che usano sia dynamic loading e linking. Che sono l'altro apsetto della medaglia diq aundo abbiamo deciso che ci sono delgi indizii fisici e logici.
+
+% ----------- fine BOH-------------
+
+\newpage
+\section{Allocazione dei programmi}
+
+
+\subsection{Allocazione contigua}
+
+Vogliamo gestire efficientemente la memoria principale perché deve supportare sia il SO che i processi utente ed è una risorsa limitata; deve essere allocata in modo efficiente.
+
+L'allocazione contigua è uno dei primi metodi: array e liste concatenate.
+
+\paragraph{}
+
+La memoria principale è solitamente suddivisa in due partizioni:
+
+\begin{itemize}
+    \item Sistema operativo residente, solitamente collocato in memoria bassa con il vettore degli interrupt;
+    \item I processi utente sono collocati in memoria alta
+\end{itemize}
+
+Ogni processo è contenuto in una singola sezione contigua di memoria.
+
+I registri di rilocazione vengono utilizzati per proteggere i processi utente l'uno dall'altro e per impedire modifiche al codice e ai dati del sistema operativo:
+
+\begin{itemize}
+    \item Il registro base contiene il valore del più piccolo indirizzo fisico
+    \item Il registro limite contiene l'intervallo degli indirizzi logici - ogni indirizzo logico deve essere inferiore al registro limite
+    \item La MMU mappa dinamicamente gli indirizzi logici
+\end{itemize}
+
+
+ \begin{figure}[htbp]
+     \centering
+     \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/fbs.png}
+ \end{figure}
+
+
+\subsection{Partizione variabile}
+
+Il SO può decidere l'allocazione a partizioni multiple. Il grado di multiprogrammazione è limitato dal numero di partizioni.
+
+\begin{itemize}
+    \item \textbf{Partizione variabile} - dimensioni per l'efficienza (dimensionate in base alle necessità del processo).
+    \item \textbf{Buco} - blocco di memoria disponibile; buchi di varie dimensioni sono dispersi nella memoria. Indesiderato; idealmente si vuole un blocco contiguo di memoria disponibile.
+\end{itemize}
+
+\paragraph{}
+\newpage
+Quando un processo arriva, gli viene allocata memoria da un buco sufficientemente grande da contenerlo; quando un processo termina e libera la sua partizione, le partizioni libere adiacenti vengono unite. Tutto ciò è gestito dal sistema operativo che mantiene informazioni su:
+
+\begin{itemize}
+    \item partizioni allocate
+    \item partizioni libere (buchi)
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/jyrt.png}
+\end{figure}
+
+
+\subsection{Problema dell'allocazione dinamica della memoria}
+Come soddisfare una richiesta di dimensione n da una lista di buchi liberi?
+
+\begin{itemize}
+    \item First-fit: Alloca il primo buco sufficientemente grande
+    \begin{itemize}
+        \item[] Può produrre molti piccoli buchi residui
+    \end{itemize}
+
+    \item Best-fit: Alloca il buco più piccolo sufficientemente grande; deve scorrere l'intera lista, salvo che sia ordinata per dimensione
+
+    \begin{itemize}
+        \item[] Produce il buco residuo più piccolo, che potrebbe non essere più riempito.
+    \end{itemize}
+
+    \item Worst-fit: Alloca il buco più grande; deve anch'esso scorrere l'intera lista
+    \begin{itemize}
+        \item[] Produce il buco residuo più grande, che può essere riempito da altri processi.
+    \end{itemize}
+\end{itemize}
+
+First-fit e best-fit sono migliori di worst-fit in termini di velocità e utilizzo della memoria.
+\newpage
+\subsection{Frammentazione}
+
+\paragraph{Frammentazione esterna} - esiste sufficiente spazio di memoria totale per soddisfare una richiesta, ma non è contiguo. Sia la strategia first-fit che best-fit causano frammentazione esterna.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mkjhg.png}
+\end{figure}
+
+\paragraph{Frammentazione interna} - la memoria allocata può essere leggermente più grande di quella richiesta; la dimensione minima è definita dal SO e la differenza tra la dimensione del programma C e questa dimensione minima è detta frammentazione interna. L'uso della partizione dinamica per assegnare spazio al processo può risolvere questo problema.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/mht.png}
+\end{figure}
+
+\subsection{Compattazione}
+Si riduce la frammentazione esterna tramite la \textbf{compattazione}: il contenuto della memoria viene riorganizzato in modo da raccogliere tutta la memoria libera in un unico blocco contiguo. La compattazione è possibile solo se la rilocazione è dinamica e viene eseguita al tempo di esecuzione.
+
+\paragraph{}
+Sebbene la tecnica di compattazione sia molto utile per migliorare l'utilizzo della memoria e ridurre la frammentazione esterna, il problema è che durante il processo viene sprecata una grande quantità di tempo e la CPU rimane inattiva, riducendo l'efficienza complessiva del sistema.
+\newpage
+\section{Paginazione}
+Supponiamo di consentire che lo spazio di indirizzamento fisico di un processo possa essere non contiguo: il vantaggio è maggiore. In questo modo, al processo viene allocata memoria fisica ogni volta che la memoria principale è disponibile. Evitiamo la frammentazione esterna e blocchi di memoria di dimensioni variabili.
+
+Il processo di paginazione consiste nel dividere la memoria fisica in blocchi di dimensione fissa chiamati \textbf{frame}; la dimensione è una potenza di 2, compresa tra 512 byte e 16 MiB. Anche la memoria logica viene divisa in blocchi della stessa dimensione chiamati \textbf{pagine}.
+
+\paragraph{NOTA: } a questo punto è indifferente parlare di SSD o RAM, è la stessa cosa; cambiano solo la latenza e la volatilità.
+
+Questo permette di tenere traccia di tutti i frame liberi e consente di eseguire un programma di dimensione N pagine, trovando N frame liberi e caricando il programma. Per fare ciò dobbiamo impostare una tabella delle pagine per tradurre gli indirizzi logici in fisici.
+\paragraph{}
+La frammentazione interna è ancora presente.
+
+\subsection{Schema di traduzione degli indirizzi}
+
+L'indirizzo (virtuale) generato dalla CPU è suddiviso in:
+
+\begin{itemize}
+    \item \textbf{Numero di pagina (p)} - usato come indice in una tabella delle pagine che contiene l'indirizzo base di ogni pagina nella memoria fisica;
+    \item \textbf{Offset di pagina (d)} - combinato con l'indirizzo base definisce l'indirizzo di memoria fisica inviato all'unità di memoria.
+\end{itemize}
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/yuj,.png}
+\end{figure}
+
+Per un dato spazio di indirizzamento logico $2^m$ e dimensione di pagina $2^n$.
+
+\newpage
+\section{Hardware di paginazione}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/nfg.png}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dsf.png}
+    \caption{Modello di paginazione della memoria logica e fisica}
+\end{figure}
+
+\newpage
+\subsubsection{Esempio di paginazione}
+
+Indirizzo logico: n = 2 (bit di offset), n-m = 3 (bit di pagina). Con una dimensione di pagina di 4 byte e una memoria fisica di 32 bit ($2^m$ = 8 pagine).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/jmy.png}
+\end{figure}
+
+
+\paragraph{Paginazione - Calcolo della frammentazione interna}
+\paragraph{}
+Dimensione pagina = 2.048 byte; dimensione processo = 72.766 byte; si usano 35 pagine + 1.086 byte, la frammentazione interna è 2.048 - 1.086 = 962 byte.
+
+Caso peggiore = dimensione frame - 1 byte; in media frammentazione = 1/2 dimensione frame.
+
+\paragraph{}
+Quindi, frame di dimensione ridotta consentono una piccola frammentazione interna... ma la dimensione della tabella delle pagine aumenta perché ogni tabella delle pagine, per processo, occupa memoria: dimensione pagina piccola = moltissime pagine = molta memoria allocata per tracciare le pagine e non disponibile per i task utente/SO.
+
+Le dimensioni delle pagine sono cresciute nel tempo:
+
+\begin{itemize}
+    \item Solaris supporta due dimensioni di pagina - 8 KB e 4 MB
+    \item Win10 supporta due dimensioni di pagina - 4 KB e 2 MB
+    \item Linux supporta due dimensioni di pagina - 4 KB e dimensione huge page personalizzata
+\end{itemize}
+\newpage
+\subsection{Quante pagine?}
+Supponiamo una dimensione di pagina di 4KB (212 byte) e una CPU hardware a 32 bit. La voce della tabella delle pagine è pari a 32 bit. $2^{32}$ pagine, ciascuna da 4KiB, per un totale di memoria indirizzabile pari a 16 TiB ($2^{12} * 2^{10}$, dove il primo termine rappresenta gli indirizzi di paginazione e il secondo l'offset).
+
+\paragraph{}
+Altro esempio:
+\paragraph{}
+
+\begin{itemize}
+\centering
+    \item[] m = lunghezza indirizzo = 8 bit.
+    \item[] n = $log_2(\text{dimensione pagina})$ = $log_2(32 \text{ byte})$ = 5 bit di offset.
+    \item[] m - n = 3 = numero di pagine che posso indirizzare.
+\end{itemize}
+
+Riducendo la dimensione della pagina si possono indirizzare più pagine e l'offset diminuisce. Normalmente m = 32 e la dimensione della pagina è 4KiB, come nell'esempio precedente.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/yrtjn.png}
+    \caption{Frame liberi}
+\end{figure}
+
+
+\subsection{Implementazione della tabella delle pagine}
+La tabella delle pagine, come detto in precedenza, è mantenuta nella memoria principale. È il principale «artefatto» della gestione della memoria virtuale:
+
+\begin{itemize}
+    \item[] Il registro base della tabella delle pagine (PTBR) punta alla tabella delle pagine
+    \item[] Il registro di lunghezza della tabella delle pagine (PTLR) indica la dimensione della tabella delle pagine
+\end{itemize}
+
+In questo schema ogni accesso a dati o istruzioni richiede due accessi alla memoria! Uno per la tabella delle pagine e uno per i dati o l'istruzione.
+
+Il problema del doppio accesso alla memoria può essere risolto tramite l'uso di una speciale cache hardware ad accesso rapido chiamata \textit{translation look-aside buffer}, \textbf{TLB}.
+
+\paragraph{}
+Sfrutta la \textbf{località temporale}: la tendenza dei programmi a utilizzare ripetutamente gli stessi dati nel corso della loro esecuzione.
+
+\subsection{Soluzione hardware - Translation Look-Aside Buffer}
+
+I TLB memorizzano \textbf{identificatori dello spazio di indirizzamento} (ASID) in ogni voce del TLB - identificano univocamente ogni processo per fornire protezione dello spazio di indirizzamento; altrimenti sarebbe necessario svuotarlo ad ogni context switch.
+
+I TLB sono tipicamente piccoli, da 64 a 1024 voci, ma più veloci; sono quindi una cache completamente associativa.
+
+In caso di TLB miss, il valore viene caricato nel TLB per un accesso più rapido la volta successiva; le politiche di sostituzione devono essere considerate; alcune voci possono essere fissate per un accesso rapido permanente.
+
+\paragraph{}
+Non accelera tutto:
+
+\begin{itemize}
+    \item Caso medio: accesso nel TLB + accesso in memoria per il dato;
+    \item Caso peggiore: nessun dato nel TLB, quindi accesso in memoria per la tabella delle pagine + accesso in memoria per il dato.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/ythmu.png}
+\end{figure}
+
+\subsection{Tempo di accesso effettivo}
+
+\textbf{Hit ratio} - percentuale delle volte in cui un numero di pagina viene trovato nel TLB. Un hit ratio dell'80\% significa che troviamo il numero di pagina desiderato nel TLB l'80\% delle volte.
+
+Supponiamo che siano necessari 10 nanosecondi per accedere alla memoria. Se troviamo la pagina desiderata nel TLB, un accesso alla memoria mappata richiede 10 ns; altrimenti servono due accessi alla memoria, quindi 20 ns.
+
+\paragraph{}
+\textbf{Tempo di accesso effettivo} (EAT) = 0,80 x 10 + 0,20 x 20 = 12 nanosecondi, il che implica un rallentamento del 20\% nel tempo di accesso.
+
+Considerando un hit ratio più realistico del 99\%, EAT = 0,99 x 10 + 0,01 x 20 = 10,1 ns, il che implica solo l'1\% di rallentamento nel tempo di accesso.
+
+
+\newpage
+\section{Codice C e page fault}
+
+Immagina di avere la RAM piena, con solo una pagina libera, e in questa pagina vogliamo fare questo:
+
+\begin{minted}{c}
+int main(){
+    int[128,128] data;
+
+    ...
+
+    for (j = 0; j <128; j++)
+        for (i = 0; i < 128; i++)
+            data[i,j] = 0;
+ 
+    //quanti page fault? 128 * 128 = 16384
+
+    ...
+
+    for (i = 0; i < 128; i++)
+        for (j = 0; j < 128; j++)
+            data[i,j] = 0;
+
+    //quanti page fault? solo 128
+
+}   
+\end{minted}
+
+\textbf{Page fault} - Un page fault si verifica quando un programma tenta di accedere a dati o codice che si trovano nel suo spazio di indirizzamento, ma non sono attualmente nella RAM del sistema.
+
+Quando si accede a qualcosa nella RAM, il SO carica un blocco di dati dall'SSD nella RAM. Nel primo caso il SO carica un blocco ma il codice C usa solo la prima colonna; nel secondo caso il SO carica un blocco di dati e ne usa tutta la colonna.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/bnetg.png}
+    \caption{Page fault}
+\end{figure}
+
+\newpage
+\section{Page fault}
+
+\paragraph{Cos'è un page fault?} I dati sono tipicamente memorizzati in memorie non volatili, grandi e lente, e poi caricati nella RAM; ciò significa che i dati necessari per l'esecuzione (una pagina) possono esistere solo nella memoria secondaria a causa del caricamento dinamico. Devono quindi essere caricati nella RAM, poi nella cache, poi nei registri: questo è un \textbf{page fault}!
+
+\paragraph{}
+Non possiamo eliminarlo, ma cerchiamo di mitigare questo evento lento.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/frsb.png}
+    \caption{Page fault}
+\end{figure}
+
+\subsection{Come rilevare i page fault?}
+
+Possiamo usare un bit, \textbf{valid-invalid}, per tracciare se l'indirizzo è nella RAM o nella memoria secondaria.
+
+\begin{itemize}
+    \item valido (1): indica che la pagina associata è nello spazio di indirizzamento logico del processo ed esiste già nella RAM;
+    \item non valido (0): indica che la pagina non è nella RAM, il che significa che si verificherà un \textbf{page fault}.
+\end{itemize}
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/rfynhmg.png}
+\end{figure}
+
+
+
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mhg.png}
+\end{figure}
+
+
+
+\subsection{Passi nella gestione dei page fault}
+
+\begin{enumerate}
+    \item Se c'è un riferimento a una pagina, il primo riferimento a quella pagina genera un trap al sistema operativo = page fault;
+    \item Se c'è un riferimento a una pagina, il primo riferimento genera un trap al sistema operativo;
+    \begin{itemize}
+        \item[] Riferimento non valido $\to$ abort
+        \item[] Semplicemente non in memoria, deve essere caricata dal disco
+    \end{itemize}
+    \item Trovare un frame libero in memoria;
+    \item Caricare la pagina nel frame tramite un'operazione disco pianificata, la parte più lenta del processo;
+    \item Aggiornare le tabelle per indicare che la pagina è ora in memoria; impostare il bit valido = v;
+    \item Riavviare l'istruzione che ha causato il page fault;
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/bnetg.png}
+    \caption{Page fault}
+\end{figure}
+
+\subsection{Costo di un page fault}
+Supponiamo un tasso di page fault 0 < p < 1; se p = 0 nessun page fault, se p = 1 ogni riferimento è un fault.
+
+Tempo di accesso effettivo:
+
+\begin{itemize}
+    \centering 
+    \item[] EAT = (1 - p) × accesso in memoria + p (overhead page fault)
+\end{itemize}
+
+Tempo di accesso in memoria = 200 nanosecondi; tempo medio di gestione del page fault = 8 millisecondi; un accesso su 1.000 causa un page fault. Sembra un numero piccolo, ma non lo è!
+
+\paragraph{}
+Ipotizzando un tempo di accesso RAM = 200 nanosecondi, tempo medio di gestione del page fault = 8 millisecondi:
+
+\begin{itemize}
+    \centering 
+    \item[] EAT = (1 - p)200 + p (8 millisecondi) = 200 + p7.999.800
+\end{itemize}
+
+Se un accesso su 1.000 causa un page fault, allora EAT = 8,2 microsecondi.
+
+Questo è un rallentamento di un fattore 8,2 / 0,2 = 41!! Non è per niente buono!
+
+\paragraph{}
+Questa è probabilmente la fonte principale di rallentamenti quando si elabora qualcosa.
+
+
+
+\newpage
+\section{Strategia di sostituzione delle pagine}
+
+Quando si verifica un page fault, il sistema operativo deve portare la
+pagina desiderata dalla memoria secondaria nella memoria principale.
+
+La maggior parte dei sistemi operativi mantiene una lista di frame liberi -- un pool di frame liberi per soddisfare tali richieste.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/rhsbgfw.png}
+\end{figure}
+
+I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota come zero-fill-on-demand -- il contenuto dei frame viene azzerato prima di essere allocato. All'avvio del sistema, tutta la memoria disponibile viene inserita nella lista dei frame liberi.
+
+\subsection{Cosa succede se non ci sono frame liberi?}
+
+Come per gli algoritmi di scheduling, possiamo implementare la soluzione più semplice usando la casualità: prendere un frame in memoria, metterlo nell'HD e caricare la pagina necessaria nella RAM; questa soluzione non è ottimale!
+
+Questa tecnica, indipendentemente dall'algoritmo, si chiama \textbf{sostituzione di pagina} - trovare una pagina in memoria non realmente in uso, rimuoverla e caricare la pagina necessaria.
+
+\paragraph{}
+Si previene la sovra-allocazione della memoria modificando la routine di gestione dei page fault in modo da includere la sostituzione delle pagine.
+
+Possiamo farlo usando il \textbf{bit di modifica (dirty bit)} per ridurre l'overhead dei trasferimenti di pagina - solo le pagine modificate vengono scritte su disco.
+
+Se il dirty bit è impostato significa che il valore nella RAM è cambiato e prima di caricare la nuova pagina devo scrivere il valore nell'HD.
+
+La sostituzione delle pagine completa la separazione tra memoria logica e
+fisica - una grande memoria virtuale può essere fornita con una memoria
+fisica più piccola.
+
+\paragraph{}
+
+Questo processo significa accedere all'HD \textbf{due volte}.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/sdfbgv.png}
+\end{figure}
+
+\newpage
+\subsection{Sostituzione di pagina di base}
+
+\begin{enumerate}
+    \item Trovare la posizione della pagina desiderata su disco
+    \item Trovare un frame libero:
+    \begin{itemize}
+        \item[] Se c'è un frame libero, usarlo
+        \item[] Se non c'è un frame libero, usare un algoritmo di sostituzione delle pagine per selezionare un frame vittima
+        \item[] Scrivere il frame vittima su disco se è sporco (= modificato mentre era in RAM)
+    \end{itemize}
+    \item Caricare la pagina desiderata nel frame (appena) libero; aggiornare le tabelle delle pagine e dei frame
+    \item Continuare il processo riavviando l'istruzione che ha causato il trap
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/mghj.png}
+\end{figure}
+
+
+\section{Allocazione dei frame ai processi}
+
+Ogni processo necessita di un numero minimo di frame; il massimo è ovviamente il numero totale di frame nel sistema.
+
+Due principali schemi di allocazione: allocazione fissa e allocazione a priorità, oltre a molte varianti.
+
+\subsection{Allocazione fissa}
+
+Ad esempio, se ci sono 100 frame (dopo aver allocato i frame per il SO) e 5 processi, si assegnano 20 frame a ciascun processo. Si mantiene una parte come pool di frame liberi.
+
+\subsection{Allocazione proporzionale}
+
+Si alloca in base alla dimensione del processo; dinamica in funzione del grado di multiprogrammazione, le dimensioni dei processi cambiano.
+
+
+In entrambi i tipi di allocazione non è possibile tener conto dei task ad alta/bassa priorità;
+idealmente si vorrebbe che quelli ad alta priorità terminassero prima, assegnando loro più
+memoria/CPU.
+
+\subsection{Allocazione globale vs. locale}
+
+\textbf{Sostituzione globale} - il processo seleziona un frame di sostituzione dall'insieme di tutti i frame.
+
+\begin{itemize}
+    \item un processo può sottrarre un frame a un altro
+    \item il tempo di esecuzione del processo può variare notevolmente
+    \item throughput maggiore, quindi più comune
+\end{itemize}
+
+\textbf{Sostituzione locale} - ogni processo seleziona solo dal proprio insieme di
+frame allocati
+
+\begin{itemize}
+    \item Prestazioni per processo più consistenti
+    \item possibile sottoutilizzo della memoria
+    \item Quindi, throughput minore
+\end{itemize}
+
+\newpage
+\subsection{Recupero delle pagine}
+Una strategia per implementare la politica di sostituzione globale è: tutte le richieste di memoria vengono soddisfatte dalla lista dei frame liberi, invece di aspettare che la lista scenda a zero prima di iniziare a selezionare le pagine da sostituire. Il recupero delle pagine viene attivato dal kernel quando la lista scende sotto una certa soglia.
+
+\paragraph{}
+Il processo kernel che lo gestisce è chiamato \textbf{reaper}.
+
+Questa strategia cerca di garantire che ci sia sempre sufficiente memoria libera per soddisfare le nuove richieste, ovvero che la lista dei frame liberi non si svuoti mai.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/andg.png}
+    \caption{Esempio di recupero delle pagine}
+\end{figure}
+
+
+\newpage
+\subsection{Thrashing}
+
+\textbf{Thrashing} - un processo è occupato a scambiare continuamente pagine in entrata e in uscita.
+\paragraph{}
+
+Se un processo non ha un numero "sufficiente" di pagine, il tasso di page fault è molto
+alto: \textbf{page fault} per ottenere la pagina, \textbf{sostituzione} del frame esistente, ma rapidamente si ha bisogno di nuovo del \textbf{frame sostituito}.
+
+Tutti questi cicli portano a:
+
+\begin{itemize}
+    \item Basso utilizzo della CPU
+    \item Il sistema operativo pensa di dover aumentare il grado di multiprogrammazione
+    \item Un altro processo viene aggiunto al sistema
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/SDBF.png}
+\end{figure}
+
+\subsection{Frequenza dei page fault}
+
+Si stabilisce un tasso di page fault (PFF) "accettabile" e si usa la politica di sostituzione locale.
+
+\begin{itemize}
+    \item[] Se il tasso effettivo è troppo basso, il processo perde un frame
+    \item[] Se il tasso effettivo è troppo alto, il processo guadagna un frame
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fmh.png}
+    \caption{PFF}
+\end{figure}
+
+\chapter{Approfondimento sulla Memoria Virtuale}
+
+\section{Swapping delle Pagine}
+
+Un processo può essere temporaneamente spostato dalla memoria all'HD e poi riportato in memoria per continuare l'esecuzione. Lo spazio di memoria logico totale dei processi può superare la memoria fisica.
+
+\paragraph{HD - Backing store} - disco veloce abbastanza grande da contenere copie di tutte
+le immagini di memoria di tutti gli utenti; deve fornire accesso diretto a queste
+immagini di memoria.
+
+
+\paragraph{Roll out, roll in} - variante dello swapping usata negli algoritmi di scheduling basati sulla priorità; il processo a bassa priorità viene rimosso dalla memoria (swap out) in modo che il processo a priorità più alta possa essere caricato ed eseguito.
+
+\paragraph{}
+
+La parte principale del tempo di swap è il tempo di trasferimento; il tempo totale di trasferimento è direttamente
+proporzionale alla quantità di memoria trasferita. Il sistema mantiene una \textbf{ready queue} di processi pronti all'esecuzione che
+possiedono immagini di memoria su disco.
+
+\paragraph{}
+Il processo che è stato rimosso (swap out) deve tornare agli stessi indirizzi fisici?
+
+Di solito no, ma dipende dal metodo di binding degli indirizzi; occorre anche considerare l'I/O in attesa verso/dalla memoria del processo.
+
+\paragraph{}
+
+Ogni OS può decidere come gestire il metodo di swap:
+
+\begin{itemize}
+    \item Swapping normalmente disabilitato
+    \item Avviato se la quantità di memoria allocata supera una soglia
+    \item Disabilitato nuovamente quando la domanda di memoria scende sotto la soglia
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dfbngt.png}
+    \caption{Processo di swapping}
+\end{figure}
+
+
+\newpage
+\subsection{Tempo di Context Switch con lo Swapping}
+
+Se il prossimo processo da eseguire sulla CPU non è in memoria e la RAM è piena,
+occorre effettuare lo swap out di un processo e lo swap in del processo target. Il tempo di context switch può quindi essere molto elevato, ovvero la latenza per il trasferimento dati verso l'HD.
+
+\paragraph{Esempio: } processo da 100MB in swap verso l'hard disk con velocità di trasferimento di 50MB/sec:
+
+\begin{itemize}
+    \item[] Tempo di swap out di 2 secondi
+    \item[] Più swap in di un processo delle stesse dimensioni
+    \item[] Tempo totale del componente di swapping nel context switch: 4 s
+\end{itemize}
+
+È possibile ridurre il tempo sapendo quanta memoria viene effettivamente usata. Chiamate di sistema per informare l'OS sull'uso della memoria tramite
+\verb|request_memory()| e \verb|release_memory()|.
+
+\paragraph{Altri vincoli: } se un task ha I/O in attesa non può essere rimosso (swap out), poiché l'I/O avverrebbe sul processo sbagliato; oppure si trasferisce sempre l'I/O nello spazio kernel e poi al dispositivo I/O, ma questo causa il cosiddetto double buffering, aggiungendo overhead.
+
+
+Allora come funziona nei \textbf{sistemi operativi moderni}?
+
+
+\begin{itemize}
+    \item[] Lo swap viene attivato solo quando la memoria libera è quasi esaurita
+    \item[] Con la memoria a pagine si scambiano intere pagine dentro e fuori dalla RAM
+    \item[] Le pagine spostate su disco vengono in genere salvate in un “file di paging”
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/ndgf.png}
+    \caption{Swapping con paginazione}
+\end{figure}
+
+\subsection{Swapping sui Sistemi Mobili}
+
+Lo swapping non viene tipicamente usato perché lo storage è piccolo, il flash drive ha un numero limitato di cicli di scrittura e il bus tra la memoria flash e la CPU è limitato.
+
+Quindi, invece di usare lo swapping quando la memoria libera è bassa:
+
+\begin{itemize}
+    \item \textbf{iOS} chiede alle app di cedere volontariamente la memoria allocata; i dati in sola lettura vengono eliminati e ricaricati dal flash se necessario. Il mancato rilascio può portare alla terminazione.
+    \item \textbf{Android} termina le app in caso di memoria libera insufficiente, ma prima salva lo stato dell'applicazione nel flash per un riavvio rapido.
+\end{itemize}
+
+
+Entrambi i sistemi operativi supportano la paginazione come discusso di seguito.
+
+
+
+\section{Struttura della Tabella delle Pagine}
+
+Le strutture di memoria per la paginazione possono diventare enormi con metodi diretti. Si consideri uno spazio di indirizzamento logico a 32 bit, con pagine da 4KB: la tabella avrebbe 1 milione di voci e lo spazio totale per OGNI processo è di 4MB solo per ottenere lo spazio di indirizzamento fisico.
+
+Una soluzione semplice è dividere la tabella delle pagine in unità più piccole e caricarla solo parzialmente: 
+
+\begin{enumerate}
+    \item Shared Pages
+    \item Paginazione Gerarchica
+    \item Tabelle delle Pagine con Hashing
+    \item Tabelle delle Pagine Invertite
+\end{enumerate}
+
+\subsection{Shared Pages}
+
+\subsubsection{Shared code}
+Una sola copia in modalità read-only (reentrant), è condivisa tra i processi (eg. text editors, compilers, windows systems).
+Il concetto è simile a thread multipli che condividono lo stesso process space.
+
+Inoltre è anche molto utile per le comunicazioni interprocesso (IPC), se la condivisione di pagine read-write è consentita.
+
+\subsubsection{Codice privato e dati}
+Ogni processo tiene una copia privata del codice e dei dati.
+Le pagine di codice e dati privati possono apparire ovunque nella logical address space.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/OS_internals/Main-memory/MM-esempio1.png}
+\end{figure}
+
+
+\subsection{Paginazione gerarchica}
+
+Con questo metodo si suddivide lo spazio di indirizzamento logico in più tabelle delle pagine. Una tecnica semplice è la tabella delle pagine a due livelli: in questo modo si carica solo la sezione di interesse.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/sbdf.png}
+\end{figure}
+
+Con indirizzi a 32 bit e pagine da 4 KB, l'indirizzo logico si divide in:
+
+\begin{itemize}
+    \item un numero di pagina di 20 bit, suddiviso in due parti da 10 bit ciascuna:
+    \begin{itemize}
+        \item[] p1 per selezionare la pagina delle page table, cioè la \textbf{pagina esterna}
+        \item[] p2 per selezionare la riga specifica del “blocco” di page table, la \textbf{pagina interna}
+    \end{itemize}
+    \item un offset di pagina di 12 bit
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/mu.png}
+\end{figure}
+
+
+\subsubsection{Spazio di Indirizzamento Logico a 64 bit}
+
+Anche uno schema di paginazione a due livelli potrebbe non essere sufficiente; se la dimensione della pagina è ancora 4 KB, la tabella delle pagine ha $2^{52}$ voci e le tabelle delle pagine interne potrebbero essere $2^{10}$:
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/ndg.png}
+\end{figure}
+
+La tabella delle pagine esterna ha $2^{42}$ voci, ovvero 4 terabyte per processo! Una soluzione potrebbe essere aggiungere un ulteriore livello di tabella delle pagine esterna:
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/db.png}
+\end{figure}
+
+Il problema qui è che sono necessari 4 accessi in memoria per ottenere una singola posizione di memoria fisica, il che non è una soluzione brillante.
+
+\newpage
+\subsection{Tabelle delle Pagine con Hashing}
+Gli spazi di indirizzamento comuni sono $> 32$ bit. Il numero di pagina virtuale viene sottoposto a hashing in una tabella delle pagine; questa tabella contiene un elenco di elementi a cui è stato applicato lo stesso hash.
+
+Ogni elemento contiene:
+
+\begin{itemize}
+    \item il numero di pagina virtuale
+    \item il valore del frame di pagina mappato
+    \item un puntatore all'elemento successivo
+\end{itemize}
+
+Se si dispone di uno spazio di indirizzamento a 64 bit, 12 bit sono per l'offset, quindi 52 per l'indirizzo di pagina. Si può usare una tabella hash da 4KB ($2^{12}$), che tipicamente si adatta a una singola pagina e rimane sempre in memoria per ciascun processo. 
+
+Si accede alla pagina specifica tramite essa. Se tutta la memoria viene usata dal processo, questo non è efficiente. Tuttavia, nella stragrande maggioranza dei casi nessun processo utilizzerà tutti i $2^{52}$ pagine.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/ngf.png}
+    \caption{Tabella delle pagine con hashing}
+\end{figure}
+
+\subsection{Tabella delle Pagine Invertita}
+
+Invece di avere una tabella delle pagine per ogni processo che tiene traccia di tutte le pagine logiche possibili, si ha un'unica voce per ogni pagina reale della memoria!
+
+Ogni voce consiste nell'indirizzo virtuale della pagina memorizzata in quella locazione di memoria reale, con informazioni sul processo che possiede quella pagina.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/sfb.png}
+\end{figure}
+
+Riduce la memoria necessaria per memorizzare ogni tabella delle pagine, ma aumenta
+il tempo necessario per ricercare nella tabella quando si verifica un riferimento a una pagina. 
+
+Una soluzione potrebbe essere usare l'hashing per limitare la ricerca a una sola voce; anche il TLB può accelerare l'accesso.
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/OS_internals/Main-memory/MM-esempio2.png}
+    \caption{Comparativa tra tabella delle pagine tradizionale e tabella delle pagine invertita}
+\end{figure}
+
+\section{Oracle SPARC Solaris}
+
+Oracle SPARC Solaris è un sistema a 64-bit che è molto vicino e integrato con l'hardware.
+È basato su due hash table: 
+\begin{itemize}
+    \item Una per il kernel
+    \item Una per i processi utente.
+\end{itemize}
+
+Ogniuna mappa memoria virtuale a memoria fisica. Più efficiente che avere due separate hash table per pagina.
+
+Ogni entry ha un address e una span, che indica il numero di pagine che la entry rappresenta.\newline
+
+TLB possiede la translation table entries (TTEs), per un accesso hardware più rapido.
+La cache di TTEs risiede nel transaltion storage buffer (TSB), includendo un entry per le pagine recentemente accedute.\newline
+
+Virtual adress recerence causa una TLB seach:
+
+Se è miss, l'hardware va a cercaare nella memoria TSB guardando dentro la TTE corrispondente all'address.
+\begin{itemize}
+    \item Se è hit, la CPU copia la TSB entry nella TLB e la traduzione viene completata
+    \item Se no match, il kernel interrompe la ricerca nella hash table. Il kernel crea una TTE dall'apropriata hash table e la memorizza nella TSB, Interrupt handler ritorna il controllo alla MMU, la quale completa la traduzione dell'address.
+
+\end{itemize}
+
+
+
+
+
+
+
+
+\newpage
+\section{Segmentazione}
+L'uso di pagine di dimensioni fisse apre il problema della frammentazione interna: ogni processo viene abbinato a un certo numero di pagine piuttosto che alla memoria di cui ha bisogno.
+
+Esiste quindi un modo per assegnare esattamente la quantità di memoria di cui un processo ha bisogno, evitando così qualsiasi spreco di memoria? La risposta è usare la \textbf{segmentazione}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/sdavg.png}
+\end{figure}
+
+Un processo è diviso in blocchi; i blocchi in cui viene suddiviso un programma, che non devono essere necessariamente tutti della stessa dimensione, sono chiamati segmenti. 
+
+\begin{itemize}
+    \item[--] Un blocco per lo stack
+    \item[--] Un blocco per lo heap
+    \item[--] Un blocco per la libreria 1
+\end{itemize}
+
+Ogni processo è diviso in diversi segmenti, tutti caricati in memoria durante l'esecuzione, anche se non necessariamente in modo contiguo. 
+
+Una tabella memorizza le informazioni su tutti questi segmenti: la base e il limite (lunghezza).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/dgn.png}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/dasv.png}
+    \caption{Segmentazione: da logico a fisico}
+\end{figure}
+
+\newpage
+\subsection{Paginazione vs Segmentazione}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/dsfb.png}
+\end{figure}
+
+\newpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 170639.png}
+\end{figure}
+
+\subsubsection{Esempio di Architettura Intel IA-32}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/dddbv.png}
+    \caption{Conversione degli indirizzi di memoria}
+\end{figure}
+
+Le unità di paginazione formano l'equivalente dell'MMU; le dimensioni delle pagine possono essere 4 KB o 4 MB, con tabelle delle pagine a due livelli.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/abdv.png}
+\end{figure}
+
+
+\subsubsection{Esempio di Intel x86-64}
+
+L'attuale generazione dell'architettura CISC ha 64 bit, il che è enorme (> 16 exabyte). In pratica viene implementato solo l'indirizzamento a 48 bit.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\linewidth]{content/OS_Internals/img/fmhh.png}
+\end{figure}
+
+
+\section{Example: ARM Architecture}
+
+Nei moderni processori ARM installati sugli smartphone sono CPU 64bit con particolare attenzione ai consumi energetici.
+Un livello di paginazione per sezione, due livelli si pagine più piccole.
+
+Due livelli di TLBs
+
+\begin{itemize}
+    \item L'outer ha due micro TLBs, uno per le istruzioni e uno per i dati.
+    \item L'inner è una TLB singola
+    \item Viene controllato il primo interno, successivamente vengono controllati gli esterni mancanti,
+e in caso di mancata corrispondenza viene eseguita la ricerca nella tabella delle pagine
+da parte della CPU.
+\end{itemize}
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/OS_internals/Main-memory/MM-esempio3.png}
+    \caption{Architettura ARM}
+\end{figure}
