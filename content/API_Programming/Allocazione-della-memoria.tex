@@ -649,7 +649,7 @@ su una combinazione dei seguenti algoritmi:
 \begin{table}[H]
 \renewcommand{\arraystretch}{1.6}
     \centering
-    \begin{tabular}{l p{4.7cm}}
+    \begin{tabularx}{\textwidth}{X X}
         % \hline
         \hline
         \textbf{Gestione manuale in C/C++} & \textbf{Gestione automatica (Java/C\#/Python/Js)} \\
@@ -663,6 +663,6 @@ su una combinazione dei seguenti algoritmi:
         Il rilascio non comporta tempi supplementari di attesa, che sarebbero incompatibili con i sistemi in tempo reale   & Quando si attiva la garbage collection, il programma si arresta fino al termine dell'algoritmo, mettendo a rischio il funzionamento di un sistema in tempo reale\\
         
         Si possono verificare memory leak, doppi rilasci, dangling pointer, wild pointer & Non possono verificarsi errori sulla gestione della memoria\\
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
