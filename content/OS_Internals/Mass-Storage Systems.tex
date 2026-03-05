@@ -1,5 +1,4 @@
 % 261-837
-\chapter{Sistemi di Archiviazione di Massa}
 
 La maggior parte della memoria secondaria nei computer moderni è costituita da \textbf{hard disk drive}, HDD, e dispositivi di \textbf{memoria non volatile}, NVM.
 
@@ -15,7 +14,7 @@ La maggior parte della memoria secondaria nei computer moderni è costituita da 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.75\linewidth]{img/yys.png}
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/yys.png}
 \end{figure}
 
 
@@ -72,7 +71,7 @@ La testina parte dalla posizione 53
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/Immagine 2024-05-22 183104.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 183104.png}
 \end{figure}
 
 \subsection{SCAN - algoritmo dell'ascensore}
@@ -81,7 +80,7 @@ Il braccio del disco parte da un'estremità e si sposta verso l'altra. Questo no
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/Immagine 2024-05-22 183628.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 183628.png}
 \end{figure}
 
 \paragraph{NOTA: } non ci sono richieste da 0 a 65, quindi possiamo saltare quella zona.
@@ -93,7 +92,7 @@ Fornisce un tempo di attesa più uniforme rispetto a SCAN: la testina si sposta 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/Immagine 2024-05-22 184919.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 184919.png}
 \end{figure}
 
 \newpage
@@ -167,7 +166,7 @@ Il boot block inizializza il sistema ed è memorizzato in ROM, firmware. Il prog
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.37\linewidth]{img/fhmgmfgzh.png}
+    \includegraphics[width=0.37\linewidth]{content/OS_Internals/img/fhmgmfgzh.png}
     \caption{Avvio dallo storage secondario in Windows}
 \end{figure}
 
@@ -184,7 +183,7 @@ Utilizzato per spostare interi processi o pagine dalla DRAM all'archiviazione se
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.55\linewidth]{img/amrjkyt.png}
+    \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/amrjkyt.png}
     \caption{Strutture dati per lo swapping nei sistemi Linux}
 \end{figure}
 
@@ -208,7 +207,7 @@ Il network-attached storage (NAS) è uno storage reso disponibile tramite rete a
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/tdmng.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/tdmng.png}
     \caption{NAS}
 \end{figure}
 
@@ -257,12 +256,12 @@ Il RAID all'interno di un array di storage può comunque fallire se l'array si g
 \begin{figure}[h!]
     \begin{minipage}[h!]{0.5\textwidth}
         \centering
-        \includegraphics[width=1\linewidth]{img/zmfdg.png}
+        \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmfdg.png}
         \caption{Schemi RAID}
     \end{minipage}
     \begin{minipage}[h!]{0.5\textwidth}
     \centering
-    \includegraphics[width=1\linewidth]{img/zmnfdg.png}    
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmnfdg.png}    
     \end{minipage}
 \end{figure}
 
@@ -285,7 +284,7 @@ Spazio di indirizzamento logico contiguo. Tipi:
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/fgnfnfg.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fgnfnfg.png}
     \caption{Tipi di file}
 \end{figure}
 
@@ -358,7 +357,7 @@ Operazioni: \texttt{read next}, \texttt{write next}, reset; nessuna lettura dopo
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.45\linewidth]{img/andfg.png}
+    \includegraphics[width=0.45\linewidth]{content/OS_Internals/img/andfg.png}
     \caption{Accesso sequenziale}
 \end{figure}
 
@@ -367,7 +366,7 @@ Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/dbfs.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dbfs.png}
     \caption{Accesso diretto}
 \end{figure}
 
@@ -376,7 +375,7 @@ Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/mhfg.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mhfg.png}
 \end{figure}
 
 \subsubsection{Altri Metodi di Accesso}
@@ -397,7 +396,7 @@ Il metodo sequenziale ad accesso indicizzato di IBM (ISAM)
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/dfb.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dfb.png}
 \end{figure}
 
 \section{File Mappati in Memoria}
@@ -416,7 +415,7 @@ In questo modo i dati possono essere scritti su disco in sicurezza e i frame di 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/mfh.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mfh.png}
     \caption{File mappati in memoria}
 \end{figure}
 
@@ -459,14 +458,14 @@ Una raccolta di nodi contenenti informazioni su tutti i file
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.4\linewidth]{img/jhg.png}
+    \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/jhg.png}
 \end{figure}
 
  Sia la struttura delle directory che i file risiedono sul disco. Le informazioni delle directory si trovano di solito in cima a una partizione.
 
  \begin{figure}[h!]
      \centering
-     \includegraphics[width=0.5\linewidth]{img/dbgnf.png}
+     \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dbgnf.png}
  \end{figure}
 
  Le operazioni eseguite sulla Directory sono molte: ricerca di un file, creazione di un file, eliminazione di un file, elenco dei contenuti di una directory, rinomina di un file, navigazione del file system verso sottodirectory o directory padre.
@@ -486,7 +485,7 @@ In particolare:
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{dfgnb.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dfgnb.png}
     \caption{Una singola directory per tutti gli utenti}
 \end{figure}
 
@@ -496,7 +495,7 @@ Molti problemi: il problema della denominazione e il problema del raggruppamento
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/fng.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fng.png}
     \caption{Directory separata per ogni utente}
 \end{figure}
 
@@ -509,7 +508,7 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
 \begin{figure}[h!]
     \begin{minipage}[h!]{0.5\textwidth}
         \centering
-        \includegraphics[width=1\linewidth]{img/dfsbv.png}
+        \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfsbv.png}
     \caption{Schemi RAID}
     \end{minipage}
     \begin{minipage}[h!]{0.5\textwidth}
@@ -533,7 +532,7 @@ Hanno sottodirectory e file condivisi con nomi diversi (alias), ma possono fare 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/fdbg.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fdbg.png}
 \end{figure}
 
 Quando si elimina una directory, si ottiene un puntatore pendente (dangling pointer) che punta a memoria non più allocata; il suo dereferenziamento costituisce un comportamento indefinito.
@@ -560,7 +559,7 @@ Come garantiamo l'assenza di cicli? Consentiamo solo link a file, non a sottodir
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.55\linewidth]{dngf.png}
+    \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/dngf.png}
 \end{figure}
 
 \section{Protezione}
