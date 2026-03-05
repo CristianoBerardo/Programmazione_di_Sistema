@@ -50,16 +50,35 @@ Il modello base di esecuzione prevede l'alternarsi continuo di tre fasi:
 
 \section{Spazio di indirizzamento  }
 
-L’esecuzione di un programma avviene nel suo \textbf{spazio di indirizzamento.} Sottoinsieme delle celle indirizzabili, gestito dal sistema operativo. Dati, istruzioni, informazioni di controllo, … sono memorizzati come valori al suo interno. 
-Lo spazio di indirizzamento può essere immaginato come un enorme array di byte, che possono essere letti individualmente, a coppie, a gruppi di 4, 8 alla volta, in base al parallelismo del processore (8, 16, 32 o 64 bit).
+\begin{center}
+\centering
+\begin{minipage}{\linewidth}
+  % Primo blocco: 50% dello spazio per il codice
+  \begin{minipage}{0.68\linewidth} 
+
+    
+    L'esecuzione di un programma avviene nel suo \textbf{spazio di indirizzamento.} Sottoinsieme delle celle indirizzabili, gestito dal sistema operativo. Dati, istruzioni, informazioni di controllo, … sono memorizzati come valori al suo interno. 
+    Lo spazio di indirizzamento può essere immaginato come un enorme array di byte, che possono essere letti individualmente, a coppie, a gruppi di 4, 8 alla volta, in base al parallelismo del processore (8, 16, 32 o 64 bit).
 
 
-Il numero di celle \textbf{potenzialmente} presenti nello spazio di indirizzamento dipende dal processore. Il numero di celle \textbf{effettivamente} presenti, è limitato dalla quantità di RAM disponibile ed è controllato dal sistema operativo.
+    Il numero di celle \textbf{potenzialmente} presenti nello spazio di indirizzamento dipende dal processore. Il numero di celle \textbf{effettivamente} presenti, è limitato dalla quantità di RAM disponibile ed è controllato dal sistema operativo.
 
-Nel caso di CPU Intel x64, il processore opera a 64 bit. Ma lo spazio di indirizzamento si estende tra $0$ e $2^{48}-1$(scelta di implementazione).
-All'interno di questo, però, solo una piccola parte di indirizzi è effettivamente presente.\newline
+    Nel caso di CPU Intel x64, il processore opera a 64 bit. Ma lo spazio di indirizzamento si estende tra $0$ e $2^{48}-1$(scelta di implementazione).
+    All'interno di questo, però, solo una piccola parte di indirizzi è effettivamente presente.\newline
 
-Gli indirizzi che un programma utilizza non corrispondono - in generale - all'effettiva posizione che un dato assume in memoria  
+    Gli indirizzi che un programma utilizza non corrispondono - in generale - all'effettiva posizione che un dato assume in memoria  
+
+
+\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+
+    \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio7.png}
+
+
+\end{minipage}
+\end{minipage}
+\end{center}
 
 \begin{itemize}
     \item Il codice fa riferimento ad \textbf{indirizzi virtuali}
@@ -76,13 +95,6 @@ Tale traduzione garantisce che:
     \item Consente di controllare quali operazioni siano possibili (lettura, scrittura, esecuzione)
     \item Permette inoltre di scrivere programmi che manipolano dati più grossi della memoria fisica effettivamente presente
 \end{itemize}
-
-
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.75\linewidth]{images/API_Programming/Memoria/Memoria-esempio7.png}
-\end{figure}
 
 
 
@@ -120,7 +132,7 @@ Per questo Vec<T> è quasi sempre meglio di LinkedList<T>
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.75\linewidth]{images/API_Programming/Memoria/Memoria-esempio6.png}
+    \includegraphics[width=0.4\linewidth]{images/API_Programming/Memoria/Memoria-esempio6.png}
 \end{figure}
 
 \section{Esecuzione e programmi di alto livello  }
@@ -148,7 +160,7 @@ un modello di esecuzione ed un insieme di istruzioni più semplice. Che può ess
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.75\linewidth]{images/API_Programming/Memoria/Memoria-esempio1.png}
+    \includegraphics[width=0.4\linewidth]{images/API_Programming/Memoria/Memoria-esempio1.png}
 \end{figure}
 
 \section{Librerie di esecuzione}
@@ -522,7 +534,7 @@ ovunque. Può causare una violazione di accesso oppure corrompere un'area di mem
 \begin{table}[H]
 \renewcommand{\arraystretch}{1.6}
     \centering
-    \begin{tabular}{l p{4.7cm}}
+    \begin{tabular}{l p{5.5cm}}
         % \hline
         \hline
         \textbf{Problema} & \textbf{Conseguenza} \\
@@ -543,7 +555,7 @@ ovunque. Può causare una violazione di accesso oppure corrompere un'area di mem
 \begin{table}[H]
 \renewcommand{\arraystretch}{1.6}
     \centering
-    \begin{tabular}{l p{4.7cm}}
+    \begin{tabular}{l p{5.5cm}}
         % \hline
         \hline
         \textbf{Problema C / C++} & \textbf{Strumento Rust} \\
@@ -663,6 +675,7 @@ su una combinazione dei seguenti algoritmi:
         Il rilascio non comporta tempi supplementari di attesa, che sarebbero incompatibili con i sistemi in tempo reale   & Quando si attiva la garbage collection, il programma si arresta fino al termine dell'algoritmo, mettendo a rischio il funzionamento di un sistema in tempo reale\\
         
         Si possono verificare memory leak, doppi rilasci, dangling pointer, wild pointer & Non possono verificarsi errori sulla gestione della memoria\\
+    \hline
     \end{tabularx}
 \end{table}
 

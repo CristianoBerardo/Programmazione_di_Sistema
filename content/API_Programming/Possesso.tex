@@ -58,13 +58,11 @@ Finché le variabili sono in scope, \textit{i} e \textit{v}, le risorse che poss
 
 \section{Movimento}
 
-Quando una variabile viene inizializzata, essa prende il possesso del relativo valore. Se ad una variabile mutable viene assegnato un nuovo valore, quello precedentemente posseduto viene rilasciato e la variabile diventa proprietaria del nuovo valore.\newline
-
+Quando una variabile viene inizializzata, essa prende il possesso del relativo valore. Se ad una variabile mutable viene assegnato un nuovo valore, quello precedentemente posseduto viene rilasciato e la variabile diventa proprietaria del nuovo valore.
 
 \begin{center}
 \mintinline{rust}{let mut b = a} \qquad\qquad \mintinline{rust}{f(a)} \qquad\qquad \mintinline{rust}{return a}
 \end{center}
-
 
  In questi tre casi, assegnazione, passaggio ad una funzione e ritorno di una variabile, in Rust, succede qualcosa che in altri linguaggi di programmazione non succede: il valore viene \textbf{mosso}, il possesso viene passato dalla variabile originale alla destinazione.  
 
@@ -120,6 +118,7 @@ let mut s2 = s1 \\s2 possiede "hello"
 let mut s1 ...  \\Questo s1 nasconde il precedente s1
 \end{minted}
 
+\newpage
 \section{Copia}
 Alcuni tipo, tra cui quelli numerici, sono definiti \textbf{copiabili}.
 
@@ -141,7 +140,7 @@ Viceversa i riferimenti a valori mutabili NON sono copiabili.\newline
 
 \begin{figure}
     \centering
-    \includegraphics[width=1\linewidth]{images/API_Programming/Possesso/Possesso-esempio3.png}
+    \includegraphics[width=0.85\linewidth]{images/API_Programming/Possesso/Possesso-esempio3.png}
 \end{figure}
 
 \begin{tcolorbox}
@@ -175,6 +174,7 @@ let num2 = num1; //nessun vincolo su num1!
 \end{minipage}
 \end{center}
 
+\newpage
 \section{Clonazione}
 
 Alcune volte non vogliamo cedere il possesso ma solamente avere una copia e se un tipo implementa il tratto \textit{Clone} può essere duplicato invocando il metodo \textit{clone()}.
@@ -195,7 +195,9 @@ L'implementazione dell'operazione di clonazione, a differenza di copia e movimen
 \begin{minted}[breaklines]{rust}
 let mut s1 = "hi".to_string();
 let s2 = s1.clone();
+
 s1.push('!');
+
 println!("s1: {}", s1); //hi!
 println!("s2: {}", s2); //hi
 \end{minted}
@@ -215,6 +217,7 @@ println!("s2: {}", s2); //hi
 \end{minipage}
 \end{center}
 
+\newpage
 \section{Box<T> - Puntatore con possesso}
 
 Una variabile locale è SEMPRE allocata sullo stack. Questo si estende di una quantità pari alla dimensione del valore che deve essere memorizzato nella variabile. Quando la variabile esce dal proprio scope sintattico, lo stack si contrae ed il valore viene rilasciato.
@@ -297,6 +300,7 @@ fn main() {
 \end{minipage}
 \end{center}
 
+\newpage
 \section{Riferimenti}
 Per risolvere i problemi di accesso, Rust introduce diverse forme di puntatori, volte a rendere espliciti responsabilità e diritti di chi le maneggia.
 Il borrow checker si occupa di garantire che il codice sia scritto in conformità con tali regole e impedisce la compilazione in caso contrario.
@@ -344,11 +348,12 @@ Mentre esiste un riferimento mutabile
 
 È possibile creare un riferimento mutabile solo se la variabile che possiede il dato è a sua volta dichiarata come mutabile.
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=1\linewidth]{images//API_Programming//Possesso/Possesso-esempio10.png}
+    \includegraphics[width=0.55\linewidth]{images//API_Programming//Possesso/Possesso-esempio10.png}
 \end{figure}
 
+\newpage
 \subsection{Riferimenti: disposizione in memoria}
 
 I riferimenti sono implementati diversamente in base al tipo puntato
@@ -725,11 +730,12 @@ let s = &a[1..3]; // s è una slice formata da 2 elementi [2,3]
 let two = s[0]; // two contiene il valore 2
 \end{minted}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/API_Programming/Possesso/Possesso-slice.png}
+    \includegraphics[width=0.4\linewidth]{images/API_Programming/Possesso/Possesso-slice.png}
 \end{figure}
 
+\newpage
 \section{Vantaggi introdotti dal concetto di possesso}
 
 Un programma Rust, pur non avendo un garbage collector, offre molteplici garanzie
@@ -752,10 +758,9 @@ Il modello di possesso non riguarda solo la gestione della memoria, ma anche la
 L'assenza di un garbage collector impedisce \textbf{comportamenti non deterministici}. In particolare, la sospensione totale del funzionamento ogni qual volta occorra ricompattare la
 memoria.
 
-
 \section{Disposizione in memoria}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\linewidth]{images/API_Programming/Possesso/Possesso-disposizione-in-memoria.png}
 \end{figure}
