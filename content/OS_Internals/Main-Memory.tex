@@ -878,6 +878,152 @@ I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota
 \end{minipage}
 
 
+
+% MANCA una parte pagina 118 pdf in inglese fino a 121
+
+
+\section{Algoritmi di sostituzione di pagine e frame}
+
+L'algoritmo di allocazione dei frame determina:
+
+\begin{itemize}
+    \item[] Quanti frame assegnare a ciascun processo
+    \item[] Quali frame sostituire; idealmente sostituisco solo la pagina che non mi servirà presto (ma non conosco il futuro)
+\end{itemize}
+
+
+Algoritmo di sostituzione delle pagine:
+
+\begin{itemize}
+    \item[] Si vuole il tasso di page fault più basso sia al primo accesso che ai successivi
+\end{itemize}
+\newpage
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{img/ahet.png}
+\end{figure}
+
+In questa immagine si può vedere che più frame slot sono associati a ogni processo, minore è la probabilità di avere page fault.
+
+\subsection{Algoritmo FIFO}
+
+Stringa di riferimento: 7,0,1,2,0,3,0,4,2,3,0,3,0,3,2,1,2,0,1,7,0,1;
+
+3 frame (3 pagine possono essere in memoria contemporaneamente per processo)
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{img/dgnf.png}
+\end{figure}
+
+Con questo metodo si hanno 15 page fault; si può fare meglio?
+
+\subsection{Algoritmo ottimale (?)}
+
+Sostituisce la pagina che non verrà usata per il periodo più lungo; 9 page fault è il risultato ottimale per l'esempio. Ma come detto non possiamo leggere il futuro; TUTTAVIA questa è la soluzione ottimale, quindi possiamo usarla per misurare le prestazioni degli altri algoritmi.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.77\linewidth]{img/dng.png}
+\end{figure}
+
+\newpage
+\subsection{Algoritmo LRU (Least Recently Used)}
+
+Abbiamo visto che il programma non può conoscere il futuro, ma possiamo usare la conoscenza del passato!
+
+Sostituisce la pagina che non è stata usata per il periodo di tempo più lungo; sfrutta il principio di località temporale. Si associa a ogni pagina il tempo dell'ultimo utilizzo.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/fdb.png}
+\end{figure}
+
+12 fault - meglio di FIFO ma peggio di OPT; generalmente un buon algoritmo e ampiamente usato. Ma come si implementa?
+
+\paragraph{Implementazione con contatore: } Ogni voce di pagina ha un contatore; ogni volta che la pagina viene referenziata, si copia il clock nel contatore. Quando una pagina deve essere sostituita, si cerca il contatore con il valore minore; è necessaria una ricerca nella tabella.
+
+\paragraph{Implementazione con stack: } Si mantiene uno stack di numeri di pagina in forma di lista doppiamente concatenata. Quando una pagina viene referenziata, viene spostata in cima e sono necessari 6 puntatori da modificare.
+
+Ma ogni aggiornamento è più costoso e non è necessaria una ricerca per la sostituzione.
+
+\paragraph{}
+LRU e OPT sono casi di algoritmi a stack che non hanno l'anomalia di Belady. Si usa uno stack per registrare i riferimenti alle pagine più recenti.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/sd.png}
+\end{figure}
+
+\newpage
+\subsection{Algoritmi LRU approssimati}
+
+LRU richiede hardware speciale ed è comunque lento e costoso in termini di memoria (4 byte per ogni voce).
+
+Possiamo semplificare usando un solo bit: il \textbf{bit di riferimento}. Inizialmente a ogni pagina viene associato un bit con valore 0; quando la pagina viene referenziata il bit viene impostato a 1. Se il SO necessita di memoria per un processo, può sostituire qualsiasi pagina con il bit a 0 (se ne esiste una).
+
+Nel caso peggiore, l'algoritmo scorre l'intera lista.
+
+\paragraph{Algoritmo second-chance: } Generalmente FIFO, più il bit di riferimento fornito dall'hardware con sostituzione \textbf{Clock}. Se la pagina da sostituire ha:
+
+\begin{itemize}
+    \item Bit di riferimento = 0 -> sostituirla
+    \item Bit di riferimento = 1 allora:
+    \begin{itemize}
+    \item[] impostare il bit di riferimento a 0, lasciare la pagina in memoria
+    \item[] sostituire la pagina successiva, con le stesse regole
+    \end{itemize}
+\end{itemize}
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{img/jnyfg.png}
+\end{figure}
+
+\subsection{Algoritmi basati sul conteggio}
+Si mantiene un contatore del numero di riferimenti effettuati a ogni pagina; non comune.
+
+\subsubsection{Algoritmo LFU (Least Frequently Used):}
+
+\begin{itemize}
+    \item Sostituisce la pagina con il contatore più basso
+    \item Può avere il problema di sostituire sempre le "pagine appena arrivate" che hanno il contatore impostato a 1
+\end{itemize}
+
+
+\subsubsection{Algoritmo MFU (Most Frequently Used):}
+
+Si basa sull'argomento che la pagina con il contatore più basso è stata probabilmente appena caricata e non è ancora stata utilizzata
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \section{Allocazione dei frame ai processi}
 
 Ogni processo necessita di un numero minimo di frame; il massimo è ovviamente il numero totale di frame nel sistema.
