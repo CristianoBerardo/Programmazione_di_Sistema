@@ -259,10 +259,13 @@ Il SO può aiutare fornendo librerie per implementare il caricamento dinamico.
 % Problema del versioning delle liberie shared, normalmente basta aggiornare.
 
 \subsection{Static vs Dynamic Linking}
-\textbf{Linking statico} - librerie di sistema e codice di programma sono tutti combinati dal loader nell'immagine del programma binario in fase di compilazione. Problema: grandi eseguibili.
+\textbf{Linking statico} - librerie di sistema e codice di programma sono tutti combinati dal linker nell'immagine del programma binario in fase di compilazione. Problema: grandi eseguibili.
 
 \noindent\textbf{Linking dinamico} - il linking è rinviato fino alla fase di esecuzione del programma.\newline
-
+\noindent
+\begin{tcolorbox}
+\textbf{Nota:} Le DLL possono avere le due varianti: load-time dynamic linking (caricamento all'avvio) o run-time dynamic linking (caricamento su richiesta durante l'esecuzione)
+\end{tcolorbox}
 
 \begin{center}
 \centering
@@ -343,6 +346,8 @@ Questo metodo offre inoltre un ulteriore vantaggio: quando Windows aggiorna una 
 
 \section{Allocazione dei programmi}
 
+A questo punto dobbiamo parlare di dove effetticamente vengono allocati i programmi in memoria, e di come viene creato lo spazio di indirizzamento.
+Nella memoria centrale va inserito tutto, dal sistema operativo ai processi utente. Solitamente il SO si prende una parte di RAM in alto o in basso dato che lui non parteciperà al gioco dell'allocazione e deallocazione della memoria
 
 \subsection{Allocazione contigua}
 
@@ -359,7 +364,11 @@ La memoria principale è solitamente suddivisa in due partizioni:
     \item I processi utente sono collocati in memoria alta
 \end{itemize}
 
-di rilocazione vengono utilizzati per proteggere i processi utente l'uno dall'altro e per impedire modifiche al codice e ai dati del sistema operativo:
+% \textbf{sotto 0 non vai, 1M? se il limite è 500K, è un rischio, leggi qualcosa che non dovresti}
+% \textbf{ma se corrompi qualcosa?} 
+
+% \textbf{C'era il limitation register, ora c'è altro.}
+
 
 \begin{center}
 \centering
@@ -367,9 +376,9 @@ di rilocazione vengono utilizzati per proteggere i processi utente l'uno dall'al
   % Primo blocco: 50% dello spazio per il codice
   \begin{minipage}{0.6\linewidth}
 
-    Ogni processo è contenuto in una singola sezione contigua di memoria.
+Ogni processo è contenuto in una singola sezione contigua di memoria. 
 
-    I registri stema operativo verifica se la routine si trova nello spazio di indirizzamento del processo e, in caso contrario, la aggiunge.
+Il relocation register viene utilizzato per proteggere i processi utente l'uno dall'altro e per impedire modifiche al codice e ai dati del sistema operativo.
 
 \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
@@ -380,8 +389,8 @@ di rilocazione vengono utilizzati per proteggere i processi utente l'uno dall'al
 \end{center}
 
 \begin{itemize}
-    \item Il registro base contiene il valore del più piccolo indirizzo fisico
-    \item Il registro limite contiene l'intervallo degli indirizzi logici - ogni indirizzo logico deve essere inferiore al registro limite
+    \item Il base register contiene il valore del più piccolo indirizzo fisico
+    \item Il limit register contiene l'intervallo degli indirizzi logici - ogni indirizzo logico deve essere inferiore al registro limite
     \item La MMU mappa dinamicamente gli indirizzi logici
 \end{itemize}
 
@@ -440,8 +449,19 @@ Come soddisfare una richiesta di dimensione n da una lista di buchi liberi?
 \end{itemize}
 
 First-fit e best-fit sono migliori di worst-fit in termini di velocità e utilizzo della memoria.
+Per decidere tra Best e Worst fit andrebbero fatti test sul campo. 
 
 \subsection{Frammentazione}
+
+% \textbf{Frammentazione: si lascianod dei residuzi sono troppo piccoli e tanti. Memoria frammentata a pezzettini.
+% Stiamo parlando di frammentazione esterne
+% }
+
+% \textbf{fino a qui, introduzione tra indirizzi logici e fisici e abbaimo parlato di allocazione contigua
+% allocazione di partizioni contigue (un solo intervallo fisico
+% variabile: qualcuno è più grossa e qualcono è più piccola)
+% nella deframmentazione però ci possono essere dei Job che non possono essere spostati
+% }
 
 \begin{center}
 \centering
@@ -478,15 +498,45 @@ First-fit e best-fit sono migliori di worst-fit in termini di velocità e utiliz
 \end{minipage}
 \end{center}
 
+È sensato pensare che allocando N blocchi, la metà sono frammentati. E.g. 100 blocchi, 50 frammentati, 50 utilizzati, frammentazione del ~50\% (thumb roule).
 
 \subsection{Compattazione}
 Si riduce la frammentazione esterna tramite la \textbf{compattazione}: il contenuto della memoria viene riorganizzato in modo da raccogliere tutta la memoria libera in un unico blocco contiguo. La compattazione è possibile solo se la rilocazione è dinamica e viene eseguita al tempo di esecuzione.
+
+Esempio: La cosa migliore sarebbe trasferire tutti i processi da un'altra parte, questo implica
+avere altra RAM la quale avrei utilizzato se l'avessi avuta. Posso utilizzare il disco ma questo 
+significa che non potrei utilizzare il  pc. 
+
+Inoltre si presenta il problema dell'I/O: se un processo è "waiting for IO", 
+non posso spostarlo perché altrimenti l'I/O non saprebbe dove inviare i dati.
+
+Solutioni: 1. Evitare che il processo venga spostato, la cui conseguenza è una 
+deframmentazione non ottimale;
+
+2. Spostare comunque il programma utilizzando un buffer, anche se questo comporta 
+un tempo complessivo di spostamento più lungo. Spostare la memoria da utente a kernel fatto all'inizio di "waiting for IO".
+% \textbf{Esempio: ristsitemare i mobili e l'alloggio è sempre pieno. la cosa migliore è portare tutto fuoi e poi rimetto dentro.
+% Quando si può fare nel cotesto dei processo? Tutti i processi fermi a patto del kernel, 
+% se avessi ram allora l'avrei utilizzata, c'è il disco ma dovrei stare fermi 1 ora.}
+
+% \textbf{c'è il problema dell' IO -> un processo è fermo per "waiting for IO" e non posso spostarlo perché i dispoositivi IO sono molto più lenti.
+% Fai altro nel mentre! IO significa c'è qualcuno che sta spostando dati da qualche posizione in ram o vicecersa.}
+
+% \textbf{Se lo sposto (metà del trasloco) e sposto da tuttalatra parre i dati di altri programmi, l'impresa di traslochi si trova basita %:)
+% }
+% \textbf{soluzioni: 1. evita che il processo venga spostato, consegnuenza deframmentazione NON ottimale
+% 2. spostalo ma prendi precauzioni, come fare? mettiamo un buffer anche se il tempo compessivo di spostamento è più lungo -> chiamata bufferizzazioine.
+% M M IO,  sposta dalla memroa user 1000 a memoria kernel ed è rapido fatto all'inizo di waiting for IO. Eg 7MB da spostare li sposto in memoria kernel, svincolare il processo di. BUFFERIZZAZIONE
+% }
+% \textbf{concusione: si può fare la frammentazione, ma si può fare altro! deframmentare implica aspettare tempo!
+% }
 
 \paragraph{}
 Sebbene la tecnica di compattazione sia molto utile per migliorare l'utilizzo della memoria e ridurre la frammentazione esterna, il problema è che durante il processo viene sprecata una grande quantità di tempo e la CPU rimane inattiva, riducendo l'efficienza complessiva del sistema.
 
 \section{Paginazione}
-Supponiamo di consentire che lo spazio di indirizzamento fisico di un processo possa essere non contiguo: il vantaggio è maggiore. In questo modo, al processo viene allocata memoria fisica ogni volta che la memoria principale è disponibile. Evitiamo la frammentazione esterna e blocchi di memoria di dimensioni variabili.
+
+Supponiamo di consentire che lo spazio di indirizzamento fisico di un processo possa essere non contiguo: il vantaggio è maggiore. In questo modo, al processo viene allocata memoria fisica ogni volta che la memoria principale è disponibile. Evitiamo la frammentazione esterna e blocchi di memoria di dimensioni variabili, sono della stessa dimensione.
 
 Il processo di paginazione consiste nel dividere la memoria fisica in blocchi di dimensione fissa chiamati \textbf{frame}; la dimensione è una potenza di 2, compresa tra 512 byte e 16 MiB. Anche la memoria logica viene divisa in blocchi della stessa dimensione chiamati \textbf{pagine}.\newline
 \noindent
@@ -495,17 +545,19 @@ Il processo di paginazione consiste nel dividere la memoria fisica in blocchi di
 \end{tcolorbox}
 
 Questo permette di tenere traccia di tutti i frame liberi e consente di eseguire un programma di dimensione N pagine, trovando N frame liberi e caricando il programma. Per fare ciò dobbiamo impostare una tabella delle pagine per tradurre gli indirizzi logici in fisici.\newline
-La frammentazione interna è ancora presente.
+La frammentazione interna è ancora presente. 
+
+Per trovare i frame liberi possiamo utilizzare una free-list oppure un vettore chiamato bitmap.
+
 
 \subsection{Schema di traduzione degli indirizzi}
 
 L'indirizzo (virtuale) generato dalla CPU è suddiviso in:
 
-\begin{center}
-\centering
-\begin{minipage}{\linewidth}
+
+\begin{minipage}{0.9\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.75\linewidth}    
+  \begin{minipage}{0.7\linewidth}    
     \begin{itemize}
         \item \textbf{Numero di pagina (p)} - usato come indice in una tabella delle pagine che contiene l'indirizzo base di ogni pagina nella memoria fisica;
         \item \textbf{Offset di pagina (d)} - combinato con l'indirizzo base definisce l'indirizzo di memoria fisica inviato all'unità di memoria.
@@ -516,12 +568,24 @@ L'indirizzo (virtuale) generato dalla CPU è suddiviso in:
      \includegraphics[width=1\linewidth]{content/OS_Internals/img/yuj,.png}
 \end{minipage}
 \end{minipage}
-\end{center}
 
 
 Per un dato spazio di indirizzamento logico $2^m$ e dimensione di pagina $2^n$.
 
 \section{Hardware di paginazione}
+
+Abbiamo quasi annullato il problema della frammentazione dato che tutti i processi
+ora possono prendere la stessa dimensione della pagina, e non importa se sono contigue o no. 
+
+
+% \textbf{
+%   Logical memory, 40MB lo diviamo in 4, cerchiamo 4 in memoria:
+%   non sono contigui
+%   non importa nulla dell'ordine
+%   Se facciamo questo, abbiamo quasi annualto il probelma della frammentaizne: perché
+%   se tutti i processi giocano con pagine della stessa paginazione, possiamo vedere la memoria
+%   fisica come una lista !  La page table sta in memoria del kernel.
+% }
 
 
 \begin{center}
@@ -568,6 +632,21 @@ Le dimensioni delle pagine sono cresciute nel tempo:
     \item Linux supporta due dimensioni di pagina - 4 KB e dimensione huge page personalizzata
 \end{itemize}
 
+\begin{figure}[htbp]
+    \centering
+  \includegraphics[width=0.5\linewidth]{images/OS_internals/Main-memory/MM-esempio4.png}
+\end{figure}
+
+Sappiamo, dato l'architettura e il funzionamento della memoria e dei processori, che 
+non possiamo allocare vettori di dimensioni arbitrarie, ma dobbiamo utilizzare potenze di 2.
+
+A questo punto, essendo che abbiamo celle disponibili, possiamo
+memorizzare dati aggiuntivi. Ad esempio, la protection bit per indicare se 
+il frame è read-only o se è anche permesso fare accessi read-write.
+
+% \textbf{Essendo che gli array utilizzano multipli di $2^x$ byte, non possiamo fare un array
+% di 22, facciamolo di 32 e memorizziamo altri dati nelle celle disponibili}
+
 \subsection{Quante pagine?}
 Supponiamo una dimensione di pagina di 4KB (212 byte) e una CPU hardware a 32 bit. La voce della tabella delle pagine è pari a 32 bit. $2^{32}$ pagine, ciascuna da 4KiB, per un totale di memoria indirizzabile pari a 16 TiB ($2^{12} * 2^{10}$, dove il primo termine rappresenta gli indirizzi di paginazione e il secondo l'offset).\newline
 Altro esempio:
@@ -594,15 +673,15 @@ Altro esempio:
 \end{minipage}
 \end{center}
 
-\subsection{Implementazione della tabella delle pagine}
-La tabella delle pagine, come detto in precedenza, è mantenuta nella memoria principale. È il principale «artefatto» della gestione della memoria virtuale:
+\subsection{Implementazione della page table}
+La tabella delle pagine, come detto in precedenza, è mantenuta nella memoria principale. È il principale "artefatto" della gestione della memoria virtuale:
 
 \begin{itemize}
-    \item[] Il registro base della tabella delle pagine (PTBR) punta alla tabella delle pagine
-    \item[] Il registro di lunghezza della tabella delle pagine (PTLR) indica la dimensione della tabella delle pagine
+    \item[] Il registro base della tabella delle pagine (Page-table base register - PTBR) punta alla tabella delle pagine
+    \item[] Il registro di lunghezza della tabella delle pagine (Page-table length register - PTLR) indica la dimensione della tabella delle pagine
 \end{itemize}
 
-In questo schema ogni accesso a dati o istruzioni richiede due accessi alla memoria! Uno per la tabella delle pagine e uno per i dati o l'istruzione.
+In questo schema ogni accesso a dati o istruzioni richiede \textbf{due accessi alla memoria}! Uno per la tabella delle pagine e uno per i dati o l'istruzione.
 
 Il problema del doppio accesso alla memoria può essere risolto tramite l'uso di una speciale cache hardware ad accesso rapido chiamata \textit{translation look-aside buffer}, \textbf{TLB}.
 
@@ -611,14 +690,22 @@ Sfrutta la \textbf{località temporale}: la tendenza dei programmi a utilizzare 
 
 \subsection{Soluzione hardware - Translation Look-Aside Buffer}
 
+% \textbf{
+%   TBL unica, 
+%   le pagine table, una per processo
+%   e ogni volta che c'è context switch la TLB deve ripartirre da zero oppure fai essitere + processi
+%   ma significa che metto 3 cose al posto di 2 (il pid  ASID)
+% }
 
+La TLB è una cache univoca per tutte le page table. Il primo apporccio potrebbe essere
+quello di svuotare la TLB ad ogni context switch, ma questo è inefficiente.
 
 \begin{center}
 \centering
 \begin{minipage}{\linewidth}
   % Primo blocco: 50% dello spazio per il codice
   \begin{minipage}{0.6\linewidth} 
-    I TLB memorizzano \textbf{identificatori dello spazio di indirizzamento} (ASID) in ogni voce del TLB - identificano univocamente ogni processo per fornire protezione dello spazio di indirizzamento; altrimenti sarebbe necessario svuotarlo ad ogni context switch.
+    Invece di svuotare la TLB, memorizziamo anche \textbf{identificatori dello spazio di indirizzamento di un dato processo} (ASID) in ogni voce del TLB.
 
     I TLB sono tipicamente piccoli, da 64 a 1024 voci, ma più veloci; sono quindi una cache completamente associativa.
 
@@ -632,15 +719,38 @@ Sfrutta la \textbf{località temporale}: la tendenza dei programmi a utilizzare 
 \end{minipage}
 \end{center}
 
-Non accelera tutto:
 
-\begin{itemize}
-    \item Caso medio: accesso nel TLB + accesso in memoria per il dato;
-    \item Caso peggiore: nessun dato nel TLB, quindi accesso in memoria per la tabella delle pagine + accesso in memoria per il dato.
-\end{itemize}
+\begin{minipage}{0.95\linewidth}
+  % Primo blocco: 50% dello spazio per il codice
+  \begin{minipage}{0.6\linewidth} 
+  Non accelera tutto:
 
+  \begin{itemize}
+      \item Caso medio: accesso nel TLB + accesso in memoria per il dato;
+      \item Caso peggiore: nessun dato nel TLB, quindi accesso in memoria per la tabella delle pagine + accesso in memoria per il dato.
+  \end{itemize}
+\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \hfill
+  \begin{minipage}{0.37\linewidth}
+  \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio5.png}
+\end{minipage}
+\end{minipage}
+
+Una volta riempita la TLB, dobbiamo utilizzare algoritmi per decidere quale voce sostituire in caso di TLB miss.
+Sicuramente l'utilizzo di un valid-invalid bit per ogni voce del TLB è utile per identificare le voci che possono essere sovrascritte.
+
+% \textbf{
+%   se è piena? si gioca con gli algoritmi di sostituzione
+% }
+
+% \textbf{
+%   cosa serve di mettere in cache se è un errore, cosa serve quindi il bit valid or invalid?
+%   se cerco una casella libera vado a cercare gli zeri
+% }
 
 \subsection{Tempo di accesso effettivo}
+
+% \textbf{Domande da esame:}
 
 \textbf{Hit ratio} - percentuale delle volte in cui un numero di pagina viene trovato nel TLB. Un hit ratio dell'80\% significa che troviamo il numero di pagina desiderato nel TLB l'80\% delle volte.
 
@@ -716,13 +826,72 @@ int main(){
 \end{minipage}
 \end{center}
 
+\subsubsection{Background}
+
+Il codice deve essere in memoria per essere eseguito, 
+ma l'intero programma è raramente utilizzato interamente per via della gestione delle eccezioni, funzioni non utilizzate e larghe strutture dati.
+
+Tutto il programma non è necessario allo stesso tempo.
+
+Considera la possibilità di eseguire un programma parzialmente caricato: il programma non è più vincolato dai limiti della memoria fisica, ogni programma occupa meno memoria durante l'esecuzione, il che consente a più programmi di essere eseguiti contemporaneamente, aumentando l'utilizzo della CPU e il throughput senza aumentare i tempi di risposta o turnaround. Inoltre, è necessario meno I/O per caricare o scambiare programmi in memoria, il che significa che ogni programma utente viene eseguito più velocemente.
+
+\subsubsection{Memoria virtuale}
+
+\textbf{Virtual memory: } separazione tra memoria logica utente e memoria fisica; solo una parte del programma deve essere in memoria per l'esecuzione; lo spazio di indirizzamento logico può quindi essere molto più grande dello spazio di indirizzamento fisico; consente la condivisione degli spazi di indirizzamento da parte di più processi; consente una creazione di processi più efficiente; più programmi in esecuzione contemporaneamente; meno I/O necessario per caricare o scambiare processi in memoria.
+
+\textbf{Virtual address space: } molto maggiore della memoria fisica; visualizzazione logica di come il processo è memorizzato in memoria; di solito inizia all'indirizzo 0, con indirizzi contigui fino alla fine dello spazio; nel frattempo, la memoria fisica è organizzata in frame di pagina; la MMU deve mappare gli indirizzi logici a quelli fisici.
+
+La virtual memory può essere implementata tramite: demand paging, demand segmentation.
+
+
+\begin{center}
+\centering
+\begin{minipage}{\linewidth}
+  % Primo blocco: 50% dello spazio per il codice
+  \begin{minipage}{0.7\linewidth} 
+    Normalmente lo spazio di indirizzamento logico è progettato in modo che lo stack inizi all'indirizzo logico massimo e cresca "verso il basso", mentre l'heap cresce "verso l'alto". Questo massimizza l'utilizzo dello spazio degli indirizzi, lasciando uno spazio inutilizzato tra i due, noto come "buco". Non è necessaria memoria fisica fino a quando l'heap o lo stack non crescono fino a una nuova pagina. Ciò consente spazi di indirizzamento sparsi con buchi lasciati per la crescita, librerie dinamicamente collegate, ecc. Le librerie di sistema possono essere condivise tramite mappatura nello spazio di indirizzamento virtuale. La memoria condivisa può essere implementata mappando pagine in lettura-scrittura nello spazio di indirizzamento virtuale. Le pagine possono essere condivise durante fork(), accelerando la creazione dei processi.
+
+\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \hfill
+  \begin{minipage}{0.25\linewidth}
+    \centering
+     \includegraphics[width=0.3\linewidth]{images/OS_internals/Main-memory/MM-esempio6.png}
+      \vspace{0.5cm}
+      \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio7.png}
+\end{minipage}
+\end{minipage}
+\end{center}
+
+\subsubsection{Demand Paging}
+
+
+\begin{center}
+\centering
+\begin{minipage}{\linewidth}
+  % Primo blocco: 50% dello spazio per il codice
+  \begin{minipage}{0.6\linewidth} 
+Posso caricare un processo interamente in memoria al momento del caricamento, oppure posso caricare una pagina solo quando è necessaria. Il demand paging richiede meno I/O, non esegue I/O non necessario, richiede meno memoria, offre una risposta più rapida e consente più utenti. È simile a un sistema di paging con swapping.
+
+\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \hfill
+  \begin{minipage}{0.37\linewidth}
+      \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio8.png}
+\end{minipage}
+\end{minipage}
+\end{center}
+
+\subsubsection{Basic Concepts}
+
+Con lo swapping, il pager indovina quali pagine saranno utilizzate prima di essere nuovamente scambiate. Invece, il pager porta in memoria solo quelle pagine necessarie. Come determinare quel set di pagine? È necessaria una nuova funzionalità della MMU per implementare il demand paging. Se le pagine necessarie sono già residenti in memoria, non c'è differenza rispetto al paging non a richiesta. Se la pagina necessaria non è residente in memoria, è necessario rilevare e caricare la pagina in memoria dallo storage senza modificare il comportamento del programma e senza che il programmatore debba modificare il codice.
+
+
 \subsection{Come rilevare i page fault?}
 
 Possiamo usare un bit, \textbf{valid-invalid}, per tracciare se l'indirizzo è nella RAM o nella memoria secondaria.
 
 \begin{itemize}
     \item valido (1): indica che la pagina associata è nello spazio di indirizzamento logico del processo ed esiste già nella RAM;
-    \item non valido (0): indica che la pagina non è nella RAM, il che significa che si verificherà un \textbf{page fault}.
+    \item non valido (0): indica che la pagina non è nello spazio di indirizzamento logico del processo e non è nella RAM, il che significa che si verificherà un \textbf{page fault/trap nel kernel}.
 \end{itemize}
 
 
@@ -732,7 +901,7 @@ Possiamo usare un bit, \textbf{valid-invalid}, per tracciare se l'indirizzo è n
   % Primo blocco: 50% dello spazio per il codice
   \begin{minipage}{0.48\linewidth} 
         \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/rfynhmg.png}
-
+      
 \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.48\linewidth}
@@ -799,6 +968,33 @@ Questo è un rallentamento di un fattore 8,2 / 0,2 = 41!! Non è per niente buon
 \paragraph{}
 Questa è probabilmente la fonte principale di rallentamenti quando si elabora qualcosa.
 
+\section{Aspetti nel richiedere paging}
+
+
+
+Caso estremo - avviare un processo senza pagine in memoria.
+Il sistema operativo imposta il puntatore dell'istruzione alla prima istruzione del processo, che non è residente in memoria, causando un page fault. E questo accade per ogni pagina del processo al primo accesso, il che è noto come pure demand paging.
+
+In realtà, un certa istruzione potrebbe accedere a più pagine $\to$ più page fault. 
+Considera il fetch e decode di un'istruzione che aggiunge 2 numeri dalla memoria e memorizza il risultato nuovamente in memoria. Il dolore è diminuito a causa della località di riferimento.
+
+
+Il supporto hardware necessario per il demand paging include:
+\begin{itemize}
+    \item[] Tabella delle pagine con bit valido/invalido
+    \item[] Memoria secondaria (dispositivo di swap con spazio di swap)
+    \item[] Riavvio dell'istruzione
+\end{itemize} 
+
+\section{Instruction Restart}
+
+Considera un istruzione che può accedere a più locazioni di memoria
+
+\begin{itemize}
+  \item Back move
+  \item Auto incremento/decremento della locazione
+  \item Riavviare l'intera operazione? Cosa succede se l'istruzione destinataria è overlapped?
+\end{itemize}
 
 \section{Strategia di sostituzione delle pagine}
 
@@ -813,6 +1009,53 @@ La maggior parte dei sistemi operativi mantiene una lista di frame liberi -- un 
 \end{figure}
 
 I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota come zero-fill-on-demand -- il contenuto dei frame viene azzerato prima di essere allocato. All'avvio del sistema, tutta la memoria disponibile viene inserita nella lista dei frame liberi.
+
+\subsection{Passi nelrichiedere Paging - Worse Case}
+
+\begin{enumerate}
+    \item Trap all'operating system
+    \item Salva i registri utente e lo stato del processo
+    \item Determina che l'interruzione è stata causata da un page fault
+    \item Controlla che il riferimento alla pagina sia legale e determina la posizione della pagina sul disco
+    \item Emetti una lettura dal disco a un frame libero:
+    \begin{itemize}
+        \item[] Attendi in una coda per questo dispositivo fino a quando la richiesta di lettura non viene soddisfatta
+        \item[] Attendi il tempo di seek e/o latenza del dispositivo
+        \item[] Inizia il trasferimento della pagina a un frame libero
+    \end{itemize}
+    \item Mentre aspetti, assegna la CPU a qualche altro utente
+    \item Ricevi un'interruzione dal sottosistema I/O del disco (I/O completato)
+    \item Salva i registri e lo stato del processo per l'altro utente
+    \item Determina che l'interruzione è stata causata dal disco
+    \item Correggi la tabella delle pagine e altre tabelle per mostrare che la pagina è ora in memoria
+    \item Attendi che la CPU venga assegnata a questo processo di nuovo
+    \item Ripristina i registri utente, lo stato del processo e la nuova tabella delle pagine, quindi riprendi l'istruzione interrotta
+\end{enumerate}
+
+\subsection{Demand Paging Optimizations}
+
+Lo swap space è più veloce dell'I/O del file system anche se sullo stesso dispositivo; lo swap viene allocato in blocchi più grandi, richiedendo meno gestione rispetto al file system; copia l'intera immagine del processo nello spazio di swap al momento del caricamento del processo, quindi pagina dentro e fuori dallo spazio di swap; usato in BSD Unix più vecchio; demand page dal programma binario su disco, ma scarta piuttosto che paginare quando si libera un frame; usato in Solaris e BSD attuale; è ancora necessario scrivere nello spazio di swap per le pagine non associate a un file (come stack e heap) - memoria anonima - o per le pagine modificate in memoria ma non ancora scritte indietro al file system; i sistemi mobili tipicamente non supportano lo swapping, invece demand page dal file system e reclamano le pagine di sola lettura (come il codice).
+
+\subsection{Copy-on-Write}
+
+Copy-on-Write (COW) consente sia al processo padre che a quello figlio di condividere inizialmente le stesse pagine in memoria. Se uno dei processi modifica una pagina condivisa, solo allora la pagina viene copiata. COW consente una creazione di processi più efficiente poiché vengono copiate solo le pagine modificate. In generale, le pagine libere vengono allocate da un pool di pagine zero-fill-on-demand. Il pool dovrebbe sempre avere frame liberi per un'esecuzione rapida del demand page; non si vuole dover liberare un frame oltre ad altre elaborazioni su un page fault. Perché azzerare una pagina prima di allocarla? La variazione vfork() della system call fork() sospende il processo padre e il figlio utilizza lo spazio degli indirizzi copy-on-write del padre. Progettato per far sì che il figlio chiami exec(), molto efficiente.
+
+\begin{center}
+\centering
+\begin{minipage}{0.85\linewidth}
+ \begin{minipage}{0.47\linewidth}
+     \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio9.png}
+
+
+\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \hfill
+  \begin{minipage}{0.47\linewidth}
+      \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio10.png}
+
+\end{minipage}
+\end{minipage}
+\end{center}
+
 
 \subsection{Cosa succede se non ci sono frame liberi?}
 
@@ -884,24 +1127,34 @@ I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota
 
 \section{Algoritmi di sostituzione di pagine e frame}
 
-L'algoritmo di allocazione dei frame determina:
 
-\begin{itemize}
-    \item[] Quanti frame assegnare a ciascun processo
-    \item[] Quali frame sostituire; idealmente sostituisco solo la pagina che non mi servirà presto (ma non conosco il futuro)
-\end{itemize}
+\begin{minipage}{1\linewidth}
+  % Primo blocco: 50% dello spazio per il codice
+  \begin{minipage}{0.6\linewidth} 
+
+    L'algoritmo di allocazione dei frame determina:
+
+    \begin{itemize}
+        \item[] Quanti frame assegnare a ciascun processo
+        \item[] Quali frame sostituire; idealmente sostituisco solo la pagina che non mi servirà presto (ma non conosco il futuro)
+    \end{itemize}
 
 
-Algoritmo di sostituzione delle pagine:
+    Algoritmo di sostituzione delle pagine:
 
-\begin{itemize}
-    \item[] Si vuole il tasso di page fault più basso sia al primo accesso che ai successivi
-\end{itemize}
-\newpage
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/ahet.png}
-\end{figure}
+    \begin{itemize}
+        \item[] Si vuole il tasso di page fault più basso sia al primo accesso che ai successivi
+    \end{itemize}
+
+\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \hfill
+  \begin{minipage}{0.36\linewidth}
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/ahet.png}
+
+\end{minipage}
+\end{minipage}
+
+\vspace{0.5cm}
 
 In questa immagine si può vedere che più frame slot sono associati a ogni processo, minore è la probabilità di avere page fault.
 
@@ -914,7 +1167,7 @@ Stringa di riferimento: 7,0,1,2,0,3,0,4,2,3,0,3,0,3,2,1,2,0,1,7,0,1;
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/dgnf.png}
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/dgnf.png}
 \end{figure}
 
 Con questo metodo si hanno 15 page fault; si può fare meglio?
@@ -925,10 +1178,9 @@ Sostituisce la pagina che non verrà usata per il periodo più lungo; 9 page fau
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.77\linewidth]{content/OS_Internals/img/dng.png}
+    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/dng.png}
 \end{figure}
 
-\newpage
 \subsection{Algoritmo LRU (Least Recently Used)}
 
 Abbiamo visto che il programma non può conoscere il futuro, ma possiamo usare la conoscenza del passato!
@@ -937,7 +1189,7 @@ Sostituisce la pagina che non è stata usata per il periodo di tempo più lungo;
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\linewidth]{content/OS_Internals/img/fdb.png}
+    \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/fdb.png}
 \end{figure}
 
 12 fault - meglio di FIFO ma peggio di OPT; generalmente un buon algoritmo e ampiamente usato. Ma come si implementa?
@@ -954,7 +1206,7 @@ LRU e OPT sono casi di algoritmi a stack che non hanno l'anomalia di Belady. Si 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/sd.png}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/sd.png}
 \end{figure}
 
 \newpage
@@ -980,8 +1232,21 @@ Nel caso peggiore, l'algoritmo scorre l'intera lista.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/jnyfg.png}
+    \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/jnyfg.png}
 \end{figure}
+
+\subsection{Miglioramento del Second-Chance Algorithm}
+
+Possiamo migliorare l'algoritmo usando il bit di riferimento e il bit di modifica (se disponibile) in concerto. Prendiamo la coppia ordinata (riferimento, modifica):
+\begin{itemize}
+    \item (0, 0) né recentemente usata né modificata --- la migliore pagina da sostituire
+    \item (0, 1) non recentemente usata ma modificata --- non così buona, deve essere scritta prima della sostituzione
+    \item (1, 0) recentemente usata ma pulita --- probabilmente sarà usata di nuovo presto
+    \item (1, 1) recentemente usata e modificata --- probabilmente sarà usata di nuovo presto e deve essere scritta prima della sostituzione
+\end{itemize}
+Quando viene chiamata la sostituzione di pagina, si utilizza lo schema clock ma si usano le quattro classi per sostituire la pagina nella classe non vuota più bassa. Potrebbe essere necessario cercare più volte nella coda circolare.
+
+
 
 \subsection{Algoritmi basati sul conteggio}
 Si mantiene un contatore del numero di riferimenti effettuati a ogni pagina; non comune.
@@ -999,29 +1264,14 @@ Si mantiene un contatore del numero di riferimenti effettuati a ogni pagina; non
 Si basa sull'argomento che la pagina con il contatore più basso è stata probabilmente appena caricata e non è ancora stata utilizzata
 
 
+\subsection{Page-Buffering Algorithms}
+
+Prendiamo un pool di frame liberi, sempre disponibile quando necessario, non trovato al momento del page fault. Leggiamo la pagina in un frame libero e selezioniamo una vittima da espellere e aggiungiamo al pool dei frame liberi. Quando è conveniente, espelliamo la vittima, possibilmente tenendo una lista di pagine modificate. Quando lo storage secondario è altrimenti inattivo, scriviamo le pagine lì e impostiamo a non sporco. Possibilmente, manteniamo intatti i contenuti del frame libero e annotiamo cosa c'è dentro; se viene referenziato di nuovo prima di essere riutilizzato, non c'è bisogno di caricare nuovamente i contenuti da disco. Generalmente utile per ridurre la penalità se viene selezionato il frame vittima sbagliato.
 
 
+\subsection{Applications and Page Replacement}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Tutti questi algoritmi di sostituzione delle pagine sono basati su ipotesi e non possono prevedere con precisione il futuro accesso alle pagine. Tuttavia, alcune applicazioni, come i database, hanno una migliore conoscenza dei loro modelli di accesso alla memoria e possono utilizzare questa conoscenza per ottimizzare le prestazioni. Le applicazioni che richiedono molta memoria possono causare un doppio buffering, in cui il sistema operativo mantiene una copia della pagina in memoria come buffer I/O, mentre l'applicazione mantiene la pagina in memoria per il proprio lavoro. In questi casi, il sistema operativo può fornire un accesso diretto al disco, bypassando il buffering e altre funzionalità del sistema operativo, consentendo all'applicazione di gestire direttamente l'I/O del disco.
 
 
 \section{Allocazione dei frame ai processi}
@@ -1087,6 +1337,29 @@ frame allocati
 \end{minipage}
 \end{center}
 
+\subsection{Non-Uniform Memory Access}
+
+
+
+\begin{center}
+\centering
+\begin{minipage}{1\linewidth}
+  % Primo blocco: 50% dello spazio per il codice
+  \begin{minipage}{0.65\linewidth} 
+        
+   Fino ad ora tutta la memoria è stata considerata uguale, ma molti sistemi sono NUMA (Non-Uniform Memory Access) - la velocità di accesso alla memoria varia. Considera le schede di sistema contenenti CPU e memoria, interconnesse tramite un bus di sistema - architettura di multiprocessing NUMA.
+
+\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \includegraphics[width=0.7\linewidth]{images/OS_internals/Main-memory/MM-esempio11.png}
+
+\end{minipage}
+\end{minipage}
+\end{center}
+
+L'ottima prestazione deriva dall'allocare la memoria "vicino" alla CPU su cui è programmato il thread e modificare lo scheduler per programmare il thread sulla stessa scheda di sistema quando possibile. Soluzione adottata da Solaris creando lgroups, una struttura per tracciare i gruppi a bassa latenza CPU/memoria, usata dallo scheduler e dal pager. Quando possibile, schedula tutti i thread di un processo e allocare tutta la memoria per quel processo all'interno dell'lgroup.
+
 
 \subsection{Thrashing}
 
@@ -1117,6 +1390,35 @@ Tutti questi cicli portano a:
     \item Il sistema operativo pensa di dover aumentare il grado di multiprogrammazione
     \item Un altro processo viene aggiunto al sistema
 \end{itemize}
+
+\subsection{Paging su richiesta e thrashing}
+
+
+Perché il demand paging funziona? Modello di località:
+\begin{itemize}
+    \item[] Il processo migra da una località all'altra
+    \item[] Le località possono sovrapporsi
+\end{itemize}
+Perché si verifica il thrashing? La somma delle dimensioni delle località è maggiore della dimensione totale della memoria.
+Limitare gli effetti usando la sostituzione di pagina locale o a priorità.
+
+\subsection{Working-Set Model}
+
+$\Delta$ è la finestra di lavoro, un numero fisso di riferimenti.
+WSS i è il working set del processo P i , ovvero il numero totale di pagine referenziate nelle più recenti $\Delta$ istruzioni. D è la somma di tutti i WSS i , ovvero il numero totale di frame richiesti da tutti i processi.
+
+\begin{itemize}
+  \item se $Delta$ è troppo piccolo, non coprirà l'intera località
+  \item se $Delta$ è troppo grande, coprirà diverse località
+  \item se $Delta = \infty$, coprirà l'intero programma
+\end{itemize}
+
+Se D > m $\implies$ thrashing. Policy se D > m, allora sospendi o swap out uno dei processi.
+
+\subsection{Tenere traccia del Working Set}
+
+Approssimativamente con un timer a intervalli + un bit di riferimento. Esempio: $\Delta = 10.000$ ; l'interruzione del timer avviene ogni $5000$ unità di tempo; mantenere in memoria 2 bit per ogni pagina; ogni volta che il timer interrompe, copiare e impostare i valori di tutti i bit di riferimento a 0; se uno dei bit in memoria $= 1 \implies$ pagina nel working set. Perché non è completamente accurato? Miglioramento $= 10$ bit e interruzione ogni $1000$ unità di tempo.
+
 
 
 \subsection{Frequenza dei page fault}
@@ -1244,7 +1546,7 @@ Entrambi i sistemi operativi supportano la paginazione come discusso di seguito.
 
 \section{Struttura della Tabella delle Pagine}
 
-Le strutture di memoria per la paginazione possono diventare enormi con metodi diretti. Si consideri uno spazio di indirizzamento logico a 32 bit, con pagine da 4KB: la tabella avrebbe 1 milione di voci e lo spazio totale per OGNI processo è di 4MB solo per ottenere lo spazio di indirizzamento fisico.
+Le strutture di memoria per la paginazione possono diventare enormi con metodi diretti. Si consideri uno spazio di indirizzamento logico a 32 bit, con pagine da 4KB: la tabella avrebbe 1 milione di voci e lo spazio totale per OGNI processo è di 4MB solo per ottenere lo spazio di indirizzamento fisico, i quali devono essere contigui.
 
 Una soluzione semplice è dividere la tabella delle pagine in unità più piccole e caricarla solo parzialmente: 
 
@@ -1256,8 +1558,6 @@ Una soluzione semplice è dividere la tabella delle pagine in unità più piccol
 \end{enumerate}
 
 \subsection{Shared Pages}
-
-
 
 \begin{center}
 \centering
@@ -1325,6 +1625,9 @@ Una soluzione semplice è dividere la tabella delle pagine in unità più piccol
     \includegraphics[width=0.3\linewidth]{content/OS_Internals/img/mu.png}
 \end{figure}
 
+\textbf{ATTENZIONE ERRORE: non è 10 10 12 bensì 10 12 10
+ETA da cambiare perché è su 3 livelli e non 2}
+
 
 \subsubsection{Spazio di Indirizzamento Logico a 64 bit}
 
@@ -1373,6 +1676,10 @@ Il problema qui è che sono necessari 4 accessi in memoria per ottenere una sing
 \subsection{Tabelle delle Pagine con Hashing}
 Gli spazi di indirizzamento comuni sono $> 32$ bit. Il numero di pagina virtuale viene sottoposto a hashing in una tabella delle pagine; questa tabella contiene un elenco di elementi a cui è stato applicato lo stesso hash.
 
+\begin{minipage}{0.9\linewidth}
+  % Primo blocco: 50% dello spazio per il codice
+  \begin{minipage}{0.65\linewidth} 
+    
 Ogni elemento contiene:
 
 \begin{itemize}
@@ -1380,19 +1687,6 @@ Ogni elemento contiene:
     \item il valore del frame di pagina mappato
     \item un puntatore all'elemento successivo
 \end{itemize}
-
-
-\begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-    
-    
-Se si dispone di uno spazio di indirizzamento a 64 bit, 12 bit sono per l'offset, quindi 52 per l'indirizzo di pagina. Si può usare una tabella hash da 4KB ($2^{12}$), che tipicamente si adatta a una singola pagina e rimane sempre in memoria per ciascun processo. 
-
-Si accede alla pagina specifica tramite essa. Se tutta la memoria viene usata dal processo, questo non è efficiente. Tuttavia, nella stragrande maggioranza dei casi nessun processo utilizzerà tutti i $2^{52}$ pagine.
-
 \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.3\linewidth}
@@ -1401,10 +1695,28 @@ Si accede alla pagina specifica tramite essa. Se tutta la memoria viene usata da
 
 \end{minipage}
 \end{minipage}
-\end{center}
 
+    
+Se si dispone di uno spazio di indirizzamento a 64 bit, 12 bit sono per l'offset, quindi 52 per l'indirizzo di pagina. Si può usare una tabella hash da 4KB ($2^{12}$), che tipicamente si adatta a una singola pagina e rimane sempre in memoria per ciascun processo. 
+
+Si accede alla pagina specifica tramite essa. Se tutta la memoria viene usata dal processo, questo non è efficiente. Tuttavia, nella stragrande maggioranza dei casi nessun processo utilizzerà tutti i $2^{52}$ pagine.
+
+
+Ovviamente di possono avere collisioni, ma non è un grosso problema se la tabella hash è abbastanza grande. 
+Altrimenti, possono utilizzare \textbf{open addressing} (cerca un altro posto) o \textbf{linear chaining} (una lista).
 
 \subsection{Tabella delle Pagine Invertita}
+
+% \textbf{Bravissima da l'indice è il frame e il contenuto il n di pagina
+% Perché? gli spazzi di indirizzamenteo sono >> della RAM, supponiamo di avere 4 processi 
+% da 4GB ogniuno 40GB e tante tabelle delle pagine e se ho solo 4GB di ram, non 
+% ci stanno tutti.
+% Facciamo un vettore parallelo alla ram, il vettor e ha una riga per ogni riga di ram 
+% occupata!  e non sui 64bit
+% La tabella delle pagine è una singola per tutte, risparmi anceh su questo.
+% Va meglio in termini di memoria ma fa peggio di tempo, ricerca linear!
+% Mettiamoci una hash table davanti. inverted page table fa una hash table più furba senza le liste linkate
+% }
 
 \begin{center}
 \centering
