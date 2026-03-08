@@ -6,26 +6,26 @@ La maggior parte della memoria secondaria nei computer moderni è costituita da 
 
 
 \begin{itemize}
-    \item I dischi ruotano da 60 a 250 volte al secondo
-    \item La velocità di trasferimento è la velocità con cui i dati scorrono tra il disco e il computer, $\approx\,1$ Gb/sec
-    \item Il tempo di posizionamento (tempo di accesso casuale) è il tempo necessario per spostare il braccio del disco al cilindro desiderato (seek time) e il tempo per far ruotare il settore desiderato sotto la testina (latenza rotazionale), da 3ms a 12ms
-    \item Lo schianto della testina avviene quando la testina del disco entra in contatto con la superficie del disco -- molto grave
+  \item I dischi ruotano da 60 a 250 volte al secondo
+  \item La velocità di trasferimento è la velocità con cui i dati scorrono tra il disco e il computer, $\approx\,1$ Gb/sec
+  \item Il tempo di posizionamento (tempo di accesso casuale) è il tempo necessario per spostare il braccio del disco al cilindro desiderato (seek time) e il tempo per far ruotare il settore desiderato sotto la testina (latenza rotazionale), da 3ms a 12ms
+  \item Lo schianto della testina avviene quando la testina del disco entra in contatto con la superficie del disco -- molto grave
 \end{itemize}
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/yys.png}
+  \centering
+  \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/yys.png}
 \end{figure}
 
 
 \begin{equation*}
-    \text{Latenza di accesso (tempo medio di accesso) = tempo medio di seek + latenza media}
+  \text{Latenza di accesso (tempo medio di accesso) = tempo medio di seek + latenza media}
 \end{equation*}
 
 Per un disco molto veloce: 3 ms + 2 ms = 5 ms.
 
 \begin{equation*}
-    \text{Tempo medio di I/O = tempo medio di accesso + (dati da trasferire / velocità di trasferimento) + overhead del controller}
+  \text{Tempo medio di I/O = tempo medio di accesso + (dati da trasferire / velocità di trasferimento) + overhead del controller}
 \end{equation*}
 
 \paragraph{Esempio: } trasferire un blocco da 4KB su un disco a 7200 RPM con un seek time medio di 5ms, velocità di trasferimento di 1Gb/sec e overhead del controller di 0.1ms.
@@ -60,8 +60,8 @@ In passato l'HD non era sofisticato come oggi; l'OS doveva occuparsi di tutto: g
 \paragraph{Esempio: } vogliamo gestire la seguente lista di richieste usando diversi algoritmi di scheduling:
 
 \begin{itemize}
-\centering
-    \item[] 98, 183, 37, 122, 14, 124, 65, 67
+  \centering
+  \item[] 98, 183, 37, 122, 14, 124, 65, 67
 \end{itemize}
 
 La testina parte dalla posizione 53
@@ -70,8 +70,8 @@ La testina parte dalla posizione 53
 \subsection{FCFS}
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 183104.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 183104.png}
 \end{figure}
 
 \subsection{SCAN - algoritmo dell'ascensore}
@@ -79,8 +79,8 @@ La testina parte dalla posizione 53
 Il braccio del disco parte da un'estremità e si sposta verso l'altra. Questo non è equo: gli ultimi valori devono aspettare molto a lungo.
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 183628.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 183628.png}
 \end{figure}
 
 \paragraph{NOTA: } non ci sono richieste da 0 a 65, quindi possiamo saltare quella zona.
@@ -91,27 +91,27 @@ Fornisce un tempo di attesa più uniforme rispetto a SCAN: la testina si sposta 
 
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 184919.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 184919.png}
 \end{figure}
 
 \newpage
 \subsection{Scelta dell'Algoritmo di Scheduling del Disco}
 
 \begin{itemize}
-    \item FCFS è comune e ha un'attrattiva naturale
-    \item SCAN e C-SCAN hanno prestazioni migliori per sistemi con un carico elevato sul disco
+  \item FCFS è comune e ha un'attrattiva naturale
+  \item SCAN e C-SCAN hanno prestazioni migliori per sistemi con un carico elevato sul disco
 \end{itemize}
 
 Linux implementa lo scheduler deadline
 
 \begin{itemize}
-    \item[-] Mantiene code separate per lettura e scrittura
-    \item[-] Per impostazione predefinita, i batch di lettura hanno la precedenza sui batch di scrittura, poiché le applicazioni tendono a bloccarsi sulle operazioni di I/O in lettura
-    \item[-] Schedula i batch di lettura e scrittura per l'esecuzione in ordine crescente di indirizzamento logico dei blocchi (LBA)
-    \item[-] Dopo ogni batch, seleziona naturalmente i batch di lettura se presenti, ma controlla anche da quanto tempo le operazioni di scrittura sono in attesa (per evitare la starvation)
-    \item[-] Schedula il successivo batch di lettura o scrittura secondo necessità
-    \item[-] Tipicamente, se un batch di lettura è in attesa da più di 500ms, ottiene la priorità sulla scrittura
+  \item[-] Mantiene code separate per lettura e scrittura
+  \item[-] Per impostazione predefinita, i batch di lettura hanno la precedenza sui batch di scrittura, poiché le applicazioni tendono a bloccarsi sulle operazioni di I/O in lettura
+  \item[-] Schedula i batch di lettura e scrittura per l'esecuzione in ordine crescente di indirizzamento logico dei blocchi (LBA)
+  \item[-] Dopo ogni batch, seleziona naturalmente i batch di lettura se presenti, ma controlla anche da quanto tempo le operazioni di scrittura sono in attesa (per evitare la starvation)
+  \item[-] Schedula il successivo batch di lettura o scrittura secondo necessità
+  \item[-] Tipicamente, se un batch di lettura è in attesa da più di 500ms, ottiene la priorità sulla scrittura
 \end{itemize}
 
 Questo scheduler è adatto alla maggior parte dei casi d'uso, in particolare quelli in cui le
@@ -124,9 +124,9 @@ Non vi sono testine del disco né latenza rotazionale, ma c'è ancora margine pe
 
 \section{Gestione dei Dispositivi}
 
-Un aspetto fondamentale di molte parti dell'informatica è il \textbf{Rilevamento e Correzione degli Errori}. 
+Un aspetto fondamentale di molte parti dell'informatica è il \textbf{Rilevamento e Correzione degli Errori}.
 
-Il \textbf{rilevamento degli errori} determina se si è verificato un problema; viene spesso implementato tramite bit di parità. 
+Il \textbf{rilevamento degli errori} determina se si è verificato un problema; viene spesso implementato tramite bit di parità.
 
 La parità è una forma di checksum; un altro metodo di rilevamento errori è il controllo di ridondanza ciclica (CRC), che usa una funzione hash per rilevare errori su più bit.
 
@@ -142,8 +142,8 @@ Il \textbf{codice di correzione degli errori}, ECC, non solo rileva, ma può anc
 Per usare un disco per i file, il sistema operativo deve comunque registrare sul disco le proprie strutture dati:
 
 \begin{itemize}
-    \item \textbf{Partizionare} il disco in uno o più gruppi di cilindri, ognuno trattato come disco logico
-    \item Eseguire la \textbf{formattazione logica}, o “creare un file system”
+  \item \textbf{Partizionare} il disco in uno o più gruppi di cilindri, ognuno trattato come disco logico
+  \item Eseguire la \textbf{formattazione logica}, o “creare un file system”
 \end{itemize}
 
 Per aumentare l'efficienza molti file system raggruppano i blocchi in cluster. L'I/O sul disco avviene in blocchi, quello sui file nei cluster.
@@ -153,11 +153,11 @@ Per aumentare l'efficienza molti file system raggruppano i blocchi in cluster. L
 
 La \textbf{partizione di boot/root} contiene il sistema operativo; le altre partizioni possono contenere altri sistemi operativi, altri file system, o essere raw. La partizione può essere \textbf{montata} al boot, automaticamente o manualmente.
 
-Al momento del montaggio, viene verificata la consistenza del file system e la correttezza di tutti i metadati. 
+Al momento del montaggio, viene verificata la consistenza del file system e la correttezza di tutti i metadati.
 
 \begin{itemize}
-    \item[] Se non corretta, correggere e riprovare
-    \item[] Se corretta, aggiungere alla tabella di montaggio e consentire l'accesso
+  \item[] Se non corretta, correggere e riprovare
+  \item[] Se corretta, aggiungere alla tabella di montaggio e consentire l'accesso
 \end{itemize}
 
 Il boot block, o un programma di gestione del boot per sistemi multi-OS, può puntare al volume di boot o al boot loader, ovvero un insieme di blocchi che contengono il codice necessario per caricare il kernel dal file system.
@@ -165,26 +165,26 @@ Il boot block, o un programma di gestione del boot per sistemi multi-OS, può pu
 Il boot block inizializza il sistema ed è memorizzato in ROM, firmware. Il programma Bootstrap loader è memorizzato nei boot block della partizione di boot: il master boot record MBR.
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.37\linewidth]{content/OS_Internals/img/fhmgmfgzh.png}
-    \caption{Avvio dallo storage secondario in Windows}
+  \centering
+  \includegraphics[width=0.37\linewidth]{content/OS_Internals/img/fhmgmfgzh.png}
+  \caption{Avvio dallo storage secondario in Windows}
 \end{figure}
 
 \subsection{Gestione dello Spazio di Swap}
 Utilizzato per spostare interi processi o pagine dalla DRAM all'archiviazione secondaria quando la DRAM non è sufficiente per tutti i processi. Il sistema operativo fornisce la \textbf{gestione dello spazio di swap}:
 
 \begin{itemize}
-    \item L'archiviazione secondaria è più lenta della DRAM, quindi è importante ottimizzare le prestazioni
-    \item Di solito sono possibili più spazi di swap, riducendo il carico di I/O su ogni singolo dispositivo
-    \item È preferibile avere dispositivi dedicati
-    \item Può essere in una partizione raw o in un file all'interno di un file system (per comodità)
+  \item L'archiviazione secondaria è più lenta della DRAM, quindi è importante ottimizzare le prestazioni
+  \item Di solito sono possibili più spazi di swap, riducendo il carico di I/O su ogni singolo dispositivo
+  \item È preferibile avere dispositivi dedicati
+  \item Può essere in una partizione raw o in un file all'interno di un file system (per comodità)
 \end{itemize}
 
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/amrjkyt.png}
-    \caption{Strutture dati per lo swapping nei sistemi Linux}
+  \centering
+  \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/amrjkyt.png}
+  \caption{Strutture dati per lo swapping nei sistemi Linux}
 \end{figure}
 
 
@@ -194,9 +194,9 @@ Utilizzato per spostare interi processi o pagine dalla DRAM all'archiviazione se
 I computer accedono allo storage in tre modi:
 
 \begin{itemize}
-    \item[--] collegato all'host
-    \item[--] collegato in rete
-    \item[--] cloud
+  \item[--] collegato all'host
+  \item[--] collegato in rete
+  \item[--] cloud
 \end{itemize}
 
 L'accesso collegato all'host avviene tramite porte I/O locali, usando una delle varie tecnologie per collegare molti dispositivi (USB, LAN...).
@@ -206,9 +206,9 @@ L'accesso collegato all'host avviene tramite porte I/O locali, usando una delle 
 Il network-attached storage (NAS) è uno storage reso disponibile tramite rete anziché tramite un canale locale (come un bus). \textbf{NFS} e \textbf{CIFS} sono protocolli comuni, implementati tramite Remote Procedure Call (RPC) tra host e storage, tipicamente su TCP o UDP su rete IP.
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/tdmng.png}
-    \caption{NAS}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/tdmng.png}
+  \caption{NAS}
 \end{figure}
 
 \subsection{Archiviazione Cloud}
@@ -219,19 +219,19 @@ Il NAS viene presentato come un normale file system, mentre lo storage cloud è 
 
 \subsection{Array Ridondante di Dischi Indipendenti - RAID}
 
-RAID - più dischi forniscono affidabilità tramite ridondanza. 
+RAID - più dischi forniscono affidabilità tramite ridondanza.
 
 \begin{itemize}
-    \item Aumenta il \textbf{tempo medio al guasto}.
-    \item \textbf{Tempo medio di riparazione} - periodo di esposizione durante il quale un altro guasto potrebbe causare perdita di dati
-    \item \textbf{Tempo medio alla perdita di dati} basato sui fattori precedenti
+  \item Aumenta il \textbf{tempo medio al guasto}.
+  \item \textbf{Tempo medio di riparazione} - periodo di esposizione durante il quale un altro guasto potrebbe causare perdita di dati
+  \item \textbf{Tempo medio alla perdita di dati} basato sui fattori precedenti
 \end{itemize}
 
 
 Se i dischi speculari si guastano indipendentemente, si consideri un disco con 100.000 ore di tempo medio al guasto e 10 ore di tempo medio di riparazione. Il tempo medio alla perdita di dati è:
 
 \begin{equation*}
-    \text{MTDL } = 100\,000^2 / (2*10) = 500 * 10^6 \text{ hours or 57 000 years! }   
+  \text{MTDL } = 100\,000^2 / (2*10) = 500 * 10^6 \text{ hours or 57 000 years! }
 \end{equation*}
 
 Diversi miglioramenti nelle tecniche di utilizzo dei dischi coinvolgono l'uso di
@@ -245,24 +245,24 @@ I sistemi RAID migliorano le prestazioni e l'affidabilità dello storage memoriz
 
 
 \begin{itemize}
-    \item Il \textbf{mirroring} o shadowing (\textbf{RAID 1}) mantiene una copia duplicata di ogni disco
-    \item Mirror striped (\textbf{RAID 1+0}) o stripe mirror (\textbf{RAID 0+1}) offre alte prestazioni e alta affidabilità
-    \item La parità a blocchi interlacciati (\textbf{RAID 4, 5, 6}) usa molta meno ridondanza
+  \item Il \textbf{mirroring} o shadowing (\textbf{RAID 1}) mantiene una copia duplicata di ogni disco
+  \item Mirror striped (\textbf{RAID 1+0}) o stripe mirror (\textbf{RAID 0+1}) offre alte prestazioni e alta affidabilità
+  \item La parità a blocchi interlacciati (\textbf{RAID 4, 5, 6}) usa molta meno ridondanza
 \end{itemize}
 
 Il RAID all'interno di un array di storage può comunque fallire se l'array si guasta, quindi la replica automatica dei dati tra array è comune. Spesso un piccolo numero di dischi hot-spare viene lasciato non allocato, pronto a sostituire automaticamente un disco guasto e a ricostruire i dati su di esso.
 
 
 \begin{figure}[h!]
-    \begin{minipage}[h!]{0.5\textwidth}
-        \centering
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmfdg.png}
-        \caption{Schemi RAID}
-    \end{minipage}
-    \begin{minipage}[h!]{0.5\textwidth}
+  \begin{minipage}[h!]{0.5\textwidth}
     \centering
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmnfdg.png}    
-    \end{minipage}
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmfdg.png}
+    \caption{Schemi RAID}
+  \end{minipage}
+  \begin{minipage}[h!]{0.5\textwidth}
+    \centering
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmnfdg.png}
+  \end{minipage}
 \end{figure}
 
 
@@ -273,19 +273,19 @@ Il RAID all'interno di un array di storage può comunque fallire se l'array si g
 Spazio di indirizzamento logico contiguo. Tipi:
 
 \begin{itemize}
-    \item File di Dati
+  \item File di Dati
         \begin{itemize}
-        \item Numerico
-        \item Carattere
-        \item Binario
+          \item Numerico
+          \item Carattere
+          \item Binario
         \end{itemize}
-    \item File di Programma
+  \item File di Programma
 \end{itemize}
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fgnfnfg.png}
-    \caption{Tipi di file}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fgnfnfg.png}
+  \caption{Tipi di file}
 \end{figure}
 
 
@@ -293,13 +293,13 @@ Spazio di indirizzamento logico contiguo. Tipi:
 \subsection{Attributi del File}
 
 \begin{itemize}
-    \item \textbf{Nome} - è la sola informazione mantenuta in forma leggibile dall'uomo
-    \item \textbf{Identificatore} - tag unico (numero) che identifica il file all'interno del file system
-    \item \textbf{Tipo} - necessario per i sistemi che supportano tipi diversi
-    \item \textbf{Posizione} - puntatore alla posizione del file sul dispositivo
-    \item \textbf{Dimensione} - dimensione corrente del file
-    \item \textbf{Protezione} - controlla chi può leggere, scrivere, eseguire
-    \item \textbf{Ora}, \textbf{data} e \textbf{identificazione utente} - dati per protezione, sicurezza e monitoraggio dell'uso
+  \item \textbf{Nome} - è la sola informazione mantenuta in forma leggibile dall'uomo
+  \item \textbf{Identificatore} - tag unico (numero) che identifica il file all'interno del file system
+  \item \textbf{Tipo} - necessario per i sistemi che supportano tipi diversi
+  \item \textbf{Posizione} - puntatore alla posizione del file sul dispositivo
+  \item \textbf{Dimensione} - dimensione corrente del file
+  \item \textbf{Protezione} - controlla chi può leggere, scrivere, eseguire
+  \item \textbf{Ora}, \textbf{data} e \textbf{identificazione utente} - dati per protezione, sicurezza e monitoraggio dell'uso
 \end{itemize}
 
 Le informazioni sui file sono conservate nella \textbf{struttura delle directory}, mantenuta sul disco. Molte varianti, tra cui attributi estesi del file come il checksum.
@@ -307,9 +307,9 @@ Le informazioni sui file sono conservate nella \textbf{struttura delle directory
 \subsection{Struttura del File}
 
 \begin{itemize}
-    \item Nessuna - sequenza di parole, byte
-    \item Struttura semplice - Righe, lunghezza fissa, lunghezza variabile...
-    \item Strutture complesse - Documento formattato, File di caricamento rilocabile
+  \item Nessuna - sequenza di parole, byte
+  \item Struttura semplice - Righe, lunghezza fissa, lunghezza variabile...
+  \item Strutture complesse - Documento formattato, File di caricamento rilocabile
 \end{itemize}
 
 Le ultime due strutture possono essere simulate con la prima inserendo opportuni caratteri di controllo.
@@ -321,11 +321,11 @@ La decisione sulla struttura spetta all'\textbf{OS} o al \textbf{Programma}.
 Sono necessari diversi dati per gestire i \textbf{file aperti}:
 
 \begin{itemize}
-    \item \textbf{Tabella dei file aperti}: traccia i file aperti
-    \item Puntatore al file: puntatore all'ultima posizione di lettura/scrittura, specifico per ogni processo che ha il file aperto
-    \item \textbf{Contatore di aperture del file}: contatore del numero di volte in cui un file è aperto, per consentire la rimozione dei dati dalla tabella dei file aperti quando l'ultimo processo lo chiude
-    \item Posizione del file su disco: cache delle informazioni di accesso ai dati
-    \item Diritti di accesso: informazioni sulla modalità di accesso per processo
+  \item \textbf{Tabella dei file aperti}: traccia i file aperti
+  \item Puntatore al file: puntatore all'ultima posizione di lettura/scrittura, specifico per ogni processo che ha il file aperto
+  \item \textbf{Contatore di aperture del file}: contatore del numero di volte in cui un file è aperto, per consentire la rimozione dei dati dalla tabella dei file aperti quando l'ultimo processo lo chiude
+  \item Posizione del file su disco: cache delle informazioni di accesso ai dati
+  \item Diritti di accesso: informazioni sulla modalità di accesso per processo
 \end{itemize}
 
 \subsection{Blocco dei File}
@@ -343,12 +343,12 @@ Fornito da alcuni \textbf{sistemi operativi} e file system. Simile ai lock letto
 
 \subsection{Metodi di Accesso}
 
-Un file è un \textbf{record logico} di lunghezza fissa: 
+Un file è un \textbf{record logico} di lunghezza fissa:
 
 \begin{itemize}
-    \item Accesso Sequenziale
-    \item Accesso Diretto
-    \item Altri Metodi di Accesso
+  \item Accesso Sequenziale
+  \item Accesso Diretto
+  \item Altri Metodi di Accesso
 \end{itemize}
 
 \subsubsection{Accesso Sequenziale}
@@ -356,26 +356,26 @@ Operazioni: \texttt{read next}, \texttt{write next}, reset; nessuna lettura dopo
 
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.45\linewidth]{content/OS_Internals/img/andfg.png}
-    \caption{Accesso sequenziale}
+  \centering
+  \includegraphics[width=0.45\linewidth]{content/OS_Internals/img/andfg.png}
+  \caption{Accesso sequenziale}
 \end{figure}
 
 \subsubsection{Accesso Diretto}
 Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco relativo
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dbfs.png}
-    \caption{Accesso diretto}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dbfs.png}
+  \caption{Accesso diretto}
 \end{figure}
 
 \subsubsection{Accesso Sequenziale vs Diretto}
 
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mhfg.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mhfg.png}
 \end{figure}
 
 \subsubsection{Altri Metodi di Accesso}
@@ -388,15 +388,15 @@ Se l'indice è troppo grande, si crea un indice in memoria, che è un indice di 
 Il metodo sequenziale ad accesso indicizzato di IBM (ISAM)
 
 \begin{itemize}
-    \item Piccolo indice master, punta ai blocchi su disco dell'indice secondario
-    \item Il file è mantenuto ordinato su una chiave predefinita
-    \item Tutto gestito dall'OS
-    \item Un motore simile, MyISAM, è un modo per indicizzare i DB MySQL
+  \item Piccolo indice master, punta ai blocchi su disco dell'indice secondario
+  \item Il file è mantenuto ordinato su una chiave predefinita
+  \item Tutto gestito dall'OS
+  \item Un motore simile, MyISAM, è un modo per indicizzare i DB MySQL
 \end{itemize}
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dfb.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dfb.png}
 \end{figure}
 
 \section{File Mappati in Memoria}
@@ -414,9 +414,9 @@ In questo modo i dati possono essere scritti su disco in sicurezza e i frame di 
 
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mfh.png}
-    \caption{File mappati in memoria}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mfh.png}
+  \caption{File mappati in memoria}
 \end{figure}
 
 \newpage
@@ -424,9 +424,9 @@ In questo modo i dati possono essere scritti su disco in sicurezza e i frame di 
 
 Dalla lezione precedente:
 \begin{itemize}
-    \item I dischi possono essere suddivisi in partizioni
-    \item I dischi o le partizioni possono essere protetti da RAID contro i guasti
-    \item Le partizioni sono note anche come minidisk, slice
+  \item I dischi possono essere suddivisi in partizioni
+  \item I dischi o le partizioni possono essere protetti da RAID contro i guasti
+  \item Le partizioni sono note anche come minidisk, slice
 \end{itemize}
 
 Un file system governa l'organizzazione e l'accesso ai file.
@@ -441,12 +441,12 @@ Parliamo principalmente di file system di uso generale, ma i sistemi spesso hann
 Si consideri Solaris, che ha:
 
 \begin{itemize}
-    \item tmpfs - FS volatile basato su memoria per I/O rapido e temporaneo
-    \item objfs - interfaccia nella memoria del kernel per ottenere i simboli del kernel per il debugging
-    \item ctfs - file system dei contratti per la gestione dei daemon
-    \item lofs - file system loopback che consente l'accesso a un FS al posto di un altro
-    \item procfs - interfaccia del kernel alle strutture dei processi
-    \item ufs, zfs - file system di uso generale
+  \item tmpfs - FS volatile basato su memoria per I/O rapido e temporaneo
+  \item objfs - interfaccia nella memoria del kernel per ottenere i simboli del kernel per il debugging
+  \item ctfs - file system dei contratti per la gestione dei daemon
+  \item lofs - file system loopback che consente l'accesso a un FS al posto di un altro
+  \item procfs - interfaccia del kernel alle strutture dei processi
+  \item ufs, zfs - file system di uso generale
 \end{itemize}
 
 Anche Linux ha più file system.
@@ -457,36 +457,36 @@ Una raccolta di nodi contenenti informazioni su tutti i file
 
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/jhg.png}
+  \centering
+  \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/jhg.png}
 \end{figure}
 
- Sia la struttura delle directory che i file risiedono sul disco. Le informazioni delle directory si trovano di solito in cima a una partizione.
+Sia la struttura delle directory che i file risiedono sul disco. Le informazioni delle directory si trovano di solito in cima a una partizione.
 
- \begin{figure}[h!]
-     \centering
-     \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dbgnf.png}
- \end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dbgnf.png}
+\end{figure}
 
- Le operazioni eseguite sulla Directory sono molte: ricerca di un file, creazione di un file, eliminazione di un file, elenco dei contenuti di una directory, rinomina di un file, navigazione del file system verso sottodirectory o directory padre.
+Le operazioni eseguite sulla Directory sono molte: ricerca di un file, creazione di un file, eliminazione di un file, elenco dei contenuti di una directory, rinomina di un file, navigazione del file system verso sottodirectory o directory padre.
 
- \subsection{Organizzazione delle Directory}
+\subsection{Organizzazione delle Directory}
 
- La directory è organizzata logicamente per prestazioni, usabilità e controllo degli accessi.
+La directory è organizzata logicamente per prestazioni, usabilità e controllo degli accessi.
 In particolare:
 
 \begin{itemize}
-    \item Efficienza - individuare rapidamente un file
-    \item Denominazione - comoda per gli utenti: due utenti possono avere lo stesso nome per file diversi; lo stesso file può avere più nomi diversi
-    \item Raggruppamento - raggruppamento logico dei file per proprietà (es. tutti i programmi Java, tutti i giochi...)
+  \item Efficienza - individuare rapidamente un file
+  \item Denominazione - comoda per gli utenti: due utenti possono avere lo stesso nome per file diversi; lo stesso file può avere più nomi diversi
+  \item Raggruppamento - raggruppamento logico dei file per proprietà (es. tutti i programmi Java, tutti i giochi...)
 \end{itemize}
 
 \subsection{Directory a Singolo Livello}
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dfgnb.png}
-    \caption{Una singola directory per tutti gli utenti}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dfgnb.png}
+  \caption{Una singola directory per tutti gli utenti}
 \end{figure}
 
 Molti problemi: il problema della denominazione e il problema del raggruppamento ne sono esempi.
@@ -494,9 +494,9 @@ Molti problemi: il problema della denominazione e il problema del raggruppamento
 \subsection{Directory a Due Livelli}
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fng.png}
-    \caption{Directory separata per ogni utente}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fng.png}
+  \caption{Directory separata per ogni utente}
 \end{figure}
 
 Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome di file per utenti diversi (neutro), Ricerca efficiente (positivo), Nessuna capacità di raggruppamento (negativo)
@@ -506,22 +506,22 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
 
 
 \begin{figure}[h!]
-    \begin{minipage}[h!]{0.5\textwidth}
-        \centering
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfsbv.png}
+  \begin{minipage}[h!]{0.5\textwidth}
+    \centering
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfsbv.png}
     \caption{Schemi RAID}
-    \end{minipage}
-    \begin{minipage}[h!]{0.5\textwidth}
+  \end{minipage}
+  \begin{minipage}[h!]{0.5\textwidth}
     \centering
     \begin{tabular}{c|c}
-        Pro & Contro \\
-        \hline
-        Generale & Inefficiente\\
-        Scalabile & Nessuna condivisione di file\\
-        Facile da cercare & Duplicazione di file in più directory
+      Pro               & Contro                                \\
+      \hline
+      Generale          & Inefficiente                          \\
+      Scalabile         & Nessuna condivisione di file          \\
+      Facile da cercare & Duplicazione di file in più directory
     \end{tabular}
 
-    \end{minipage}
+  \end{minipage}
 \end{figure}
 
 
@@ -531,8 +531,8 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
 Hanno sottodirectory e file condivisi con nomi diversi (alias), ma possono fare riferimento agli stessi dati, quindi la condivisione è possibile.
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fdbg.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fdbg.png}
 \end{figure}
 
 Quando si elimina una directory, si ottiene un puntatore pendente (dangling pointer) che punta a memoria non più allocata; il suo dereferenziamento costituisce un comportamento indefinito.
@@ -540,16 +540,16 @@ Quando si elimina una directory, si ottiene un puntatore pendente (dangling poin
 Soluzioni:
 
 \begin{itemize}
-    \item Backpointer, in modo da poter eliminare tutti i puntatori alla cartella eliminata; records di dimensione variabile sono un problema
-    \item Backpointer usando un'organizzazione a catena (daisy chain)
-    \item Soluzione con contatore di riferimenti (entry-hold-count)
+  \item Backpointer, in modo da poter eliminare tutti i puntatori alla cartella eliminata; records di dimensione variabile sono un problema
+  \item Backpointer usando un'organizzazione a catena (daisy chain)
+  \item Soluzione con contatore di riferimenti (entry-hold-count)
 \end{itemize}
 
 Nuovi tipi di voci nelle directory:
 
 \begin{itemize}
-    \item[] \textbf{Link} - un altro nome (puntatore) a un file esistente
-    \item[] \textbf{Risolvi il link} - segui il puntatore per localizzare il file
+  \item[] \textbf{Link} - un altro nome (puntatore) a un file esistente
+  \item[] \textbf{Risolvi il link} - segui il puntatore per localizzare il file
 \end{itemize}
 
 \newpage
@@ -558,8 +558,8 @@ Nuovi tipi di voci nelle directory:
 Come garantiamo l'assenza di cicli? Consentiamo solo link a file, non a sottodirectory; \textbf{Garbage collection}; ogni volta che viene aggiunto un nuovo link, si usa un algoritmo di rilevamento dei cicli per verificare se è accettabile.
 
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/dngf.png}
+  \centering
+  \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/dngf.png}
 \end{figure}
 
 \section{Protezione}
@@ -568,7 +568,7 @@ Il problema:
 non si desidera che altri modifichino, leggano o spostino i propri dati/programmi.
 
 \paragraph{}
- 
+
 Il proprietario/creatore del file deve poter controllare: cosa può essere fatto/visto, da chi.
 Tipi di accesso: - Lettura - Scrittura - Esecuzione - Aggiunta - Eliminazione - Elenco.
 

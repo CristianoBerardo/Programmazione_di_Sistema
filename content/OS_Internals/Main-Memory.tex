@@ -2,28 +2,28 @@
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.7\linewidth}
-    Questa sezione illustra un modo efficace per sfruttare al meglio le potenzialità dell'hardware acquistato; il focus principale è sulla \textbf{memoria principale}.
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.7\linewidth}
+      Questa sezione illustra un modo efficace per sfruttare al meglio le potenzialità dell'hardware acquistato; il focus principale è sulla \textbf{memoria principale}.
 
-    Abbiamo visto all'inizio del corso che un programma, memorizzato su disco, diventa un processo quando viene caricato dal disco nella memoria principale.
+      Abbiamo visto all'inizio del corso che un programma, memorizzato su disco, diventa un processo quando viene caricato dal disco nella memoria principale.
 
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.25\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/memory.png}
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.25\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/memory.png}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 La memoria principale e i registri sono gli unici supporti di memorizzazione a cui la CPU può accedere direttamente. L'unità di memoria vede solo un flusso di:
 
 \begin{itemize}
-    \item indirizzi + richieste di lettura, oppure
-    \item indirizzo + dati e richieste di scrittura
+  \item indirizzi + richieste di lettura, oppure
+  \item indirizzo + dati e richieste di scrittura
 \end{itemize}
 
 La CPU può accedere ai registri in uno, o meno, cicli di clock. Tuttavia, quando la CPU preleva dati dalla memoria principale utilizza molti cicli di clock, causando uno \textbf{stall}.
@@ -40,8 +40,8 @@ Tutti questi livelli contengono una copia dello stesso sottoinsieme di dati.
 
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.9\linewidth]{content/OS_Internals/img/spatial.png}
+  \centering
+  \includegraphics[width=0.9\linewidth]{content/OS_Internals/img/spatial.png}
 \end{figure}
 
 \newpage
@@ -55,55 +55,55 @@ Come si può risolvere?
   \item Carico gli indirizzi così come sono. Fattibile utilizzando l'hardware.
 \end{itemize}
 
-Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un sommatore e in assembly non cambia nulla. 
+Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un sommatore e in assembly non cambia nulla.
 
-\section{Protezione} 
+\section{Protezione}
 
 
 \begin{center}
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.55\linewidth}
-    Quando un programma è diventato un processo, tutti o gran parte dei suoi dati sono memorizzati nella memoria principale. Abbiamo bisogno di un modo per:
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.55\linewidth}
+      Quando un programma è diventato un processo, tutti o gran parte dei suoi dati sono memorizzati nella memoria principale. Abbiamo bisogno di un modo per:
 
-    \begin{itemize}
+      \begin{itemize}
         \item Suddividere la memoria tra tutti i processi;
         \item Garantire che un processo possa accedere solo agli indirizzi del proprio spazio di indirizzamento\footnote{Lo spazio di indirizzamento, o address space, è una porzione di memoria cui un programma può utilizzare}.
-    \end{itemize}
+      \end{itemize}
 
-    Possiamo risolvere questi problemi utilizzando una coppia di registri \textbf{base} e \textbf{limite} che definiscono lo spazio di indirizzamento logico di un processo.
+      Possiamo risolvere questi problemi utilizzando una coppia di registri \textbf{base} e \textbf{limite} che definiscono lo spazio di indirizzamento logico di un processo.
 
-  \end{minipage}%
-  \hfill
-  \begin{minipage}{0.35\linewidth}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.35\linewidth}
       \centering
 
-          \includegraphics[width=1\linewidth]{content/OS_Internals/img/adsfcv.png}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/adsfcv.png}
 
+    \end{minipage}
   \end{minipage}
-\end{minipage}
 \end{center}
 
 \subsection{Protezione degli indirizzi hardware}
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.50\linewidth}
-    La CPU/OS deve verificare ogni accesso alla memoria generato in modalità utente per
-    assicurarsi che sia compreso tra base e limite per quell'utente.
-    
-    
-    Le istruzioni per caricare i registri base e limite sono privilegiate.
-  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.4\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/ikadsuhc.png}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.50\linewidth}
+      La CPU/OS deve verificare ogni accesso alla memoria generato in modalità utente per
+      assicurarsi che sia compreso tra base e limite per quell'utente.
 
+
+      Le istruzioni per caricare i registri base e limite sono privilegiate.
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.4\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/ikadsuhc.png}
+
+    \end{minipage}
   \end{minipage}
-\end{minipage}
 \end{center}
 
 
@@ -111,16 +111,16 @@ Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un somm
 
 \section{Address binding}
 
-Quando scriviamo un programma C, vogliamo utilizzare indirizzi simbolici e vogliamo che sia il compilatore a trasformarlo in indirizzi relativi. 
+Quando scriviamo un programma C, vogliamo utilizzare indirizzi simbolici e vogliamo che sia il compilatore a trasformarlo in indirizzi relativi.
 Il linker decide di riallocare a valori assoluti.
 
 Inoltre non ci vogliamo preoccupare di dove si trovi la variabile in memoria, sappiamo solo che è in memoria.
 
 \begin{itemize}
-    \item Gli indirizzi nel codice sorgente sono tipicamente simbolici;
-    \item Gli indirizzi nel codice compilato vengono legati a indirizzi rilocabili, es. «14 byte dall'inizio di questo modulo» invece di «byte 14»;
-    \item Il linker o il loader legherà gli indirizzi rilocabili ad indirizzi assoluti;
-    \item Ogni binding mappa uno spazio di indirizzamento in un altro.
+  \item Gli indirizzi nel codice sorgente sono tipicamente simbolici;
+  \item Gli indirizzi nel codice compilato vengono legati a indirizzi rilocabili, es. «14 byte dall'inizio di questo modulo» invece di «byte 14»;
+  \item Il linker o il loader legherà gli indirizzi rilocabili ad indirizzi assoluti;
+  \item Ogni binding mappa uno spazio di indirizzamento in un altro.
 \end{itemize}
 
 Nel codice compilato vediamo quanta memoria è necessaria e non l'indirizzo codificato in modo fisso. Vogliamo un binding dinamico e non statico.
@@ -140,26 +140,26 @@ Il binding degli indirizzi di istruzioni e dati agli indirizzi di memoria può a
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.75\linewidth}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.75\linewidth}
 
-    \begin{itemize}
+      \begin{itemize}
         \item \textbf{Tempo di compilazione:} Se la posizione in memoria è nota a priori, può essere generato codice assoluto; è necessario ricompilare il codice se la posizione iniziale cambia. Utilizzato nei sistemi embedded o nei sistemi in cui i task sono noti a priori e sono in numero ridotto. Sto generando l'eseguibile;
 
         \item \textbf{Tempo di caricamento:} Deve essere generato codice rilocabile se la posizione in memoria non è nota al momento della compilazione. Strategia ampiamente utilizzata nei vecchi SO o in sistemi semplici come le lavastoviglie...
 
         \item \textbf{Tempo di esecuzione:} Il binding viene ritardato al runtime se il processo può essere spostato durante l'esecuzione da un segmento di memoria a un altro; richiede supporto hardware (es. registri base e limite) ed è lo standard de facto per i SO moderni.
 
-    \end{itemize}      
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.2\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/rwefbg.png}
-    \captionof{figure}{Elaborazione in più fasi di un programma utente}
-\end{minipage}
-\end{minipage}
+      \end{itemize}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.2\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/rwefbg.png}
+      \captionof{figure}{Elaborazione in più fasi di un programma utente}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -171,8 +171,8 @@ Ho bisogno di un modo per passare dalla memoria virtuale alla memoria hardware e
 Il concetto di spazio di indirizzamento logico legato a un separato \textbf{spazio di indirizzamento fisico} è centrale per una corretta gestione della memoria.
 
 \begin{itemize}
-    \item \textbf{Indirizzo logico} - generato dalla CPU; detto anche \textbf{indirizzo virtuale};
-    \item \textbf{Indirizzo fisico} - indirizzo visto dall'unità di memoria.
+  \item \textbf{Indirizzo logico} - generato dalla CPU; detto anche \textbf{indirizzo virtuale};
+  \item \textbf{Indirizzo fisico} - indirizzo visto dall'unità di memoria.
 \end{itemize}
 
 Gli indirizzi logici e fisici coincidono negli schemi di binding al tempo di compilazione e di caricamento, ma differiscono nello schema di binding al tempo di esecuzione.
@@ -182,39 +182,39 @@ Gli indirizzi logici e fisici coincidono negli schemi di binding al tempo di com
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
 
-    Dispositivo hardware, all'interno della CPU, che al runtime mappa gli indirizzi virtuali, che troviamo nel codice assembler, in indirizzi fisici.
-    Vi sono diverse tipologie di MMU, anche in base a quanto vogliamo far pagare il chip.
+      Dispositivo hardware, all'interno della CPU, che al runtime mappa gli indirizzi virtuali, che troviamo nel codice assembler, in indirizzi fisici.
+      Vi sono diverse tipologie di MMU, anche in base a quanto vogliamo far pagare il chip.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.35\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/hnter.png}
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.35\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/hnter.png}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
 
-    Il registro base ora si chiama registro di rilocazione. Il valore nel registro di rilocazione viene aggiunto a ogni indirizzo
-    generato da un processo utente nel momento in cui viene inviato alla memoria.
+      Il registro base ora si chiama registro di rilocazione. Il valore nel registro di rilocazione viene aggiunto a ogni indirizzo
+      generato da un processo utente nel momento in cui viene inviato alla memoria.
 
-    Questo componente è composto da un sommatore ed un comparatore per bloccare il programma se vuole utilizzare spazi non facenti parti della sua address space.
-    
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.35\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/mmuu.png}
-\end{minipage}
-\end{minipage}
+      Questo componente è composto da un sommatore ed un comparatore per bloccare il programma se vuole utilizzare spazi non facenti parti della sua address space.
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.35\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/mmuu.png}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -240,8 +240,8 @@ Oltre che al relocation register ci sono anche altri modi per caricare nuovi pro
 % Per quanto riguarda il linking, cosa significa? Il linker fa statico o dimatico?\newline
 
 L'intero programma non deve necessariamente essere tutto in memoria per essere eseguito. Una routine, parte del programma, non vorremmo venisse caricata finché non viene chiamata.
-Questo migliora l'utilizzo dello spazio in memoria. Il loader perciò deve intervenire quando vogliamo caricare nuove porzioni di codice. 
-Questo fa si che il programma deve essere organizzato ed avere un formato specifico. 
+Questo migliora l'utilizzo dello spazio in memoria. Il loader perciò deve intervenire quando vogliamo caricare nuove porzioni di codice.
+Questo fa si che il programma deve essere organizzato ed avere un formato specifico.
 
 Il SO può aiutare fornendo librerie per implementare il caricamento dinamico.
 
@@ -264,28 +264,28 @@ Il SO può aiutare fornendo librerie per implementare il caricamento dinamico.
 \noindent\textbf{Linking dinamico} - il linking è rinviato fino alla fase di esecuzione del programma.\newline
 \noindent
 \begin{tcolorbox}
-\textbf{Nota:} Le DLL possono avere le due varianti: load-time dynamic linking (caricamento all'avvio) o run-time dynamic linking (caricamento su richiesta durante l'esecuzione)
+  \textbf{Nota:} Le DLL possono avere le due varianti: load-time dynamic linking (caricamento all'avvio) o run-time dynamic linking (caricamento su richiesta durante l'esecuzione)
 \end{tcolorbox}
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
 
-    Non tutti gli indirizzi sono risolti prima dell'esecuzione, pensiamo ad esempio alla printf, possiamo assumere che molti porgrammi in esecuzione possono volerla utilizzare.
-    Per questo motivo teniamo ancora indirizzi non risolti e inseriamo piccolo frammento di codice, chiamati \textit{stub}, utilizzato per individuare la routine di libreria residente in memoria.
-    A runtime lo stub, che faceva finta di essere la routine corretta, viene sostituita con l'indirizzo della routine corretta e la esegue a runtime.
+      Non tutti gli indirizzi sono risolti prima dell'esecuzione, pensiamo ad esempio alla printf, possiamo assumere che molti porgrammi in esecuzione possono volerla utilizzare.
+      Per questo motivo teniamo ancora indirizzi non risolti e inseriamo piccolo frammento di codice, chiamati \textit{stub}, utilizzato per individuare la routine di libreria residente in memoria.
+      A runtime lo stub, che faceva finta di essere la routine corretta, viene sostituita con l'indirizzo della routine corretta e la esegue a runtime.
 
-    Il sistema operativo verifica se la routine si trova nello spazio di indirizzamento del processo e, in caso contrario, la aggiunge.
+      Il sistema operativo verifica se la routine si trova nello spazio di indirizzamento del processo e, in caso contrario, la aggiunge.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.35\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/ddl.png}
-    \captionof{figure}{File .dll}
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.35\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/ddl.png}
+      \captionof{figure}{File .dll}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -360,8 +360,8 @@ L'allocazione contigua è uno dei primi metodi: array e liste concatenate.
 La memoria principale è solitamente suddivisa in due partizioni:
 
 \begin{itemize}
-    \item Sistema operativo residente, solitamente collocato in memoria bassa con il vettore degli interrupt;
-    \item I processi utente sono collocati in memoria alta
+  \item Sistema operativo residente, solitamente collocato in memoria bassa con il vettore degli interrupt;
+  \item I processi utente sono collocati in memoria alta
 \end{itemize}
 
 % \textbf{sotto 0 non vai, 1M? se il limite è 500K, è un rischio, leggi qualcosa che non dovresti}
@@ -371,27 +371,27 @@ La memoria principale è solitamente suddivisa in due partizioni:
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
 
-Ogni processo è contenuto in una singola sezione contigua di memoria. 
+      Ogni processo è contenuto in una singola sezione contigua di memoria.
 
-Il relocation register viene utilizzato per proteggere i processi utente l'uno dall'altro e per impedire modifiche al codice e ai dati del sistema operativo.
+      Il relocation register viene utilizzato per proteggere i processi utente l'uno dall'altro e per impedire modifiche al codice e ai dati del sistema operativo.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.35\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/fbs.png}
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.35\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/fbs.png}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \begin{itemize}
-    \item Il base register contiene il valore del più piccolo indirizzo fisico
-    \item Il limit register contiene l'intervallo degli indirizzi logici - ogni indirizzo logico deve essere inferiore al registro limite
-    \item La MMU mappa dinamicamente gli indirizzi logici
+  \item Il base register contiene il valore del più piccolo indirizzo fisico
+  \item Il limit register contiene l'intervallo degli indirizzi logici - ogni indirizzo logico deve essere inferiore al registro limite
+  \item La MMU mappa dinamicamente gli indirizzi logici
 \end{itemize}
 
 
@@ -400,29 +400,29 @@ Il relocation register viene utilizzato per proteggere i processi utente l'uno d
 Il SO può decidere l'allocazione a partizioni multiple. Il grado di multiprogrammazione è limitato dal numero di partizioni.
 
 \begin{itemize}
-    \item \textbf{Partizione variabile} - dimensioni per l'efficienza (dimensionate in base alle necessità del processo).
-    \item \textbf{Buco} - blocco di memoria disponibile; buchi di varie dimensioni sono dispersi nella memoria. Indesiderato; idealmente si vuole un blocco contiguo di memoria disponibile.
+  \item \textbf{Partizione variabile} - dimensioni per l'efficienza (dimensionate in base alle necessità del processo).
+  \item \textbf{Buco} - blocco di memoria disponibile; buchi di varie dimensioni sono dispersi nella memoria. Indesiderato; idealmente si vuole un blocco contiguo di memoria disponibile.
 \end{itemize}
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
 
-    Quando un processo arriva, gli viene allocata memoria da un buco sufficientemente grande da contenerlo; quando un processo termina e libera la sua partizione, le partizioni libere adiacenti vengono unite. Tutto ciò è gestito dal sistema operativo che mantiene informazioni su:
-    
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.35\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/jyrt.png}
-\end{minipage}
-\end{minipage}
+      Quando un processo arriva, gli viene allocata memoria da un buco sufficientemente grande da contenerlo; quando un processo termina e libera la sua partizione, le partizioni libere adiacenti vengono unite. Tutto ciò è gestito dal sistema operativo che mantiene informazioni su:
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.35\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/jyrt.png}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \begin{itemize}
-    \item partizioni allocate
-    \item partizioni libere (buchi)
+  \item partizioni allocate
+  \item partizioni libere (buchi)
 \end{itemize}
 
 
@@ -431,25 +431,25 @@ Il SO può decidere l'allocazione a partizioni multiple. Il grado di multiprogra
 Come soddisfare una richiesta di dimensione n da una lista di buchi liberi?
 
 \begin{itemize}
-    \item \textbf{First-fit}: Alloca il primo buco sufficientemente grande
-    \begin{itemize}
-        \item[] Può produrre molti piccoli buchi residui
-    \end{itemize}
+  \item \textbf{First-fit}: Alloca il primo buco sufficientemente grande
+        \begin{itemize}
+          \item[] Può produrre molti piccoli buchi residui
+        \end{itemize}
 
-    \item \textbf{Best-fit}: Alloca il buco più piccolo sufficientemente grande; deve scorrere l'intera lista, salvo che sia ordinata per dimensione
+  \item \textbf{Best-fit}: Alloca il buco più piccolo sufficientemente grande; deve scorrere l'intera lista, salvo che sia ordinata per dimensione
 
-    \begin{itemize}
-        \item[] Produce il buco residuo più piccolo, che potrebbe non essere più riempito.
-    \end{itemize}
+        \begin{itemize}
+          \item[] Produce il buco residuo più piccolo, che potrebbe non essere più riempito.
+        \end{itemize}
 
-    \item \textbf{Worst-fit}: Alloca il buco più grande; deve anch'esso scorrere l'intera lista
-    \begin{itemize}
-        \item[] Produce il buco residuo più grande, che può essere riempito da altri processi.
-    \end{itemize}
+  \item \textbf{Worst-fit}: Alloca il buco più grande; deve anch'esso scorrere l'intera lista
+        \begin{itemize}
+          \item[] Produce il buco residuo più grande, che può essere riempito da altri processi.
+        \end{itemize}
 \end{itemize}
 
 First-fit e best-fit sono migliori di worst-fit in termini di velocità e utilizzo della memoria.
-Per decidere tra Best e Worst fit andrebbero fatti test sul campo. 
+Per decidere tra Best e Worst fit andrebbero fatti test sul campo.
 
 \subsection{Frammentazione}
 
@@ -464,38 +464,38 @@ Per decidere tra Best e Worst fit andrebbero fatti test sul campo.
 % }
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
 
-    \paragraph{Frammentazione esterna} - esiste sufficiente spazio di memoria totale per soddisfare una richiesta, ma non è contiguo. Sia la strategia first-fit che best-fit causano frammentazione esterna.
-    
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.35\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/mkjhg.png}
-\end{minipage}
-\end{minipage}
+      \paragraph{Frammentazione esterna} - esiste sufficiente spazio di memoria totale per soddisfare una richiesta, ma non è contiguo. Sia la strategia first-fit che best-fit causano frammentazione esterna.
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.35\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/mkjhg.png}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
 
-    \paragraph{Frammentazione interna} - la memoria allocata può essere leggermente più grande di quella richiesta; la dimensione minima è definita dal SO e la differenza tra la dimensione del programma C e questa dimensione minima è detta frammentazione interna. L'uso della partizione dinamica per assegnare spazio al processo può risolvere questo problema.
-    
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.35\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/mht.png}
-\end{minipage}
-\end{minipage}
+      \paragraph{Frammentazione interna} - la memoria allocata può essere leggermente più grande di quella richiesta; la dimensione minima è definita dal SO e la differenza tra la dimensione del programma C e questa dimensione minima è detta frammentazione interna. L'uso della partizione dinamica per assegnare spazio al processo può risolvere questo problema.
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.35\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/mht.png}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 È sensato pensare che allocando N blocchi, la metà sono frammentati. E.g. 100 blocchi, 50 frammentati, 50 utilizzati, frammentazione del ~50\% (thumb roule).
@@ -504,16 +504,16 @@ Per decidere tra Best e Worst fit andrebbero fatti test sul campo.
 Si riduce la frammentazione esterna tramite la \textbf{compattazione}: il contenuto della memoria viene riorganizzato in modo da raccogliere tutta la memoria libera in un unico blocco contiguo. La compattazione è possibile solo se la rilocazione è dinamica e viene eseguita al tempo di esecuzione.
 
 Esempio: La cosa migliore sarebbe trasferire tutti i processi da un'altra parte, questo implica
-avere altra RAM la quale avrei utilizzato se l'avessi avuta. Posso utilizzare il disco ma questo 
-significa che non potrei utilizzare il  pc. 
+avere altra RAM la quale avrei utilizzato se l'avessi avuta. Posso utilizzare il disco ma questo
+significa che non potrei utilizzare il  pc.
 
-Inoltre si presenta il problema dell'I/O: se un processo è "waiting for IO", 
+Inoltre si presenta il problema dell'I/O: se un processo è "waiting for IO",
 non posso spostarlo perché altrimenti l'I/O non saprebbe dove inviare i dati.
 
-Solutioni: 1. Evitare che il processo venga spostato, la cui conseguenza è una 
+Solutioni: 1. Evitare che il processo venga spostato, la cui conseguenza è una
 deframmentazione non ottimale;
 
-2. Spostare comunque il programma utilizzando un buffer, anche se questo comporta 
+2. Spostare comunque il programma utilizzando un buffer, anche se questo comporta
 un tempo complessivo di spostamento più lungo. Spostare la memoria da utente a kernel fatto all'inizio di "waiting for IO".
 % \textbf{Esempio: ristsitemare i mobili e l'alloggio è sempre pieno. la cosa migliore è portare tutto fuoi e poi rimetto dentro.
 % Quando si può fare nel cotesto dei processo? Tutti i processi fermi a patto del kernel, 
@@ -541,11 +541,11 @@ Supponiamo di consentire che lo spazio di indirizzamento fisico di un processo p
 Il processo di paginazione consiste nel dividere la memoria fisica in blocchi di dimensione fissa chiamati \textbf{frame}; la dimensione è una potenza di 2, compresa tra 512 byte e 16 MiB. Anche la memoria logica viene divisa in blocchi della stessa dimensione chiamati \textbf{pagine}.\newline
 \noindent
 \begin{tcolorbox}
-\textbf{Nota:} a questo punto è indifferente parlare di SSD o RAM, è la stessa cosa; cambiano solo la latenza e la volatilità.
+  \textbf{Nota:} a questo punto è indifferente parlare di SSD o RAM, è la stessa cosa; cambiano solo la latenza e la volatilità.
 \end{tcolorbox}
 
 Questo permette di tenere traccia di tutti i frame liberi e consente di eseguire un programma di dimensione N pagine, trovando N frame liberi e caricando il programma. Per fare ciò dobbiamo impostare una tabella delle pagine per tradurre gli indirizzi logici in fisici.\newline
-La frammentazione interna è ancora presente. 
+La frammentazione interna è ancora presente.
 
 Per trovare i frame liberi possiamo utilizzare una free-list oppure un vettore chiamato bitmap.
 
@@ -557,16 +557,16 @@ L'indirizzo (virtuale) generato dalla CPU è suddiviso in:
 
 \begin{minipage}{0.9\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.7\linewidth}    
+  \begin{minipage}{0.7\linewidth}
     \begin{itemize}
-        \item \textbf{Numero di pagina (p)} - usato come indice in una tabella delle pagine che contiene l'indirizzo base di ogni pagina nella memoria fisica;
-        \item \textbf{Offset di pagina (d)} - combinato con l'indirizzo base definisce l'indirizzo di memoria fisica inviato all'unità di memoria.
+      \item \textbf{Numero di pagina (p)} - usato come indice in una tabella delle pagine che contiene l'indirizzo base di ogni pagina nella memoria fisica;
+      \item \textbf{Offset di pagina (d)} - combinato con l'indirizzo base definisce l'indirizzo di memoria fisica inviato all'unità di memoria.
     \end{itemize}
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.25\linewidth}
-     \includegraphics[width=1\linewidth]{content/OS_Internals/img/yuj,.png}
-\end{minipage}
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/yuj,.png}
+  \end{minipage}
 \end{minipage}
 
 
@@ -575,7 +575,7 @@ Per un dato spazio di indirizzamento logico $2^m$ e dimensione di pagina $2^n$.
 \section{Hardware di paginazione}
 
 Abbiamo quasi annullato il problema della frammentazione dato che tutti i processi
-ora possono prendere la stessa dimensione della pagina, e non importa se sono contigue o no. 
+ora possono prendere la stessa dimensione della pagina, e non importa se sono contigue o no.
 
 
 % \textbf{
@@ -589,19 +589,19 @@ ora possono prendere la stessa dimensione della pagina, e non importa se sono co
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.48\linewidth}    
-    \includegraphics[width=0.95\linewidth]{content/OS_Internals/img/nfg.png}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.48\linewidth}
+      \includegraphics[width=0.95\linewidth]{content/OS_Internals/img/nfg.png}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.48\linewidth}
-     \includegraphics[width=0.95\linewidth]{content/OS_Internals/img/dsf.png}
-    \captionof{figure}{Modello di paginazione della memoria logica e fisica}
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.48\linewidth}
+      \includegraphics[width=0.95\linewidth]{content/OS_Internals/img/dsf.png}
+      \captionof{figure}{Modello di paginazione della memoria logica e fisica}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -610,8 +610,8 @@ ora possono prendere la stessa dimensione della pagina, e non importa se sono co
 Indirizzo logico: n = 2 (bit di offset), n-m = 3 (bit di pagina). Con una dimensione di pagina di 4 byte e una memoria fisica di 32 bit ($2^m$ = 8 pagine).
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.35\linewidth]{content/OS_Internals/img/jmy.png}
+  \centering
+  \includegraphics[width=0.35\linewidth]{content/OS_Internals/img/jmy.png}
 \end{figure}
 
 
@@ -627,21 +627,21 @@ Quindi, frame di dimensione ridotta consentono una piccola frammentazione intern
 Le dimensioni delle pagine sono cresciute nel tempo:
 
 \begin{itemize}
-    \item Solaris supporta due dimensioni di pagina - 8 KB e 4 MB
-    \item Win10 supporta due dimensioni di pagina - 4 KB e 2 MB
-    \item Linux supporta due dimensioni di pagina - 4 KB e dimensione huge page personalizzata
+  \item Solaris supporta due dimensioni di pagina - 8 KB e 4 MB
+  \item Win10 supporta due dimensioni di pagina - 4 KB e 2 MB
+  \item Linux supporta due dimensioni di pagina - 4 KB e dimensione huge page personalizzata
 \end{itemize}
 
 \begin{figure}[htbp]
-    \centering
+  \centering
   \includegraphics[width=0.5\linewidth]{images/OS_internals/Main-memory/MM-esempio4.png}
 \end{figure}
 
-Sappiamo, dato l'architettura e il funzionamento della memoria e dei processori, che 
+Sappiamo, dato l'architettura e il funzionamento della memoria e dei processori, che
 non possiamo allocare vettori di dimensioni arbitrarie, ma dobbiamo utilizzare potenze di 2.
 
 A questo punto, essendo che abbiamo celle disponibili, possiamo
-memorizzare dati aggiuntivi. Ad esempio, la protection bit per indicare se 
+memorizzare dati aggiuntivi. Ad esempio, la protection bit per indicare se
 il frame è read-only o se è anche permesso fare accessi read-write.
 
 % \textbf{Essendo che gli array utilizzano multipli di $2^x$ byte, non possiamo fare un array
@@ -652,33 +652,33 @@ Supponiamo una dimensione di pagina di 4KB (212 byte) e una CPU hardware a 32 bi
 Altro esempio:
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.7\linewidth} 
-    \begin{itemize}
-    \centering
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.7\linewidth}
+      \begin{itemize}
+        \centering
         \item[] m = lunghezza indirizzo = 8 bit.
         \item[] n = $log_2(\text{dimensione pagina})$ = $log_2(32 \text{ byte})$ = 5 bit di offset.
         \item[] m - n = 3 = numero di pagine che posso indirizzare.
-    \end{itemize}   
-    Riducendo la dimensione della pagina si possono indirizzare più pagine e l'offset diminuisce. Normalmente m = 32 e la dimensione della pagina è 4KiB, come nell'esempio precedente.
+      \end{itemize}
+      Riducendo la dimensione della pagina si possono indirizzare più pagine e l'offset diminuisce. Normalmente m = 32 e la dimensione della pagina è 4KiB, come nell'esempio precedente.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.25\linewidth}
-     \includegraphics[width=1\linewidth]{content/OS_Internals/img/yrtjn.png}
-    \captionof{figure}{Frame liberi}
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.25\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/yrtjn.png}
+      \captionof{figure}{Frame liberi}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \subsection{Implementazione della page table}
 La tabella delle pagine, come detto in precedenza, è mantenuta nella memoria principale. È il principale "artefatto" della gestione della memoria virtuale:
 
 \begin{itemize}
-    \item[] Il registro base della tabella delle pagine (Page-table base register - PTBR) punta alla tabella delle pagine
-    \item[] Il registro di lunghezza della tabella delle pagine (Page-table length register - PTLR) indica la dimensione della tabella delle pagine
+  \item[] Il registro base della tabella delle pagine (Page-table base register - PTBR) punta alla tabella delle pagine
+  \item[] Il registro di lunghezza della tabella delle pagine (Page-table length register - PTLR) indica la dimensione della tabella delle pagine
 \end{itemize}
 
 In questo schema ogni accesso a dati o istruzioni richiede \textbf{due accessi alla memoria}! Uno per la tabella delle pagine e uno per i dati o l'istruzione.
@@ -701,39 +701,39 @@ La TLB è una cache univoca per tutte le page table. Il primo apporccio potrebbe
 quello di svuotare la TLB ad ogni context switch, ma questo è inefficiente.
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
-    Invece di svuotare la TLB, memorizziamo anche \textbf{identificatori dello spazio di indirizzamento di un dato processo} (ASID) in ogni voce del TLB.
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
+      Invece di svuotare la TLB, memorizziamo anche \textbf{identificatori dello spazio di indirizzamento di un dato processo} (ASID) in ogni voce del TLB.
 
-    I TLB sono tipicamente piccoli, da 64 a 1024 voci, ma più veloci; sono quindi una cache completamente associativa.
+      I TLB sono tipicamente piccoli, da 64 a 1024 voci, ma più veloci; sono quindi una cache completamente associativa.
 
-    In caso di TLB miss, il valore viene caricato nel TLB per un accesso più rapido la volta successiva; le politiche di sostituzione devono essere considerate; alcune voci possono essere fissate per un accesso rapido permanente.
+      In caso di TLB miss, il valore viene caricato nel TLB per un accesso più rapido la volta successiva; le politiche di sostituzione devono essere considerate; alcune voci possono essere fissate per un accesso rapido permanente.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.37\linewidth}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.37\linewidth}
       \includegraphics[width=1\linewidth]{content/OS_Internals/img/ythmu.png}
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
 \begin{minipage}{0.95\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
-  Non accelera tutto:
+  \begin{minipage}{0.6\linewidth}
+    Non accelera tutto:
 
-  \begin{itemize}
+    \begin{itemize}
       \item Caso medio: accesso nel TLB + accesso in memoria per il dato;
       \item Caso peggiore: nessun dato nel TLB, quindi accesso in memoria per la tabella delle pagine + accesso in memoria per il dato.
-  \end{itemize}
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \end{itemize}
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.37\linewidth}
-  \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio5.png}
-\end{minipage}
+    \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio5.png}
+  \end{minipage}
 \end{minipage}
 
 Una volta riempita la TLB, dobbiamo utilizzare algoritmi per decidere quale voce sostituire in caso di TLB miss.
@@ -789,46 +789,46 @@ int main(){
 \end{minted}
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
-    \textbf{Page fault} - Un page fault si verifica quando un programma tenta di accedere a dati o codice che si trovano nel suo spazio di indirizzamento, ma non sono attualmente nella RAM del sistema.
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
+      \textbf{Page fault} - Un page fault si verifica quando un programma tenta di accedere a dati o codice che si trovano nel suo spazio di indirizzamento, ma non sono attualmente nella RAM del sistema.
 
-    Quando si accede a qualcosa nella RAM, il SO carica un blocco di dati dall'SSD nella RAM. Nel primo caso il SO carica un blocco ma il codice C usa solo la prima colonna; nel secondo caso il SO carica un blocco di dati e ne usa tutta la colonna.
+      Quando si accede a qualcosa nella RAM, il SO carica un blocco di dati dall'SSD nella RAM. Nel primo caso il SO carica un blocco ma il codice C usa solo la prima colonna; nel secondo caso il SO carica un blocco di dati e ne usa tutta la colonna.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.37\linewidth}
-    \centering
-    \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/bnetg.png}
-    \captionof{figure}{Page fault}\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.37\linewidth}
+      \centering
+      \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/bnetg.png}
+      \captionof{figure}{Page fault}\end{minipage}
+  \end{minipage}
 \end{center}
 
 
 \section{Page fault}
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
-    \paragraph{Cos'è un page fault?} I dati sono tipicamente memorizzati in memorie non volatili, grandi e lente, e poi caricati nella RAM; ciò significa che i dati necessari per l'esecuzione (una pagina) possono esistere solo nella memoria secondaria a causa del caricamento dinamico. Devono quindi essere caricati nella RAM, poi nella cache, poi nei registri: questo è un \textbf{page fault}!\newline
-    Non possiamo eliminarlo, ma cerchiamo di mitigare questo evento lento.
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.37\linewidth}
-     \includegraphics[width=1\linewidth]{content/OS_Internals/img/frsb.png}
-    \captionof{figure}{Page fault}
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
+      \paragraph{Cos'è un page fault?} I dati sono tipicamente memorizzati in memorie non volatili, grandi e lente, e poi caricati nella RAM; ciò significa che i dati necessari per l'esecuzione (una pagina) possono esistere solo nella memoria secondaria a causa del caricamento dinamico. Devono quindi essere caricati nella RAM, poi nella cache, poi nei registri: questo è un \textbf{page fault}!\newline
+      Non possiamo eliminarlo, ma cerchiamo di mitigare questo evento lento.
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.37\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/frsb.png}
+      \captionof{figure}{Page fault}
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \subsubsection{Background}
 
-Il codice deve essere in memoria per essere eseguito, 
+Il codice deve essere in memoria per essere eseguito,
 ma l'intero programma è raramente utilizzato interamente per via della gestione delle eccezioni, funzioni non utilizzate e larghe strutture dati.
 
 Tutto il programma non è necessario allo stesso tempo.
@@ -845,39 +845,39 @@ La virtual memory può essere implementata tramite: demand paging, demand segmen
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.7\linewidth} 
-    Normalmente lo spazio di indirizzamento logico è progettato in modo che lo stack inizi all'indirizzo logico massimo e cresca "verso il basso", mentre l'heap cresce "verso l'alto". Questo massimizza l'utilizzo dello spazio degli indirizzi, lasciando uno spazio inutilizzato tra i due, noto come "buco". Non è necessaria memoria fisica fino a quando l'heap o lo stack non crescono fino a una nuova pagina. Ciò consente spazi di indirizzamento sparsi con buchi lasciati per la crescita, librerie dinamicamente collegate, ecc. Le librerie di sistema possono essere condivise tramite mappatura nello spazio di indirizzamento virtuale. La memoria condivisa può essere implementata mappando pagine in lettura-scrittura nello spazio di indirizzamento virtuale. Le pagine possono essere condivise durante fork(), accelerando la creazione dei processi.
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.7\linewidth}
+      Normalmente lo spazio di indirizzamento logico è progettato in modo che lo stack inizi all'indirizzo logico massimo e cresca "verso il basso", mentre l'heap cresce "verso l'alto". Questo massimizza l'utilizzo dello spazio degli indirizzi, lasciando uno spazio inutilizzato tra i due, noto come "buco". Non è necessaria memoria fisica fino a quando l'heap o lo stack non crescono fino a una nuova pagina. Ciò consente spazi di indirizzamento sparsi con buchi lasciati per la crescita, librerie dinamicamente collegate, ecc. Le librerie di sistema possono essere condivise tramite mappatura nello spazio di indirizzamento virtuale. La memoria condivisa può essere implementata mappando pagine in lettura-scrittura nello spazio di indirizzamento virtuale. Le pagine possono essere condivise durante fork(), accelerando la creazione dei processi.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.25\linewidth}
-    \centering
-     \includegraphics[width=0.3\linewidth]{images/OS_internals/Main-memory/MM-esempio6.png}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.25\linewidth}
+      \centering
+      \includegraphics[width=0.3\linewidth]{images/OS_internals/Main-memory/MM-esempio6.png}
       \vspace{0.5cm}
       \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio7.png}
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \subsubsection{Demand Paging}
 
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
-Posso caricare un processo interamente in memoria al momento del caricamento, oppure posso caricare una pagina solo quando è necessaria. Il demand paging richiede meno I/O, non esegue I/O non necessario, richiede meno memoria, offre una risposta più rapida e consente più utenti. È simile a un sistema di paging con swapping.
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
+      Posso caricare un processo interamente in memoria al momento del caricamento, oppure posso caricare una pagina solo quando è necessaria. Il demand paging richiede meno I/O, non esegue I/O non necessario, richiede meno memoria, offre una risposta più rapida e consente più utenti. È simile a un sistema di paging con swapping.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.37\linewidth}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.37\linewidth}
       \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio8.png}
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \subsubsection{Basic Concepts}
@@ -890,25 +890,25 @@ Con lo swapping, il pager indovina quali pagine saranno utilizzate prima di esse
 Possiamo usare un bit, \textbf{valid-invalid}, per tracciare se l'indirizzo è nella RAM o nella memoria secondaria.
 
 \begin{itemize}
-    \item valido (1): indica che la pagina associata è nello spazio di indirizzamento logico del processo ed esiste già nella RAM;
-    \item non valido (0): indica che la pagina non è nello spazio di indirizzamento logico del processo e non è nella RAM, il che significa che si verificherà un \textbf{page fault/trap nel kernel}.
+  \item valido (1): indica che la pagina associata è nello spazio di indirizzamento logico del processo ed esiste già nella RAM;
+  \item non valido (0): indica che la pagina non è nello spazio di indirizzamento logico del processo e non è nella RAM, il che significa che si verificherà un \textbf{page fault/trap nel kernel}.
 \end{itemize}
 
 
 \begin{center}
-\centering
-\begin{minipage}{0.85\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.48\linewidth} 
-        \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/rfynhmg.png}
-      
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.48\linewidth}
-    \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/mhg.png}
+  \centering
+  \begin{minipage}{0.85\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.48\linewidth}
+      \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/rfynhmg.png}
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.48\linewidth}
+      \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/mhg.png}
+
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -918,26 +918,26 @@ Possiamo usare un bit, \textbf{valid-invalid}, per tracciare se l'indirizzo è n
 
 \begin{minipage}{1\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
-        \begin{enumerate}
-            \item Se c'è un riferimento a una pagina, il primo riferimento a quella pagina genera un trap al sistema operativo = page fault;
-            \item Se c'è un riferimento a una pagina, il primo riferimento genera un trap al sistema operativo;
+  \begin{minipage}{0.6\linewidth}
+    \begin{enumerate}
+      \item Se c'è un riferimento a una pagina, il primo riferimento a quella pagina genera un trap al sistema operativo = page fault;
+      \item Se c'è un riferimento a una pagina, il primo riferimento genera un trap al sistema operativo;
             \begin{itemize}
-                \item[] Riferimento non valido $\to$ abort
-                \item[] Semplicemente non in memoria, deve essere caricata dal disco
+              \item[] Riferimento non valido $\to$ abort
+              \item[] Semplicemente non in memoria, deve essere caricata dal disco
             \end{itemize}
-            \item Trovare un frame libero in memoria;
-            \item Caricare la pagina nel frame tramite un'operazione disco pianificata, la parte più lenta del processo;
-            \item Aggiornare le tabelle per indicare che la pagina è ora in memoria; impostare il bit valido = v;
-            \item Riavviare l'istruzione che ha causato il page fault;
-        \end{enumerate}
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+      \item Trovare un frame libero in memoria;
+      \item Caricare la pagina nel frame tramite un'operazione disco pianificata, la parte più lenta del processo;
+      \item Aggiornare le tabelle per indicare che la pagina è ora in memoria; impostare il bit valido = v;
+      \item Riavviare l'istruzione che ha causato il page fault;
+    \end{enumerate}
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.36\linewidth}
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/bnetg.png}
     \captionof{figure}{Page fault}
 
-\end{minipage}
+  \end{minipage}
 \end{minipage}
 
 
@@ -947,8 +947,8 @@ Supponiamo un tasso di page fault 0 < p < 1; se p = 0 nessun page fault, se p = 
 Tempo di accesso effettivo:
 
 \begin{itemize}
-    \centering 
-    \item[] EAT = (1 - p) x accesso in memoria + p (overhead page fault)
+  \centering
+  \item[] EAT = (1 - p) x accesso in memoria + p (overhead page fault)
 \end{itemize}
 
 Tempo di accesso in memoria = 200 nanosecondi; tempo medio di gestione del page fault = 8 millisecondi; un accesso su 1.000 causa un page fault. Sembra un numero piccolo, ma non lo è!
@@ -957,8 +957,8 @@ Tempo di accesso in memoria = 200 nanosecondi; tempo medio di gestione del page 
 Ipotizzando un tempo di accesso RAM = 200 nanosecondi, tempo medio di gestione del page fault = 8 millisecondi:
 
 \begin{itemize}
-    \centering 
-    \item[] EAT = (1 - p)200 + p (8 millisecondi) = 200 + p7.999.800
+  \centering
+  \item[] EAT = (1 - p)200 + p (8 millisecondi) = 200 + p7.999.800
 \end{itemize}
 
 Se un accesso su 1.000 causa un page fault, allora EAT = 8,2 microsecondi.
@@ -975,16 +975,16 @@ Questa è probabilmente la fonte principale di rallentamenti quando si elabora q
 Caso estremo - avviare un processo senza pagine in memoria.
 Il sistema operativo imposta il puntatore dell'istruzione alla prima istruzione del processo, che non è residente in memoria, causando un page fault. E questo accade per ogni pagina del processo al primo accesso, il che è noto come pure demand paging.
 
-In realtà, un certa istruzione potrebbe accedere a più pagine $\to$ più page fault. 
+In realtà, un certa istruzione potrebbe accedere a più pagine $\to$ più page fault.
 Considera il fetch e decode di un'istruzione che aggiunge 2 numeri dalla memoria e memorizza il risultato nuovamente in memoria. Il dolore è diminuito a causa della località di riferimento.
 
 
 Il supporto hardware necessario per il demand paging include:
 \begin{itemize}
-    \item[] Tabella delle pagine con bit valido/invalido
-    \item[] Memoria secondaria (dispositivo di swap con spazio di swap)
-    \item[] Riavvio dell'istruzione
-\end{itemize} 
+  \item[] Tabella delle pagine con bit valido/invalido
+  \item[] Memoria secondaria (dispositivo di swap con spazio di swap)
+  \item[] Riavvio dell'istruzione
+\end{itemize}
 
 \section{Instruction Restart}
 
@@ -1004,8 +1004,8 @@ pagina desiderata dalla memoria secondaria nella memoria principale.
 La maggior parte dei sistemi operativi mantiene una lista di frame liberi -- un pool di frame liberi per soddisfare tali richieste.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/rhsbgfw.png}
+  \centering
+  \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/rhsbgfw.png}
 \end{figure}
 
 I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota come zero-fill-on-demand -- il contenuto dei frame viene azzerato prima di essere allocato. All'avvio del sistema, tutta la memoria disponibile viene inserita nella lista dei frame liberi.
@@ -1013,23 +1013,23 @@ I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota
 \subsection{Passi nelrichiedere Paging - Worse Case}
 
 \begin{enumerate}
-    \item Trap all'operating system
-    \item Salva i registri utente e lo stato del processo
-    \item Determina che l'interruzione è stata causata da un page fault
-    \item Controlla che il riferimento alla pagina sia legale e determina la posizione della pagina sul disco
-    \item Emetti una lettura dal disco a un frame libero:
-    \begin{itemize}
-        \item[] Attendi in una coda per questo dispositivo fino a quando la richiesta di lettura non viene soddisfatta
-        \item[] Attendi il tempo di seek e/o latenza del dispositivo
-        \item[] Inizia il trasferimento della pagina a un frame libero
-    \end{itemize}
-    \item Mentre aspetti, assegna la CPU a qualche altro utente
-    \item Ricevi un'interruzione dal sottosistema I/O del disco (I/O completato)
-    \item Salva i registri e lo stato del processo per l'altro utente
-    \item Determina che l'interruzione è stata causata dal disco
-    \item Correggi la tabella delle pagine e altre tabelle per mostrare che la pagina è ora in memoria
-    \item Attendi che la CPU venga assegnata a questo processo di nuovo
-    \item Ripristina i registri utente, lo stato del processo e la nuova tabella delle pagine, quindi riprendi l'istruzione interrotta
+  \item Trap all'operating system
+  \item Salva i registri utente e lo stato del processo
+  \item Determina che l'interruzione è stata causata da un page fault
+  \item Controlla che il riferimento alla pagina sia legale e determina la posizione della pagina sul disco
+  \item Emetti una lettura dal disco a un frame libero:
+        \begin{itemize}
+          \item[] Attendi in una coda per questo dispositivo fino a quando la richiesta di lettura non viene soddisfatta
+          \item[] Attendi il tempo di seek e/o latenza del dispositivo
+          \item[] Inizia il trasferimento della pagina a un frame libero
+        \end{itemize}
+  \item Mentre aspetti, assegna la CPU a qualche altro utente
+  \item Ricevi un'interruzione dal sottosistema I/O del disco (I/O completato)
+  \item Salva i registri e lo stato del processo per l'altro utente
+  \item Determina che l'interruzione è stata causata dal disco
+  \item Correggi la tabella delle pagine e altre tabelle per mostrare che la pagina è ora in memoria
+  \item Attendi che la CPU venga assegnata a questo processo di nuovo
+  \item Ripristina i registri utente, lo stato del processo e la nuova tabella delle pagine, quindi riprendi l'istruzione interrotta
 \end{enumerate}
 
 \subsection{Demand Paging Optimizations}
@@ -1041,56 +1041,56 @@ Lo swap space è più veloce dell'I/O del file system anche se sullo stesso disp
 Copy-on-Write (COW) consente sia al processo padre che a quello figlio di condividere inizialmente le stesse pagine in memoria. Se uno dei processi modifica una pagina condivisa, solo allora la pagina viene copiata. COW consente una creazione di processi più efficiente poiché vengono copiate solo le pagine modificate. In generale, le pagine libere vengono allocate da un pool di pagine zero-fill-on-demand. Il pool dovrebbe sempre avere frame liberi per un'esecuzione rapida del demand page; non si vuole dover liberare un frame oltre ad altre elaborazioni su un page fault. Perché azzerare una pagina prima di allocarla? La variazione vfork() della system call fork() sospende il processo padre e il figlio utilizza lo spazio degli indirizzi copy-on-write del padre. Progettato per far sì che il figlio chiami exec(), molto efficiente.
 
 \begin{center}
-\centering
-\begin{minipage}{0.85\linewidth}
- \begin{minipage}{0.47\linewidth}
-     \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio9.png}
+  \centering
+  \begin{minipage}{0.85\linewidth}
+    \begin{minipage}{0.47\linewidth}
+      \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio9.png}
 
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.47\linewidth}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.47\linewidth}
       \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio10.png}
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
 \subsection{Cosa succede se non ci sono frame liberi?}
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
-    
-    Come per gli algoritmi di scheduling, possiamo implementare la soluzione più semplice usando la casualità: prendere un frame in memoria, metterlo nell'HD e caricare la pagina necessaria nella RAM; questa soluzione non è ottimale!
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.6\linewidth}
 
-    Questa tecnica, indipendentemente dall'algoritmo, si chiama \textbf{sostituzione di pagina} - trovare una pagina in memoria non realmente in uso, rimuoverla e caricare la pagina necessaria.
+      Come per gli algoritmi di scheduling, possiamo implementare la soluzione più semplice usando la casualità: prendere un frame in memoria, metterlo nell'HD e caricare la pagina necessaria nella RAM; questa soluzione non è ottimale!
 
-    \paragraph{}
-    Si previene la sovra-allocazione della memoria modificando la routine di gestione dei page fault in modo da includere la sostituzione delle pagine.
+      Questa tecnica, indipendentemente dall'algoritmo, si chiama \textbf{sostituzione di pagina} - trovare una pagina in memoria non realmente in uso, rimuoverla e caricare la pagina necessaria.
 
-    Possiamo farlo usando il \textbf{bit di modifica (dirty bit)} per ridurre l'overhead dei trasferimenti di pagina - solo le pagine modificate vengono scritte su disco.
+      \paragraph{}
+      Si previene la sovra-allocazione della memoria modificando la routine di gestione dei page fault in modo da includere la sostituzione delle pagine.
 
-    Se il dirty bit è impostato significa che il valore nella RAM è cambiato e prima di caricare la nuova pagina devo scrivere il valore nell'HD.
+      Possiamo farlo usando il \textbf{bit di modifica (dirty bit)} per ridurre l'overhead dei trasferimenti di pagina - solo le pagine modificate vengono scritte su disco.
 
-    La sostituzione delle pagine completa la separazione tra memoria logica e
-    fisica - una grande memoria virtuale può essere fornita con una memoria
-    fisica più piccola.
+      Se il dirty bit è impostato significa che il valore nella RAM è cambiato e prima di caricare la nuova pagina devo scrivere il valore nell'HD.
 
-    \paragraph{}
+      La sostituzione delle pagine completa la separazione tra memoria logica e
+      fisica - una grande memoria virtuale può essere fornita con una memoria
+      fisica più piccola.
 
-    Questo processo significa accedere all'HD \textbf{due volte}.
+      \paragraph{}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.37\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/sdfbgv.png}
+      Questo processo significa accedere all'HD \textbf{due volte}.
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.37\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/sdfbgv.png}
+
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -1099,25 +1099,25 @@ Copy-on-Write (COW) consente sia al processo padre che a quello figlio di condiv
 
 \begin{minipage}{1\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
-        \begin{enumerate}
-            \item Trovare la posizione della pagina desiderata su disco
-            \item Trovare un frame libero:
+  \begin{minipage}{0.6\linewidth}
+    \begin{enumerate}
+      \item Trovare la posizione della pagina desiderata su disco
+      \item Trovare un frame libero:
             \begin{itemize}
-                \item[] Se c'è un frame libero, usarlo
-                \item[] Se non c'è un frame libero, usare un algoritmo di sostituzione delle pagine per selezionare un frame vittima
-                \item[] Scrivere il frame vittima su disco se è sporco (= modificato mentre era in RAM)
+              \item[] Se c'è un frame libero, usarlo
+              \item[] Se non c'è un frame libero, usare un algoritmo di sostituzione delle pagine per selezionare un frame vittima
+              \item[] Scrivere il frame vittima su disco se è sporco (= modificato mentre era in RAM)
             \end{itemize}
-            \item Caricare la pagina desiderata nel frame (appena) libero; aggiornare le tabelle delle pagine e dei frame
-            \item Continuare il processo riavviando l'istruzione che ha causato il trap
-        \end{enumerate}
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+      \item Caricare la pagina desiderata nel frame (appena) libero; aggiornare le tabelle delle pagine e dei frame
+      \item Continuare il processo riavviando l'istruzione che ha causato il trap
+    \end{enumerate}
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.36\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/mghj.png}
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/mghj.png}
 
 
-\end{minipage}
+  \end{minipage}
 \end{minipage}
 
 
@@ -1130,28 +1130,28 @@ Copy-on-Write (COW) consente sia al processo padre che a quello figlio di condiv
 
 \begin{minipage}{1\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.6\linewidth} 
+  \begin{minipage}{0.6\linewidth}
 
     L'algoritmo di allocazione dei frame determina:
 
     \begin{itemize}
-        \item[] Quanti frame assegnare a ciascun processo
-        \item[] Quali frame sostituire; idealmente sostituisco solo la pagina che non mi servirà presto (ma non conosco il futuro)
+      \item[] Quanti frame assegnare a ciascun processo
+      \item[] Quali frame sostituire; idealmente sostituisco solo la pagina che non mi servirà presto (ma non conosco il futuro)
     \end{itemize}
 
 
     Algoritmo di sostituzione delle pagine:
 
     \begin{itemize}
-        \item[] Si vuole il tasso di page fault più basso sia al primo accesso che ai successivi
+      \item[] Si vuole il tasso di page fault più basso sia al primo accesso che ai successivi
     \end{itemize}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.36\linewidth}
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/ahet.png}
 
-\end{minipage}
+  \end{minipage}
 \end{minipage}
 
 \vspace{0.5cm}
@@ -1166,8 +1166,8 @@ Stringa di riferimento: 7,0,1,2,0,3,0,4,2,3,0,3,0,3,2,1,2,0,1,7,0,1;
 
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/dgnf.png}
+  \centering
+  \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/dgnf.png}
 \end{figure}
 
 Con questo metodo si hanno 15 page fault; si può fare meglio?
@@ -1177,8 +1177,8 @@ Con questo metodo si hanno 15 page fault; si può fare meglio?
 Sostituisce la pagina che non verrà usata per il periodo più lungo; 9 page fault è il risultato ottimale per l'esempio. Ma come detto non possiamo leggere il futuro; TUTTAVIA questa è la soluzione ottimale, quindi possiamo usarla per misurare le prestazioni degli altri algoritmi.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/dng.png}
+  \centering
+  \includegraphics[width=0.65\linewidth]{content/OS_Internals/img/dng.png}
 \end{figure}
 
 \subsection{Algoritmo LRU (Least Recently Used)}
@@ -1188,8 +1188,8 @@ Abbiamo visto che il programma non può conoscere il futuro, ma possiamo usare l
 Sostituisce la pagina che non è stata usata per il periodo di tempo più lungo; sfrutta il principio di località temporale. Si associa a ogni pagina il tempo dell'ultimo utilizzo.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/fdb.png}
+  \centering
+  \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/fdb.png}
 \end{figure}
 
 12 fault - meglio di FIFO ma peggio di OPT; generalmente un buon algoritmo e ampiamente usato. Ma come si implementa?
@@ -1205,8 +1205,8 @@ LRU e OPT sono casi di algoritmi a stack che non hanno l'anomalia di Belady. Si 
 
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/sd.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/sd.png}
 \end{figure}
 
 \newpage
@@ -1221,28 +1221,28 @@ Nel caso peggiore, l'algoritmo scorre l'intera lista.
 \paragraph{Algoritmo second-chance: } Generalmente FIFO, più il bit di riferimento fornito dall'hardware con sostituzione \textbf{Clock}. Se la pagina da sostituire ha:
 
 \begin{itemize}
-    \item Bit di riferimento = 0 -> sostituirla
-    \item Bit di riferimento = 1 allora:
-    \begin{itemize}
-    \item[] impostare il bit di riferimento a 0, lasciare la pagina in memoria
-    \item[] sostituire la pagina successiva, con le stesse regole
-    \end{itemize}
+  \item Bit di riferimento = 0 -> sostituirla
+  \item Bit di riferimento = 1 allora:
+        \begin{itemize}
+          \item[] impostare il bit di riferimento a 0, lasciare la pagina in memoria
+          \item[] sostituire la pagina successiva, con le stesse regole
+        \end{itemize}
 \end{itemize}
 
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/jnyfg.png}
+  \centering
+  \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/jnyfg.png}
 \end{figure}
 
 \subsection{Miglioramento del Second-Chance Algorithm}
 
 Possiamo migliorare l'algoritmo usando il bit di riferimento e il bit di modifica (se disponibile) in concerto. Prendiamo la coppia ordinata (riferimento, modifica):
 \begin{itemize}
-    \item (0, 0) né recentemente usata né modificata --- la migliore pagina da sostituire
-    \item (0, 1) non recentemente usata ma modificata --- non così buona, deve essere scritta prima della sostituzione
-    \item (1, 0) recentemente usata ma pulita --- probabilmente sarà usata di nuovo presto
-    \item (1, 1) recentemente usata e modificata --- probabilmente sarà usata di nuovo presto e deve essere scritta prima della sostituzione
+  \item (0, 0) né recentemente usata né modificata --- la migliore pagina da sostituire
+  \item (0, 1) non recentemente usata ma modificata --- non così buona, deve essere scritta prima della sostituzione
+  \item (1, 0) recentemente usata ma pulita --- probabilmente sarà usata di nuovo presto
+  \item (1, 1) recentemente usata e modificata --- probabilmente sarà usata di nuovo presto e deve essere scritta prima della sostituzione
 \end{itemize}
 Quando viene chiamata la sostituzione di pagina, si utilizza lo schema clock ma si usano le quattro classi per sostituire la pagina nella classe non vuota più bassa. Potrebbe essere necessario cercare più volte nella coda circolare.
 
@@ -1254,8 +1254,8 @@ Si mantiene un contatore del numero di riferimenti effettuati a ogni pagina; non
 \subsubsection{Algoritmo LFU (Least Frequently Used):}
 
 \begin{itemize}
-    \item Sostituisce la pagina con il contatore più basso
-    \item Può avere il problema di sostituire sempre le "pagine appena arrivate" che hanno il contatore impostato a 1
+  \item Sostituisce la pagina con il contatore più basso
+  \item Può avere il problema di sostituire sempre le "pagine appena arrivate" che hanno il contatore impostato a 1
 \end{itemize}
 
 
@@ -1298,43 +1298,43 @@ memoria/CPU.
 \textbf{Sostituzione globale} - il processo seleziona un frame di sostituzione dall'insieme di tutti i frame.
 
 \begin{itemize}
-    \item un processo può sottrarre un frame a un altro
-    \item il tempo di esecuzione del processo può variare notevolmente
-    \item throughput maggiore, quindi più comune
+  \item un processo può sottrarre un frame a un altro
+  \item il tempo di esecuzione del processo può variare notevolmente
+  \item throughput maggiore, quindi più comune
 \end{itemize}
 
 \textbf{Sostituzione locale} - ogni processo seleziona solo dal proprio insieme di
 frame allocati
 
 \begin{itemize}
-    \item Prestazioni per processo più consistenti
-    \item possibile sottoutilizzo della memoria
-    \item Quindi, throughput minore
+  \item Prestazioni per processo più consistenti
+  \item possibile sottoutilizzo della memoria
+  \item Quindi, throughput minore
 \end{itemize}
 
 \subsection{Recupero delle pagine}
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-        
-    Una strategia per implementare la politica di sostituzione globale è: tutte le richieste di memoria vengono soddisfatte dalla lista dei frame liberi, invece di aspettare che la lista scenda a zero prima di iniziare a selezionare le pagine da sostituire. Il recupero delle pagine viene attivato dal kernel quando la lista scende sotto una certa soglia.
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
 
-    \paragraph{}
-    Il processo kernel che lo gestisce è chiamato \textbf{reaper}.
+      Una strategia per implementare la politica di sostituzione globale è: tutte le richieste di memoria vengono soddisfatte dalla lista dei frame liberi, invece di aspettare che la lista scenda a zero prima di iniziare a selezionare le pagine da sostituire. Il recupero delle pagine viene attivato dal kernel quando la lista scende sotto una certa soglia.
 
-    Questa strategia cerca di garantire che ci sia sempre sufficiente memoria libera per soddisfare le nuove richieste, ovvero che la lista dei frame liberi non si svuoti mai.
+      \paragraph{}
+      Il processo kernel che lo gestisce è chiamato \textbf{reaper}.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-    \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/andg.png}
-    \captionof{figure}{Esempio di recupero delle pagine}
+      Questa strategia cerca di garantire che ci sia sempre sufficiente memoria libera per soddisfare le nuove richieste, ovvero che la lista dei frame liberi non si svuoti mai.
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/andg.png}
+      \captionof{figure}{Esempio di recupero delle pagine}
+
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \subsection{Non-Uniform Memory Access}
@@ -1342,20 +1342,20 @@ frame allocati
 
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-        
-   Fino ad ora tutta la memoria è stata considerata uguale, ma molti sistemi sono NUMA (Non-Uniform Memory Access) - la velocità di accesso alla memoria varia. Considera le schede di sistema contenenti CPU e memoria, interconnesse tramite un bus di sistema - architettura di multiprocessing NUMA.
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-    \includegraphics[width=0.7\linewidth]{images/OS_internals/Main-memory/MM-esempio11.png}
+      Fino ad ora tutta la memoria è stata considerata uguale, ma molti sistemi sono NUMA (Non-Uniform Memory Access) - la velocità di accesso alla memoria varia. Considera le schede di sistema contenenti CPU e memoria, interconnesse tramite un bus di sistema - architettura di multiprocessing NUMA.
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=0.7\linewidth]{images/OS_internals/Main-memory/MM-esempio11.png}
+
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 L'ottima prestazione deriva dall'allocare la memoria "vicino" alla CPU su cui è programmato il thread e modificare lo scheduler per programmare il thread sulla stessa scheda di sistema quando possibile. Soluzione adottata da Solaris creando lgroups, una struttura per tracciare i gruppi a bassa latenza CPU/memoria, usata dallo scheduler e dal pager. Quando possibile, schedula tutti i thread di un processo e allocare tutta la memoria per quel processo all'interno dell'lgroup.
@@ -1364,31 +1364,31 @@ L'ottima prestazione deriva dall'allocare la memoria "vicino" alla CPU su cui è
 \subsection{Thrashing}
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
 
-    \textbf{Thrashing} - un processo è occupato a scambiare continuamente pagine in entrata e in uscita.
-    \paragraph{}
+      \textbf{Thrashing} - un processo è occupato a scambiare continuamente pagine in entrata e in uscita.
+      \paragraph{}
 
-    Se un processo non ha un numero "sufficiente" di pagine, il tasso di page fault è molto
-    alto: \textbf{page fault} per ottenere la pagina, \textbf{sostituzione} del frame esistente, ma rapidamente si ha bisogno di nuovo del \textbf{frame sostituito}.
+      Se un processo non ha un numero "sufficiente" di pagine, il tasso di page fault è molto
+      alto: \textbf{page fault} per ottenere la pagina, \textbf{sostituzione} del frame esistente, ma rapidamente si ha bisogno di nuovo del \textbf{frame sostituito}.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/SDBF.png}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/SDBF.png}
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 Tutti questi cicli portano a:
 
 \begin{itemize}
-    \item Basso utilizzo della CPU
-    \item Il sistema operativo pensa di dover aumentare il grado di multiprogrammazione
-    \item Un altro processo viene aggiunto al sistema
+  \item Basso utilizzo della CPU
+  \item Il sistema operativo pensa di dover aumentare il grado di multiprogrammazione
+  \item Un altro processo viene aggiunto al sistema
 \end{itemize}
 
 \subsection{Paging su richiesta e thrashing}
@@ -1396,8 +1396,8 @@ Tutti questi cicli portano a:
 
 Perché il demand paging funziona? Modello di località:
 \begin{itemize}
-    \item[] Il processo migra da una località all'altra
-    \item[] Le località possono sovrapporsi
+  \item[] Il processo migra da una località all'altra
+  \item[] Le località possono sovrapporsi
 \end{itemize}
 Perché si verifica il thrashing? La somma delle dimensioni delle località è maggiore della dimensione totale della memoria.
 Limitare gli effetti usando la sostituzione di pagina locale o a priorità.
@@ -1426,18 +1426,18 @@ Approssimativamente con un timer a intervalli + un bit di riferimento. Esempio: 
 
 \begin{minipage}{1\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
+  \begin{minipage}{0.65\linewidth}
     Si stabilisce un tasso di page fault (PFF) "accettabile" e si usa la politica di sostituzione locale.
     \begin{itemize}
-        \item[] Se il tasso effettivo è troppo basso, il processo perde un frame
-        \item[] Se il tasso effettivo è troppo alto, il processo guadagna un frame
+      \item[] Se il tasso effettivo è troppo basso, il processo perde un frame
+      \item[] Se il tasso effettivo è troppo alto, il processo guadagna un frame
     \end{itemize}
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.3\linewidth}
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/fmh.png}
     \captionof{figure}{PFF}
-\end{minipage}
+  \end{minipage}
 \end{minipage}
 
 
@@ -1461,27 +1461,27 @@ proporzionale alla quantità di memoria trasferita. Il sistema mantiene una \tex
 possiedono immagini di memoria su disco.
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-    Il processo che è stato rimosso (swap out) deve tornare agli stessi indirizzi fisici?
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
+      Il processo che è stato rimosso (swap out) deve tornare agli stessi indirizzi fisici?
 
-    Di solito no, ma dipende dal metodo di binding degli indirizzi; occorre anche considerare l'I/O in attesa verso/dalla memoria del processo.
-    Ogni OS può decidere come gestire il metodo di swap:
+      Di solito no, ma dipende dal metodo di binding degli indirizzi; occorre anche considerare l'I/O in attesa verso/dalla memoria del processo.
+      Ogni OS può decidere come gestire il metodo di swap:
 
-    \begin{itemize}
+      \begin{itemize}
         \item Swapping normalmente disabilitato
         \item Avviato se la quantità di memoria allocata supera una soglia
         \item Disabilitato nuovamente quando la domanda di memoria scende sotto la soglia
-    \end{itemize}
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-   \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfbngt.png}
-    \captionof{figure}{Processo di swapping}
-\end{minipage}
-\end{minipage}
+      \end{itemize}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfbngt.png}
+      \captionof{figure}{Processo di swapping}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -1494,37 +1494,37 @@ occorre effettuare lo swap out di un processo e lo swap in del processo target. 
 \paragraph{Esempio: } processo da 100MB in swap verso l'hard disk con velocità di trasferimento di 50MB/sec:
 
 \begin{itemize}
-    \item[] Tempo di swap out di 2 secondi
-    \item[] Più swap in di un processo delle stesse dimensioni
-    \item[] Tempo totale del componente di swapping nel context switch: 4 s
+  \item[] Tempo di swap out di 2 secondi
+  \item[] Più swap in di un processo delle stesse dimensioni
+  \item[] Tempo totale del componente di swapping nel context switch: 4 s
 \end{itemize}
 
 È possibile ridurre il tempo sapendo quanta memoria viene effettivamente usata. Chiamate di sistema per informare l'OS sull'uso della memoria tramite
 \verb|request_memory()| e \verb|release_memory()|.
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-    
-    \paragraph{Altri vincoli: } se un task ha I/O in attesa non può essere rimosso (swap out), poiché l'I/O avverrebbe sul processo sbagliato; oppure si trasferisce sempre l'I/O nello spazio kernel e poi al dispositivo I/O, ma questo causa il cosiddetto double buffering, aggiungendo overhead.
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
+
+      \paragraph{Altri vincoli: } se un task ha I/O in attesa non può essere rimosso (swap out), poiché l'I/O avverrebbe sul processo sbagliato; oppure si trasferisce sempre l'I/O nello spazio kernel e poi al dispositivo I/O, ma questo causa il cosiddetto double buffering, aggiungendo overhead.
 
 
-    Allora come funziona nei \textbf{sistemi operativi moderni}?
+      Allora come funziona nei \textbf{sistemi operativi moderni}?
 
-    \begin{itemize}
+      \begin{itemize}
         \item[] Lo swap viene attivato solo quando la memoria libera è quasi esaurita
         \item[] Con la memoria a pagine si scambiano intere pagine dentro e fuori dalla RAM
         \item[] Le pagine spostate su disco vengono in genere salvate in un “file di paging”
-    \end{itemize}
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-   \includegraphics[width=1\linewidth]{content/OS_Internals/img/ndgf.png}
-    \captionof{figure}{Swapping con paginazione}
-\end{minipage}
-\end{minipage}
+      \end{itemize}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/ndgf.png}
+      \captionof{figure}{Swapping con paginazione}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -1535,8 +1535,8 @@ Lo swapping non viene tipicamente usato perché lo storage è piccolo, il flash 
 Quindi, invece di usare lo swapping quando la memoria libera è bassa:
 
 \begin{itemize}
-    \item \textbf{iOS} chiede alle app di cedere volontariamente la memoria allocata; i dati in sola lettura vengono eliminati e ricaricati dal flash se necessario. Il mancato rilascio può portare alla terminazione.
-    \item \textbf{Android} termina le app in caso di memoria libera insufficiente, ma prima salva lo stato dell'applicazione nel flash per un riavvio rapido.
+  \item \textbf{iOS} chiede alle app di cedere volontariamente la memoria allocata; i dati in sola lettura vengono eliminati e ricaricati dal flash se necessario. Il mancato rilascio può portare alla terminazione.
+  \item \textbf{Android} termina le app in caso di memoria libera insufficiente, ma prima salva lo stato dell'applicazione nel flash per un riavvio rapido.
 \end{itemize}
 
 
@@ -1548,41 +1548,41 @@ Entrambi i sistemi operativi supportano la paginazione come discusso di seguito.
 
 Le strutture di memoria per la paginazione possono diventare enormi con metodi diretti. Si consideri uno spazio di indirizzamento logico a 32 bit, con pagine da 4KB: la tabella avrebbe 1 milione di voci e lo spazio totale per OGNI processo è di 4MB solo per ottenere lo spazio di indirizzamento fisico, i quali devono essere contigui.
 
-Una soluzione semplice è dividere la tabella delle pagine in unità più piccole e caricarla solo parzialmente: 
+Una soluzione semplice è dividere la tabella delle pagine in unità più piccole e caricarla solo parzialmente:
 
 \begin{enumerate}
-    \item Shared Pages
-    \item Paginazione Gerarchica
-    \item Tabelle delle Pagine con Hashing
-    \item Tabelle delle Pagine Invertite
+  \item Shared Pages
+  \item Paginazione Gerarchica
+  \item Tabelle delle Pagine con Hashing
+  \item Tabelle delle Pagine Invertite
 \end{enumerate}
 
 \subsection{Shared Pages}
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
 
-    \subsubsection{Shared code}
-    Una sola copia in modalità read-only (reentrant), è condivisa tra i processi (eg. text editors, compilers, windows systems).
-    Il concetto è simile a thread multipli che condividono lo stesso process space.
+      \subsubsection{Shared code}
+      Una sola copia in modalità read-only (reentrant), è condivisa tra i processi (eg. text editors, compilers, windows systems).
+      Il concetto è simile a thread multipli che condividono lo stesso process space.
 
-    Inoltre è anche molto utile per le comunicazioni interprocesso (IPC), se la condivisione di pagine read-write è consentita.
+      Inoltre è anche molto utile per le comunicazioni interprocesso (IPC), se la condivisione di pagine read-write è consentita.
 
-    \subsubsection{Codice privato e dati}
-    
-    Ogni processo tiene una copia privata del codice e dei dati.
-    Le pagine di codice e dati privati possono apparire ovunque nella logical address space.
+      \subsubsection{Codice privato e dati}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-       \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio1.png}
+      Ogni processo tiene una copia privata del codice e dei dati.
+      Le pagine di codice e dati privati possono apparire ovunque nella logical address space.
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio1.png}
+
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -1590,84 +1590,84 @@ Una soluzione semplice è dividere la tabella delle pagine in unità più piccol
 
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.75\linewidth} 
-    
-    Con questo metodo si suddivide lo spazio di indirizzamento logico in più tabelle delle pagine. Una tecnica semplice è la tabella delle pagine a due livelli: in questo modo si carica solo la sezione di interesse.
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.75\linewidth}
+
+      Con questo metodo si suddivide lo spazio di indirizzamento logico in più tabelle delle pagine. Una tecnica semplice è la tabella delle pagine a due livelli: in questo modo si carica solo la sezione di interesse.
 
 
-    Con indirizzi a 32 bit e pagine da 4 KB, l'indirizzo logico si divide in:
+      Con indirizzi a 32 bit e pagine da 4 KB, l'indirizzo logico si divide in:
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.25\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/sbdf.png}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.25\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/sbdf.png}
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
 
 \begin{itemize}
-    \item un numero di pagina di 20 bit, suddiviso in due parti da 10 bit ciascuna:
-    \begin{itemize}
-        \item[] p1 per selezionare la pagina delle page table, cioè la \textbf{pagina esterna}
-        \item[] p2 per selezionare la riga specifica del “blocco” di page table, la \textbf{pagina interna}
-    \end{itemize}
-    \item un offset di pagina di 12 bit
+  \item un numero di pagina di 20 bit, suddiviso in due parti da 10 bit ciascuna:
+        \begin{itemize}
+          \item[] p1 per selezionare la pagina delle page table, cioè la \textbf{pagina esterna}
+          \item[] p2 per selezionare la riga specifica del “blocco” di page table, la \textbf{pagina interna}
+        \end{itemize}
+  \item un offset di pagina di 12 bit
 \end{itemize}
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.3\linewidth]{content/OS_Internals/img/mu.png}
+  \centering
+  \includegraphics[width=0.3\linewidth]{content/OS_Internals/img/mu.png}
 \end{figure}
 
 \textbf{ATTENZIONE ERRORE: non è 10 10 12 bensì 10 12 10
-ETA da cambiare perché è su 3 livelli e non 2}
+  ETA da cambiare perché è su 3 livelli e non 2}
 
 
 \subsubsection{Spazio di Indirizzamento Logico a 64 bit}
 
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-    
-    Anche uno schema di paginazione a due livelli potrebbe non essere sufficiente; se la dimensione della pagina è ancora 4 KB, la tabella delle pagine ha $2^{52}$ voci e le tabelle delle pagine interne potrebbero essere $2^{10}$, vedi figura affianco.
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/ndg.png}
+      Anche uno schema di paginazione a due livelli potrebbe non essere sufficiente; se la dimensione della pagina è ancora 4 KB, la tabella delle pagine ha $2^{52}$ voci e le tabelle delle pagine interne potrebbero essere $2^{10}$, vedi figura affianco.
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/ndg.png}
 
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-    
-La tabella delle pagine esterna ha $2^{42}$ voci, ovvero 4 terabyte per processo! Una soluzione potrebbe essere aggiungere un ulteriore livello di tabella delle pagine esterna, vedi figura affianco.\newline
-Il problema qui è che sono necessari 4 accessi in memoria per ottenere una singola posizione di memoria fisica, il che non è una soluzione brillante.
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/db.png}
+      La tabella delle pagine esterna ha $2^{42}$ voci, ovvero 4 terabyte per processo! Una soluzione potrebbe essere aggiungere un ulteriore livello di tabella delle pagine esterna, vedi figura affianco.\newline
+      Il problema qui è che sono necessari 4 accessi in memoria per ottenere una singola posizione di memoria fisica, il che non è una soluzione brillante.
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/db.png}
 
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -1678,31 +1678,31 @@ Gli spazi di indirizzamento comuni sono $> 32$ bit. Il numero di pagina virtuale
 
 \begin{minipage}{0.9\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-    
-Ogni elemento contiene:
+  \begin{minipage}{0.65\linewidth}
 
-\begin{itemize}
-    \item il numero di pagina virtuale
-    \item il valore del frame di pagina mappato
-    \item un puntatore all'elemento successivo
-\end{itemize}
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    Ogni elemento contiene:
+
+    \begin{itemize}
+      \item il numero di pagina virtuale
+      \item il valore del frame di pagina mappato
+      \item un puntatore all'elemento successivo
+    \end{itemize}
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.3\linewidth}
-        \includegraphics[width=1\linewidth]{content/OS_Internals/img/ngf.png}
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/ngf.png}
     \captionof{figure}{Tabella delle pagine con hashing}
 
-\end{minipage}
+  \end{minipage}
 \end{minipage}
 
-    
-Se si dispone di uno spazio di indirizzamento a 64 bit, 12 bit sono per l'offset, quindi 52 per l'indirizzo di pagina. Si può usare una tabella hash da 4KB ($2^{12}$), che tipicamente si adatta a una singola pagina e rimane sempre in memoria per ciascun processo. 
+
+Se si dispone di uno spazio di indirizzamento a 64 bit, 12 bit sono per l'offset, quindi 52 per l'indirizzo di pagina. Si può usare una tabella hash da 4KB ($2^{12}$), che tipicamente si adatta a una singola pagina e rimane sempre in memoria per ciascun processo.
 
 Si accede alla pagina specifica tramite essa. Se tutta la memoria viene usata dal processo, questo non è efficiente. Tuttavia, nella stragrande maggioranza dei casi nessun processo utilizzerà tutti i $2^{52}$ pagine.
 
 
-Ovviamente di possono avere collisioni, ma non è un grosso problema se la tabella hash è abbastanza grande. 
+Ovviamente di possono avere collisioni, ma non è un grosso problema se la tabella hash è abbastanza grande.
 Altrimenti, possono utilizzare \textbf{open addressing} (cerca un altro posto) o \textbf{linear chaining} (una lista).
 
 \subsection{Tabella delle Pagine Invertita}
@@ -1719,47 +1719,47 @@ Altrimenti, possono utilizzare \textbf{open addressing} (cerca un altro posto) o
 % }
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
-    
-    
-Invece di avere una tabella delle pagine per ogni processo che tiene traccia di tutte le pagine logiche possibili, si ha un'unica voce per ogni pagina reale della memoria!
-
-Ogni voce consiste nell'indirizzo virtuale della pagina memorizzata in quella locazione di memoria reale, con informazioni sul processo che possiede quella pagina.
-
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-     \includegraphics[width=1\linewidth]{content/OS_Internals/img/sfb.png}
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
 
 
-\end{minipage}
-\end{minipage}
+      Invece di avere una tabella delle pagine per ogni processo che tiene traccia di tutte le pagine logiche possibili, si ha un'unica voce per ogni pagina reale della memoria!
+
+      Ogni voce consiste nell'indirizzo virtuale della pagina memorizzata in quella locazione di memoria reale, con informazioni sul processo che possiede quella pagina.
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/sfb.png}
+
+
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
 
 Riduce la memoria necessaria per memorizzare ogni tabella delle pagine, ma aumenta
-il tempo necessario per ricercare nella tabella quando si verifica un riferimento a una pagina. 
+il tempo necessario per ricercare nella tabella quando si verifica un riferimento a una pagina.
 
 Una soluzione potrebbe essere usare l'hashing per limitare la ricerca a una sola voce; anche il TLB può accelerare l'accesso.
 
 
 \begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{images/OS_internals/Main-memory/MM-esempio2.png}
-    \caption{Comparativa tra tabella delle pagine tradizionale e tabella delle pagine invertita}
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/OS_internals/Main-memory/MM-esempio2.png}
+  \caption{Comparativa tra tabella delle pagine tradizionale e tabella delle pagine invertita}
 \end{figure}
 
 \section{Oracle SPARC Solaris}
 
 Oracle SPARC Solaris è un sistema a 64-bit che è molto vicino e integrato con l'hardware.
-È basato su due hash table: 
+È basato su due hash table:
 \begin{itemize}
-    \item Una per il kernel
-    \item Una per i processi utente.
+  \item Una per il kernel
+  \item Una per i processi utente.
 \end{itemize}
 
 Ogniuna mappa memoria virtuale a memoria fisica. Più efficiente che avere due separate hash table per pagina.
@@ -1773,8 +1773,8 @@ Virtual adress recerence causa una TLB seach:
 
 Se è miss, l'hardware va a cercaare nella memoria TSB guardando dentro la TTE corrispondente all'address.
 \begin{itemize}
-    \item Se è hit, la CPU copia la TSB entry nella TLB e la traduzione viene completata
-    \item Se no match, il kernel interrompe la ricerca nella hash table. Il kernel crea una TTE dall'apropriata hash table e la memorizza nella TSB, Interrupt handler ritorna il controllo alla MMU, la quale completa la traduzione dell'address.
+  \item Se è hit, la CPU copia la TSB entry nella TLB e la traduzione viene completata
+  \item Se no match, il kernel interrompe la ricerca nella hash table. Il kernel crea una TTE dall'apropriata hash table e la memorizza nella TSB, Interrupt handler ritorna il controllo alla MMU, la quale completa la traduzione dell'address.
 
 \end{itemize}
 
@@ -1783,93 +1783,93 @@ Se è miss, l'hardware va a cercaare nella memoria TSB guardando dentro la TTE c
 
 
 \begin{center}
-\centering
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
 
-L'uso di pagine di dimensioni fisse apre il problema della frammentazione interna: ogni processo viene abbinato a un certo numero di pagine piuttosto che alla memoria di cui ha bisogno.
+      L'uso di pagine di dimensioni fisse apre il problema della frammentazione interna: ogni processo viene abbinato a un certo numero di pagine piuttosto che alla memoria di cui ha bisogno.
 
-Esiste quindi un modo per assegnare esattamente la quantità di memoria di cui un processo ha bisogno, evitando così qualsiasi spreco di memoria? La risposta è usare la \textbf{segmentazione}.
+      Esiste quindi un modo per assegnare esattamente la quantità di memoria di cui un processo ha bisogno, evitando così qualsiasi spreco di memoria? La risposta è usare la \textbf{segmentazione}.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/sdavg.png}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/sdavg.png}
 
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
-Un processo è diviso in blocchi; i blocchi in cui viene suddiviso un programma, che non devono essere necessariamente tutti della stessa dimensione, sono chiamati segmenti. 
+Un processo è diviso in blocchi; i blocchi in cui viene suddiviso un programma, che non devono essere necessariamente tutti della stessa dimensione, sono chiamati segmenti.
 
 \begin{itemize}
-    \item[--] Un blocco per lo stack
-    \item[--] Un blocco per lo heap
-    \item[--] Un blocco per la libreria 1
+  \item[--] Un blocco per lo stack
+  \item[--] Un blocco per lo heap
+  \item[--] Un blocco per la libreria 1
 \end{itemize}
 
-Ogni processo è diviso in diversi segmenti, tutti caricati in memoria durante l'esecuzione, anche se non necessariamente in modo contiguo. 
+Ogni processo è diviso in diversi segmenti, tutti caricati in memoria durante l'esecuzione, anche se non necessariamente in modo contiguo.
 
 Una tabella memorizza le informazioni su tutti questi segmenti: la base e il limite (lunghezza).
 
 
 \begin{center}
-\centering
-\begin{minipage}{0.85\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.47\linewidth} 
+  \centering
+  \begin{minipage}{0.85\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.47\linewidth}
 
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/dgn.png}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/dgn.png}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.47\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/dasv.png}
-    \captionof{figure}{Segmentazione: da logico a fisico}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.47\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/dasv.png}
+      \captionof{figure}{Segmentazione: da logico a fisico}
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \newpage
 \subsection{Paginazione vs Segmentazione}
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.9\linewidth]{content/OS_Internals/img/dsfb.png}
+  \centering
+  \includegraphics[width=0.9\linewidth]{content/OS_Internals/img/dsfb.png}
 \end{figure}
 
 \newpage
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 170639.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 170639.png}
 \end{figure}
 
 \subsubsection{Esempio di Architettura Intel IA-32}
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.5\linewidth} 
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.5\linewidth}
 
-    Le unità di paginazione formano l'equivalente dell'MMU; le dimensioni delle pagine possono essere 4 KB o 4 MB, con tabelle delle pagine a due livelli.
+      Le unità di paginazione formano l'equivalente dell'MMU; le dimensioni delle pagine possono essere 4 KB o 4 MB, con tabelle delle pagine a due livelli.
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.4\linewidth}
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/dddbv.png}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.4\linewidth}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/dddbv.png}
 
-    \captionof{figure}{Conversione degli indirizzi di memoria}
+      \captionof{figure}{Conversione degli indirizzi di memoria}
 
-    \vspace{0.1cm}
+      \vspace{0.1cm}
 
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/abdv.png}
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/abdv.png}
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 
@@ -1878,8 +1878,8 @@ Una tabella memorizza le informazioni su tutti questi segmenti: la base e il lim
 L'attuale generazione dell'architettura CISC ha 64 bit, il che è enorme (> 16 exabyte). In pratica viene implementato solo l'indirizzamento a 48 bit.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\linewidth]{content/OS_Internals/img/fmhh.png}
+  \centering
+  \includegraphics[width=0.8\linewidth]{content/OS_Internals/img/fmhh.png}
 \end{figure}
 
 
@@ -1890,24 +1890,24 @@ Un livello di paginazione per sezione, due livelli si pagine più piccole.
 
 \begin{minipage}{0.95\linewidth}
   % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.65\linewidth} 
+  \begin{minipage}{0.65\linewidth}
 
     Due livelli di TLBs
 
     \begin{itemize}
-        \item L'outer ha due micro TLBs, uno per le istruzioni e uno per i dati.
-        \item L'inner è una TLB singola
-        \item Viene controllato il primo interno, successivamente vengono controllati gli esterni mancanti,
-    e in caso di mancata corrispondenza viene eseguita la ricerca nella tabella delle pagine
-    da parte della CPU.
+      \item L'outer ha due micro TLBs, uno per le istruzioni e uno per i dati.
+      \item L'inner è una TLB singola
+      \item Viene controllato il primo interno, successivamente vengono controllati gli esterni mancanti,
+            e in caso di mancata corrispondenza viene eseguita la ricerca nella tabella delle pagine
+            da parte della CPU.
     \end{itemize}
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
   \hfill
   \begin{minipage}{0.3\linewidth}
 
     \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio3.png}
     \captionof{figure}{Architettura ARM}
 
-\end{minipage}
+  \end{minipage}
 \end{minipage}

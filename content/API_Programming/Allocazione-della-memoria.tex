@@ -1,11 +1,11 @@
 \section{Obiettivi}
 
 \begin{itemize}
-    \item Comprendere lo spazio di indirizzamento virtuale
-    \item Conoscere la differenza tra stack e heap
-    \item Saper spiegare perché i puntatori sono pericolosi
-    \item Conoscere quali bug tipici nascono in C/C++
-    \item Spiegare perché Rust introduce i concetti di possesso, prestito, smart pointer
+  \item Comprendere lo spazio di indirizzamento virtuale
+  \item Conoscere la differenza tra stack e heap
+  \item Saper spiegare perché i puntatori sono pericolosi
+  \item Conoscere quali bug tipici nascono in C/C++
+  \item Spiegare perché Rust introduce i concetti di possesso, prestito, smart pointer
 \end{itemize}
 
 \section{Perché studiare come è organizzata la memoria?  }
@@ -26,13 +26,13 @@ Un programma eseguibile è costituito da un insieme di istruzioni macchina, dati
 Il significato delle istruzioni macchina è cablato all'interno del processore specifico per cui il programma è stato creato.
 Il significato delle informazioni restanti è contenuto, in parte, nelle istruzioni macchina e, per la parte restante, dipende dal sistema operativo (se c'è) o da particolari caratteristiche del processore stesso.\newline
 
-Per poter essere eseguito, un programma deve essere caricato all'interno della memoria accessibile al processore. 
+Per poter essere eseguito, un programma deve essere caricato all'interno della memoria accessibile al processore.
 \begin{itemize}
-    \item Nei sistemi più piccoli (es., Arduino) questo avviene grazie ad hardware specifico che memorizza in modo semi-permanente quanto necessario nella memoria flash.
-    \item Nei sistemi più grandi, un modulo del sistema operativo (\textbf{loader}) si occupa di trasferire dal disco alla memoria RAM il contenuto del file eseguibile
+  \item Nei sistemi più piccoli (es., Arduino) questo avviene grazie ad hardware specifico che memorizza in modo semi-permanente quanto necessario nella memoria flash.
+  \item Nei sistemi più grandi, un modulo del sistema operativo (\textbf{loader}) si occupa di trasferire dal disco alla memoria RAM il contenuto del file eseguibile
 \end{itemize}
 
-Una volta che il programma è presente in memoria, può essere eseguito. Il processore preleva dalla memoria, una alla volta, le istruzioni macchina del programma e provvede ad eseguirle. 
+Una volta che il programma è presente in memoria, può essere eseguito. Il processore preleva dalla memoria, una alla volta, le istruzioni macchina del programma e provvede ad eseguirle.
 
 
 L'esecuzione di un'istruzione determina quali effetti collaterali debbano avvenire e quale debba essere la prossima istruzione da eseguire. Modifiche nelle informazioni contenute nel processore stesso e/o nella memoria. Eventuali interazioni con altre periferiche collegate al processore stesso (I/O). \newline
@@ -40,9 +40,9 @@ L'esecuzione di un'istruzione determina quali effetti collaterali debbano avveni
 Il modello base di esecuzione prevede l'alternarsi continuo di tre fasi:
 
 \begin{itemize}
-    \item Fetch - Un'istruzione viene trasferita dalla memoria all'interno del processore
-    \item Decode - L'istruzione prelevata viene trasformata in comandi da eseguire
-    \item Execute - I comandi vengono eseguiti
+  \item Fetch - Un'istruzione viene trasferita dalla memoria all'interno del processore
+  \item Decode - L'istruzione prelevata viene trasformata in comandi da eseguire
+  \item Execute - I comandi vengono eseguiti
 \end{itemize}
 
 
@@ -51,38 +51,38 @@ Il modello base di esecuzione prevede l'alternarsi continuo di tre fasi:
 \section{Spazio di indirizzamento  }
 
 \begin{center}
-\centering
-\begin{minipage}{\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.68\linewidth} 
-
-    
-    L'esecuzione di un programma avviene nel suo \textbf{spazio di indirizzamento.} Sottoinsieme delle celle indirizzabili, gestito dal sistema operativo. Dati, istruzioni, informazioni di controllo, … sono memorizzati come valori al suo interno. 
-    Lo spazio di indirizzamento può essere immaginato come un enorme array di byte, che possono essere letti individualmente, a coppie, a gruppi di 4, 8 alla volta, in base al parallelismo del processore (8, 16, 32 o 64 bit).
+  \centering
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.68\linewidth}
 
 
-    Il numero di celle \textbf{potenzialmente} presenti nello spazio di indirizzamento dipende dal processore. Il numero di celle \textbf{effettivamente} presenti, è limitato dalla quantità di RAM disponibile ed è controllato dal sistema operativo.
-
-    Nel caso di CPU Intel x64, il processore opera a 64 bit. Ma lo spazio di indirizzamento si estende tra $0$ e $2^{48}-1$(scelta di implementazione).
-    All'interno di questo, però, solo una piccola parte di indirizzi è effettivamente presente.\newline
-
-    Gli indirizzi che un programma utilizza non corrispondono - in generale - all'effettiva posizione che un dato assume in memoria  
+      L'esecuzione di un programma avviene nel suo \textbf{spazio di indirizzamento.} Sottoinsieme delle celle indirizzabili, gestito dal sistema operativo. Dati, istruzioni, informazioni di controllo, … sono memorizzati come valori al suo interno.
+      Lo spazio di indirizzamento può essere immaginato come un enorme array di byte, che possono essere letti individualmente, a coppie, a gruppi di 4, 8 alla volta, in base al parallelismo del processore (8, 16, 32 o 64 bit).
 
 
-\end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-  \hfill
-  \begin{minipage}{0.3\linewidth}
+      Il numero di celle \textbf{potenzialmente} presenti nello spazio di indirizzamento dipende dal processore. Il numero di celle \textbf{effettivamente} presenti, è limitato dalla quantità di RAM disponibile ed è controllato dal sistema operativo.
 
-    \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio7.png}
+      Nel caso di CPU Intel x64, il processore opera a 64 bit. Ma lo spazio di indirizzamento si estende tra $0$ e $2^{48}-1$(scelta di implementazione).
+      All'interno di questo, però, solo una piccola parte di indirizzi è effettivamente presente.\newline
+
+      Gli indirizzi che un programma utilizza non corrispondono - in generale - all'effettiva posizione che un dato assume in memoria
 
 
-\end{minipage}
-\end{minipage}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+
+      \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio7.png}
+
+
+    \end{minipage}
+  \end{minipage}
 \end{center}
 
 \begin{itemize}
-    \item Il codice fa riferimento ad \textbf{indirizzi virtuali}
-    \item L'hardware utilizza \textbf{indirizzi fisici}
+  \item Il codice fa riferimento ad \textbf{indirizzi virtuali}
+  \item L'hardware utilizza \textbf{indirizzi fisici}
 \end{itemize}
 
 
@@ -91,30 +91,30 @@ Un apposito blocco hardware presente nel processore (\textbf{MMU - Memory Manage
 Tale traduzione garantisce che:
 
 \begin{itemize}
-    \item Programmi diversi contemporaneamente in esecuzione non possano interferire tra loro
-    \item Consente di controllare quali operazioni siano possibili (lettura, scrittura, esecuzione)
-    \item Permette inoltre di scrivere programmi che manipolano dati più grossi della memoria fisica effettivamente presente
+  \item Programmi diversi contemporaneamente in esecuzione non possano interferire tra loro
+  \item Consente di controllare quali operazioni siano possibili (lettura, scrittura, esecuzione)
+  \item Permette inoltre di scrivere programmi che manipolano dati più grossi della memoria fisica effettivamente presente
 \end{itemize}
 
 
 
 \section{Effetti pratici  }
 \begin{itemize}
-    \item Segmentation fault
+  \item Segmentation fault
         \begin{itemize}
-            \item Tentativo di accedere ad indirizzo non mappato o senza gli adeguati permessi
-            \item Il processore blocca l'esecuzione e rimanda al sistema operativo (che termina brutalmente il
-            \item programma)
+          \item Tentativo di accedere ad indirizzo non mappato o senza gli adeguati permessi
+          \item Il processore blocca l'esecuzione e rimanda al sistema operativo (che termina brutalmente il
+          \item programma)
         \end{itemize}
-    \item Page fault
+  \item Page fault
         \begin{itemize}
-            \item Tentativo di accedere ad un indirizzo appartenente ad un blocco il cui contenuto è stato salvato su disco
-            \item Il processore richiede l'intervento del sistema operativo che ricerca una pagina fisica libera e vi trasferisce il contenuto del blocco presente nel file di paginazione
-            \item Al termine il processore ritenta l'accesso e procede normalmente
+          \item Tentativo di accedere ad un indirizzo appartenente ad un blocco il cui contenuto è stato salvato su disco
+          \item Il processore richiede l'intervento del sistema operativo che ricerca una pagina fisica libera e vi trasferisce il contenuto del blocco presente nel file di paginazione
+          \item Al termine il processore ritenta l'accesso e procede normalmente
         \end{itemize}
-    \item Trashing
+  \item Trashing
         \begin{itemize}
-            \item Se il programma cerca di accedere rapidamente ad una grande quantità di dati paginati, il sistema passa più  tempo a spostare pagine tra disco e memoria fisica di quanto ne possa dedicare all'esecuzione vera e propria
+          \item Se il programma cerca di accedere rapidamente ad una grande quantità di dati paginati, il sistema passa più  tempo a spostare pagine tra disco e memoria fisica di quanto ne possa dedicare all'esecuzione vera e propria
         \end{itemize}
 \end{itemize}
 
@@ -131,8 +131,8 @@ Per questo Vec<T> è quasi sempre meglio di LinkedList<T>
 \section{Località }
 
 \begin{figure}
-    \centering
-    \includegraphics[width=0.4\linewidth]{images/API_Programming/Memoria/Memoria-esempio6.png}
+  \centering
+  \includegraphics[width=0.4\linewidth]{images/API_Programming/Memoria/Memoria-esempio6.png}
 \end{figure}
 
 \section{Esecuzione e programmi di alto livello  }
@@ -146,7 +146,7 @@ Tuttavia, per poter garantire il livello di astrazione necessario, essi devono i
 Ogni linguaggio di programmazione propone uno specifico modello di esecuzione, un insieme di comportamenti che attuati dall'elaboratore a fronte dei costrutti di alto livello del linguaggio.
 
 
-Tale modello per lo più non corrisponde a quello di un dispositivo reale, come fa il processore ad eseguire solo Fatch, Decode ed Execute? Utilizzando strutture dati intermedie e da un insieme di run-time library. 
+Tale modello per lo più non corrisponde a quello di un dispositivo reale, come fa il processore ad eseguire solo Fatch, Decode ed Execute? Utilizzando strutture dati intermedie e da un insieme di run-time library.
 È compito del compilatore introdurre uno strato di adattamento che implementi il modello nei
 termini offerti dal dispositivo soggiacente.
 
@@ -159,23 +159,23 @@ La compilazione trasforma il programma sorgente in un nuovo programma dotato di
 un modello di esecuzione ed un insieme di istruzioni più semplice. Che può essere eseguito da una macchina fisica (CPU) o subire un'ulteriore trasformazione (esecuzione virtuale)
 
 \begin{figure}
-    \centering
-    \includegraphics[width=0.4\linewidth]{images/API_Programming/Memoria/Memoria-esempio1.png}
+  \centering
+  \includegraphics[width=0.4\linewidth]{images/API_Programming/Memoria/Memoria-esempio1.png}
 \end{figure}
 
 \section{Librerie di esecuzione}
 
 Offrono agli applicativi meccanismi di base per il loro funzionamento
 \begin{itemize}
-    \item Supportano le astrazioni del linguaggio di programmazione 
-    \item Forniscono un'interfaccia uniforme tra i diversi S.O. per le funzioni ad essi demandate 
+  \item Supportano le astrazioni del linguaggio di programmazione
+  \item Forniscono un'interfaccia uniforme tra i diversi S.O. per le funzioni ad essi demandate
 \end{itemize}
 
-Costituite da due tipi di funzioni 
+Costituite da due tipi di funzioni
 
 \begin{itemize}
-    \item Alcune, invisibili al programmatore, sono inserite in fase di compilazione per supportare l'esecuzione  (controllo dello stack, copia di aree di memoria ...)
-    \item Altre offrono al programmatore funzionalità standard, gestendo opportune strutture dati ausiliarie e/o richiedendo al S.O. quelle non altrimenti realizzabili  (malloc o fopen)
+  \item Alcune, invisibili al programmatore, sono inserite in fase di compilazione per supportare l'esecuzione  (controllo dello stack, copia di aree di memoria ...)
+  \item Altre offrono al programmatore funzionalità standard, gestendo opportune strutture dati ausiliarie e/o richiedendo al S.O. quelle non altrimenti realizzabili  (malloc o fopen)
 \end{itemize}
 
 \section{Modello di esecuzione nei linguaggi C e C++  }
@@ -187,33 +187,33 @@ L'isolamento è reso possibile dal meccanismo di indirizzamento virtuale.
 Un programma C/C++ assume di poter accedere a qualsiasi indirizzo di memoria presente nello spazio di indirizzamento, all'interno del quale può leggere o scrivere dati o dal quale può eseguire codice macchina. Ma sappiamo che invece lo spazio di indirizzamento è:
 
 \begin{itemize}
-    \item Limitato
-    \item Non contiguo
-    \item Non tutto lo spazio consente ogni tipo di operazione 
+  \item Limitato
+  \item Non contiguo
+  \item Non tutto lo spazio consente ogni tipo di operazione
 \end{itemize}
 
 \section{Esecuzione sequenziale sincrona, senza limitazioni  }
 
-Un programma C/C++ è formato da un insieme di istruzioni eseguite, una per volta, nell'ordine indicato dal programmatore. 
+Un programma C/C++ è formato da un insieme di istruzioni eseguite, una per volta, nell'ordine indicato dal programmatore.
 Non ci sono limiti sul numero di istruzioni da eseguire, sul tempo richiesto alla loro esecuzione, né sulla memoria necessaria .
 
 In realtà, tali limiti esistono e condizionano la scrittura dei programmi. Da qui nasce la necessità di un modello di gestione della memoria sicuro .
 
-All'interno del flusso principale di esecuzione è possibile attivare flussi di elaborazione secondari, detti \textbf{thread}. Questi abilitano l'esecuzione concorrente (effettivamente parallela se la CPU è multicore) e introducono un ordine di grandezza nel livello di complessità della scrittura dei programmi. È il S.O. che si occupa di gestire tutti questi flussi di esecuzione indirizzandoli nei vari core fisici. 
+All'interno del flusso principale di esecuzione è possibile attivare flussi di elaborazione secondari, detti \textbf{thread}. Questi abilitano l'esecuzione concorrente (effettivamente parallela se la CPU è multicore) e introducono un ordine di grandezza nel livello di complessità della scrittura dei programmi. È il S.O. che si occupa di gestire tutti questi flussi di esecuzione indirizzandoli nei vari core fisici.
 
 \section{Flusso di esecuzione }
 
 Il programma è costituito, come minimo, da un flusso di esecuzione il cui punto di partenza è predefinito:
 \begin{itemize}
-    \item La funzione main() nel linguaggio C
-    \item I costruttori delle variabili globali in C++, seguiti dalla chiamata alla funzione main()
+  \item La funzione main() nel linguaggio C
+  \item I costruttori delle variabili globali in C++, seguiti dalla chiamata alla funzione main()
 \end{itemize}
 
 Vi sono inoltre due strutture dati:
 
 \begin{itemize}
-    \item Lo stack che permette permette di gestire chiamate annidate tra funzioni. Essa \textbf{supporta la ricorsione} e l'uso di \textbf{variabili locali}. In C++, supporta anche la gestione strutturata delle eccezioni
-    \item Lo heap offre supporto per gestire dinamicamente l'utilizzo della memoria. Secondo logiche non strettamente correlate al procedere dell'esecuzione
+  \item Lo stack che permette permette di gestire chiamate annidate tra funzioni. Essa \textbf{supporta la ricorsione} e l'uso di \textbf{variabili locali}. In C++, supporta anche la gestione strutturata delle eccezioni
+  \item Lo heap offre supporto per gestire dinamicamente l'utilizzo della memoria. Secondo logiche non strettamente correlate al procedere dell'esecuzione
 \end{itemize}
 
 \section{Stack}
@@ -222,10 +222,10 @@ Blocco di memoria allocato automaticamente all'avvio di un programma, circa 1 MB
 
 
 \begin{itemize}
-    \item Variabili locali e temporanee
-    \item Gli argomenti passati ad ogni invocazione di funzione
-    \item Valori di ritorno
-    \item Traccia la storia delle chiamate a funzione
+  \item Variabili locali e temporanee
+  \item Gli argomenti passati ad ogni invocazione di funzione
+  \item Valori di ritorno
+  \item Traccia la storia delle chiamate a funzione
 \end{itemize}
 
 Viene utilizzato a partire da un estremo, espandendosi verso l'estremo opposto ogni volta che avviene una chiamata e contraendosi verso l'inizio quando una funzione ritorna.
@@ -237,15 +237,15 @@ Se, a seguito di un numero troppo elevato di chiamate o all'allocazione di varia
 
 \noindent
 \begin{tcolorbox}
-\textbf{Nota:} Stack = automatico, veloce, tempo di vita deterministico 
+  \textbf{Nota:} Stack = automatico, veloce, tempo di vita deterministico
 \end{tcolorbox}
 
 
 \begin{center}
-\begin{minipage}{0.85\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.55\linewidth}
-\begin{minted}[breaklines]{c}
+  \begin{minipage}{0.85\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.55\linewidth}
+      \begin{minted}[breaklines]{c}
 int f(int a) {
     int i = 5;
     if (a>0) {
@@ -261,17 +261,17 @@ int main() {
     return 0;
 }        
 \end{minted}
-  \end{minipage}
-  \begin{minipage}{0.40\linewidth}
+    \end{minipage}
+    \begin{minipage}{0.40\linewidth}
       \centering
       \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio2.png}
 
       \vspace{0.2cm}
 
       \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio5.png}
-      
+
+    \end{minipage}
   \end{minipage}
-\end{minipage}
 \end{center}
 
 L'allocazione ed il rilascio sullo stack sono estremamente efficienti, grazie alla particolare politica di espansione / contrazione adottata.
@@ -280,7 +280,7 @@ Per contro, la durata dei valori memorizzati al suo interno è strettamente corr
 
 
 Inoltre, poiché lo spazio complessivo dello stack è definito a priori, non è possibile memorizzare un dato la cui dimensione superi tale spazio.
-In generale, occorre limitare la dimensione massima del dato allocato ad una grandezza compatibile con il livello di profondità di chiamate e la dimensione degli altri dati che devono essere memorizzati complessivamente nello stack.  
+In generale, occorre limitare la dimensione massima del dato allocato ad una grandezza compatibile con il livello di profondità di chiamate e la dimensione degli altri dati che devono essere memorizzati complessivamente nello stack.
 
 
 \section{Heap}
@@ -294,10 +294,10 @@ Questo spazio concesso dal S.O. è un prestito, dunque è responsabilità del pr
 
 
 \begin{center}
-\begin{minipage}{0.85\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
-  \begin{minipage}{0.55\linewidth}
-\begin{minted}[breaklines]{c++}
+  \begin{minipage}{0.85\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.55\linewidth}
+      \begin{minted}[breaklines]{c++}
 int* f(int a) {
     if (a>0) {
         return new int[a];
@@ -312,17 +312,17 @@ int main() {
     return 0;
 }      
 \end{minted}
-  \end{minipage}
-  \begin{minipage}{0.40\linewidth}
+    \end{minipage}
+    \begin{minipage}{0.40\linewidth}
       \centering
       \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio3.png}
 
       \vspace{0.2cm}
-    
-    \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esercizio4.png}
-      
+
+      \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esercizio4.png}
+
+    \end{minipage}
   \end{minipage}
-\end{minipage}
 \end{center}
 
 Il puntatore è probabile che sia buono, ma non lo è, non gli è stato assegnato null, il linguaggio non te lo impone.
@@ -330,51 +330,51 @@ Il puntatore è probabile che sia buono, ma non lo è, non gli è stato assegnat
 \section{Organizzazione dello spazio di indirizzamento  }
 
 \begin{itemize}
-    \item Codice eseguibile
+  \item Codice eseguibile
         \begin{itemize}
-            \item Contiene le istruzioni in codice macchina
-            \item Accesso in lettura ed esecuzione
+          \item Contiene le istruzioni in codice macchina
+          \item Accesso in lettura ed esecuzione
         \end{itemize}
-    \item Costanti
-         \begin{itemize}
-            \item Accesso in sola lettura
-         \end{itemize}
-    \item Variabili globali
+  \item Costanti
         \begin{itemize}
-            \item Accesso lettura/scrittura
+          \item Accesso in sola lettura
         \end{itemize}
-    \item Stack
+  \item Variabili globali
         \begin{itemize}
-            \item Contiene indirizzi e valori di ritorno, parametri e variabili locali
-            \item Accesso lettura/scrittura
+          \item Accesso lettura/scrittura
         \end{itemize}
-    \item Heap
+  \item Stack
         \begin{itemize}
-            \item Insieme di blocchi di memoria disponibili per l'allocazione dinamica
-            \item Gestiti tramite funzioni di libreria (malloc, new, free, …) che li frammentano e ricompattano in base
-            \item alle richieste del programma
+          \item Contiene indirizzi e valori di ritorno, parametri e variabili locali
+          \item Accesso lettura/scrittura
+        \end{itemize}
+  \item Heap
+        \begin{itemize}
+          \item Insieme di blocchi di memoria disponibili per l'allocazione dinamica
+          \item Gestiti tramite funzioni di libreria (malloc, new, free, …) che li frammentano e ricompattano in base
+          \item alle richieste del programma
         \end{itemize}
 \end{itemize}
 
 Nel sistema operativo Linux, è facile verificare come sia organizzato lo spazio di indirizzamento di un programma in esecuzione (processo). Ogni processo è identificato univocamente da un numero intero (PID) e con il comando \textit{ps -ef} , il sistema operativo crea, per ciascun processo attivo, un file virtuale denominato \textit{/proc/<pid>/maps} che descrive lo spazio di indirizzamento con informazioni sui diversi segmenti al suo interno.
 
- 
+
 \section{Ciclo di vita delle variabili  }
 
-Il modello di esecuzione dei linguaggi C/C++ distingue diverse tipologie di variabili 
+Il modello di esecuzione dei linguaggi C/C++ distingue diverse tipologie di variabili
 
 \begin{center}
-    Globali \qquad  locali \qquad  dinamiche 
+  Globali \qquad  locali \qquad  dinamiche
 \end{center}
 
 
-Ciascuna classe ha un proprio ciclo di vita: Intervallo di tempo in cui è garantito l'accesso alle informazioni contenute al loro interno. 
+Ciascuna classe ha un proprio ciclo di vita: Intervallo di tempo in cui è garantito l'accesso alle informazioni contenute al loro interno.
 
 \section{Variabili globali e locali  }
 
 \begin{itemize}
-    \item Le variabili globali hanno un indirizzo fisso, determinato dal compilatore e dal linker. Sono accessibili in ogni momento e all'avvio del programma, contengono l'eventuale \textbf{valore di inizializzazione}.
-    \item Le variabili locali hanno un indirizzo relativo alla cima dello stack. Il ciclo di vita coincidente con quello della funzione/blocco in cui sono dichiarate. Il valore \textbf{iniziale è casuale}.
+  \item Le variabili globali hanno un indirizzo fisso, determinato dal compilatore e dal linker. Sono accessibili in ogni momento e all'avvio del programma, contengono l'eventuale \textbf{valore di inizializzazione}.
+  \item Le variabili locali hanno un indirizzo relativo alla cima dello stack. Il ciclo di vita coincidente con quello della funzione/blocco in cui sono dichiarate. Il valore \textbf{iniziale è casuale}.
 \end{itemize}
 
 \section{Variabili dinamiche}
@@ -382,7 +382,7 @@ Ciascuna classe ha un proprio ciclo di vita: Intervallo di tempo in cui è garan
 Le variabili dinamiche hanno un indirizzo assoluto, determinato in fase di esecuzione. Sono accessibili solo tramite puntatori, è il programmatore a controllarne il ciclo di vita e il valore iniziale può essere inizializzato o meno.
 
 
-L'uso di questo tipo di variabili presuppone un'infrastruttura di supporto che offra meccanismi di allocazione e di rilascio fornita dalla libreria di esecuzione e dal S.O.  
+L'uso di questo tipo di variabili presuppone un'infrastruttura di supporto che offra meccanismi di allocazione e di rilascio fornita dalla libreria di esecuzione e dal S.O.
 
 \section{Allocazione della memoria  }
 
@@ -404,13 +404,13 @@ Opportune funzioni di libreria permettono di restituire i blocchi precedentement
 Poiché ogni funzione di allocazione mantiene le proprie strutture dati, occorre che un blocco sia rilasciato dalla funzione duale di quella con cui è stato allocato:
 
 \begin{itemize}
-    \item \mintinline{c++}{malloc(…) / free(...)}
-    \item \mintinline{c++}{new / delete}
-    \item \mintinline{c++}{new ...[num\_elements] / delete[ ]}
+  \item \mintinline{c++}{malloc(…) / free(...)}
+  \item \mintinline{c++}{new / delete}
+  \item \mintinline{c++}{new ...[num\_elements] / delete[ ]}
 \end{itemize}
 
 
-Se il blocco non viene rilasciato si crea una perdita di memoria, che, a lungo andare, provoca l'esaurimento dello spazio di indirizzamento. 
+Se il blocco non viene rilasciato si crea una perdita di memoria, che, a lungo andare, provoca l'esaurimento dello spazio di indirizzamento.
 
 Se il blocco viene rilasciato più volte o viene rilasciato con la funzione sbagliata si corrompono le strutture dati degli allocatori, con conseguenze imprevedibili.
 
@@ -444,39 +444,39 @@ o essere allocato allo scopo \mintinline{c++}{int* pB = new int{24}}
 Possono essere esplicitamente resi invalidi:
 
 \begin{itemize}
-    \item Il valore \textit{0}
-    \item La macro NULL$ \Rightarrow$\textit{((void *)0)}
-    \item La parola-chiave \textit{nullptr}  (C++11 e superiori)
+  \item Il valore \textit{0}
+  \item La macro NULL$ \Rightarrow$\textit{((void *)0)}
+  \item La parola-chiave \textit{nullptr}  (C++11 e superiori)
 \end{itemize}
 
 Quando si usano i puntatori, occorre stabilire quali responsabilità/permessi sono associati al loro uso.
 
 \section{Le ambiguità dei puntatori in C/C++}
 
- \begin{itemize}
-     \item Contiene un indirizzo valido?
-     \item Quanto è grosso il blocco puntato?
-     \item Fino a quando è garantito l'accesso?
-     \item Se ne può modificare il contenuto?
-     \item Occorre rilasciarlo?
-     \item Lo si può rilasciare o altri conoscono lo stesso indirizzo?
-     \item Viene usato come modo per esprimere l'opzionalità del dato?
- \end{itemize}
+\begin{itemize}
+  \item Contiene un indirizzo valido?
+  \item Quanto è grosso il blocco puntato?
+  \item Fino a quando è garantito l'accesso?
+  \item Se ne può modificare il contenuto?
+  \item Occorre rilasciarlo?
+  \item Lo si può rilasciare o altri conoscono lo stesso indirizzo?
+  \item Viene usato come modo per esprimere l'opzionalità del dato?
+\end{itemize}
 
 
 
 \noindent
 \begin{tcolorbox}
-\textbf{Nota:} In C/C++ il programmatore è responsabile; in Rust la responsabilità è codificata nel sistema dei tipi 
+  \textbf{Nota:} In C/C++ il programmatore è responsabile; in Rust la responsabilità è codificata nel sistema dei tipi
 \end{tcolorbox}
 
 \section{Problemi legati ai puntatori  }
 
-In C, la gestione della memoria è totalmente affidata al programmatore 
+In C, la gestione della memoria è totalmente affidata al programmatore
 
 \begin{itemize}
-    \item Non ci sono supporti sintattici per automatizzare il ciclo di vita del blocco puntato
-    \item Né meccanismi per associare una specifica semantica al puntatore
+  \item Non ci sono supporti sintattici per automatizzare il ciclo di vita del blocco puntato
+  \item Né meccanismi per associare una specifica semantica al puntatore
 \end{itemize}
 
 In C++ sono state introdotte nuove astrazioni (riferimenti, smart pointer) che sollevano il programmatore da alcune responsabilità, facilitando la creazione di programmi più robusti. Ma richiedono in ogni caso una comprensione approfondita del problema e l'uso attento e coerente dei puntatori.
@@ -484,37 +484,37 @@ In C++ sono state introdotte nuove astrazioni (riferimenti, smart pointer) che s
 \section{Responsabilità del programmatore  }
 
 \begin{itemize}
-    \item Limitare gli accessi ad un blocco
+  \item Limitare gli accessi ad un blocco
         \begin{itemize}
-            \item Nello spazio: non accedere alle locazioni che lo precedono o che lo seguono
-            \item Nel tempo: non accedere al blocco al di fuori del suo ciclo di vita
-         \end{itemize}
-    \item Non assegnare a puntatori valori che corrispondono ad indirizzi non mappati
-         \begin{itemize}
-            \item Possibile nel caso di cast o di assegnazione improprie
-         \end{itemize}
-    \item Rilasciare tutta la memoria dinamica allocata
-         \begin{itemize}
-            \item Una e una sola volta, usando la funzione duale di quella usata per la sua allocazione
-         \end{itemize}
+          \item Nello spazio: non accedere alle locazioni che lo precedono o che lo seguono
+          \item Nel tempo: non accedere al blocco al di fuori del suo ciclo di vita
+        \end{itemize}
+  \item Non assegnare a puntatori valori che corrispondono ad indirizzi non mappati
+        \begin{itemize}
+          \item Possibile nel caso di cast o di assegnazione improprie
+        \end{itemize}
+  \item Rilasciare tutta la memoria dinamica allocata
+        \begin{itemize}
+          \item Una e una sola volta, usando la funzione duale di quella usata per la sua allocazione
+        \end{itemize}
 \end{itemize}
 
 
 \section{Rischi }
 
 Accedere ad un indirizzo quando il corrispondente ciclo di vita è terminato, ha
-\textbf{effetti impredicibili}: 
+\textbf{effetti impredicibili}:
 
 \begin{itemize}
-    \item Dangling pointer
-    \item La memoria indirizzata può essere inutilizzata, in uso ad altre parti del programma o non mappata
+  \item Dangling pointer
+  \item La memoria indirizzata può essere inutilizzata, in uso ad altre parti del programma o non mappata
 \end{itemize}
 
 Non rilasciare la memoria non più in uso, \textbf{spreca risorse} del sistema
 
 \begin{itemize}
-    \item Memory leakage
-    \item Se si continua ad allocare senza mai rilasciare, si può saturare lo spazio di indirizzamento
+  \item Memory leakage
+  \item Se si continua ad allocare senza mai rilasciare, si può saturare lo spazio di indirizzamento
 \end{itemize}
 
 Rilasciare la memoria più volte \textbf{corrompe le strutture} usate dallo heap, double free.\newline
@@ -532,20 +532,20 @@ ovunque. Può causare una violazione di accesso oppure corrompere un'area di mem
 \section{Problemi dei puntatori in C/C++  }
 
 \begin{table}[H]
-\renewcommand{\arraystretch}{1.6}
-    \centering
-    \begin{tabular}{l p{5.5cm}}
-        % \hline
-        \hline
-        \textbf{Problema} & \textbf{Conseguenza} \\
-        \hline
-        dangling / wild pointer&  crash / UB\\
-        double free&  corruzione heap\\
-        leak & esaurimento della memoria\\
-        data race & risultati casuali\\
-       
-        \hline
-    \end{tabular}
+  \renewcommand{\arraystretch}{1.6}
+  \centering
+  \begin{tabular}{l p{5.5cm}}
+    % \hline
+    \hline
+    \textbf{Problema}       & \textbf{Conseguenza}      \\
+    \hline
+    dangling / wild pointer & crash / UB                \\
+    double free             & corruzione heap           \\
+    leak                    & esaurimento della memoria \\
+    data race               & risultati casuali         \\
+
+    \hline
+  \end{tabular}
 \end{table}
 
 
@@ -553,21 +553,21 @@ ovunque. Può causare una violazione di accesso oppure corrompere un'area di mem
 \section{Le risposte di Rust  }
 
 \begin{table}[H]
-\renewcommand{\arraystretch}{1.6}
-    \centering
-    \begin{tabular}{l p{5.5cm}}
-        % \hline
-        \hline
-        \textbf{Problema C / C++} & \textbf{Strumento Rust} \\
-        \hline
-        dangling / wild pointer&  borrow checker + tempo di vita\\
-        double free&  gestione del possesso\\
-        leak & pattern RAII\\
-        nullptr & tipo Option<T>\\
-        gestione del rilascio & tipi Box<T> / RC<T> / Arc<T>\\
-       
-        \hline
-    \end{tabular}
+  \renewcommand{\arraystretch}{1.6}
+  \centering
+  \begin{tabular}{l p{5.5cm}}
+    % \hline
+    \hline
+    \textbf{Problema C / C++} & \textbf{Strumento Rust}        \\
+    \hline
+    dangling / wild pointer   & borrow checker + tempo di vita \\
+    double free               & gestione del possesso          \\
+    leak                      & pattern RAII                   \\
+    nullptr                   & tipo Option<T>                 \\
+    gestione del rilascio     & tipi Box<T> / RC<T> / Arc<T>   \\
+
+    \hline
+  \end{tabular}
 \end{table}
 
 
@@ -620,8 +620,8 @@ e lascia al programmatore la completa responsabilità della loro gestione
 Al contrario, il linguaggio C++ offre, per gli oggetti di tipo \textit{class}, \textit{struct} e \textit{union} (!), la possibilità di specificare particolari funzioni membro dette rispettivamente costruttori e distruttori.
 
 \begin{itemize}
-    \item Un costruttore è una funzione membro che ha il compito di inizializzare un oggetto, provvedendo ad acquisire - se necessario - le sue dipendenze
-    \item Il distruttore è una funzione membro che viene invocata automaticamente dal compilatore quando l'oggetto raggiunge la fine della propria esistenza ed ha il compito di rilasciare correttamente le dipendenze possedute dall'oggetto stesso
+  \item Un costruttore è una funzione membro che ha il compito di inizializzare un oggetto, provvedendo ad acquisire - se necessario - le sue dipendenze
+  \item Il distruttore è una funzione membro che viene invocata automaticamente dal compilatore quando l'oggetto raggiunge la fine della propria esistenza ed ha il compito di rilasciare correttamente le dipendenze possedute dall'oggetto stesso
 \end{itemize}
 
 
@@ -651,31 +651,31 @@ La maggior parte di tali linguaggi basa la propria strategia di gestione della m
 su una combinazione dei seguenti algoritmi:
 
 \begin{itemize}
-    \item Reference counting
-    \item Mark and Sweep
+  \item Reference counting
+  \item Mark and Sweep
 \end{itemize}
 
 
 \section{Confronto}
 
 \begin{table}[H]
-\renewcommand{\arraystretch}{1.6}
-    \centering
-    \begin{tabularx}{\textwidth}{X X}
-        % \hline
-        \hline
-        \textbf{Gestione manuale in C/C++} & \textbf{Gestione automatica (Java/C\#/Python/Js)} \\
-        \hline 
-        Il rilascio avviene invocando la funzione \textbf{free()} o l'operatore \textbf{delete}& Il rilascio è eseguito automaticamente dal garbage collector\\
-        
-        Il momento in cui avviene il rilascio è controllato dal programmatore &  Il momento in cui avviene il rilascio è controllato dal garbage collector, che viene eseguito periodicamente \\
-        
-        In C++, gli oggetti dispongono di un distruttore che gestisce il rilascio esplicito delle dipendenze  &  Il concetto di distruttore non è parte del linguaggio (ecc. Java, con il metodo \textit{finalize()} ora deprecato) \\
-        
-        Il rilascio non comporta tempi supplementari di attesa, che sarebbero incompatibili con i sistemi in tempo reale   & Quando si attiva la garbage collection, il programma si arresta fino al termine dell'algoritmo, mettendo a rischio il funzionamento di un sistema in tempo reale\\
-        
-        Si possono verificare memory leak, doppi rilasci, dangling pointer, wild pointer & Non possono verificarsi errori sulla gestione della memoria\\
+  \renewcommand{\arraystretch}{1.6}
+  \centering
+  \begin{tabularx}{\textwidth}{X X}
+    % \hline
     \hline
-    \end{tabularx}
+    \textbf{Gestione manuale in C/C++}                                                                               & \textbf{Gestione automatica (Java/C\#/Python/Js)}                                                                                                                \\
+    \hline
+    Il rilascio avviene invocando la funzione \textbf{free()} o l'operatore \textbf{delete}                          & Il rilascio è eseguito automaticamente dal garbage collector                                                                                                     \\
+
+    Il momento in cui avviene il rilascio è controllato dal programmatore                                            & Il momento in cui avviene il rilascio è controllato dal garbage collector, che viene eseguito periodicamente                                                     \\
+
+    In C++, gli oggetti dispongono di un distruttore che gestisce il rilascio esplicito delle dipendenze             & Il concetto di distruttore non è parte del linguaggio (ecc. Java, con il metodo \textit{finalize()} ora deprecato)                                               \\
+
+    Il rilascio non comporta tempi supplementari di attesa, che sarebbero incompatibili con i sistemi in tempo reale & Quando si attiva la garbage collection, il programma si arresta fino al termine dell'algoritmo, mettendo a rischio il funzionamento di un sistema in tempo reale \\
+
+    Si possono verificare memory leak, doppi rilasci, dangling pointer, wild pointer                                 & Non possono verificarsi errori sulla gestione della memoria                                                                                                      \\
+    \hline
+  \end{tabularx}
 \end{table}
 
