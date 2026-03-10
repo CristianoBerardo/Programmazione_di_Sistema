@@ -318,6 +318,8 @@ let point = (1.0, 0.0); //point possiede il valore
 let reference = &point; //reference PUÒ accedere al valore in lettura
 //finché esiste point
 println!(“({}, {})”, reference.0, reference.1);
+
+point = (2.0, 3.0);   //tentativi di accesso a reference generano errore
 \end{minted}
 
 
@@ -507,7 +509,8 @@ Se la funzione riceve più riferimenti, può essere necessario indicare se il lo
 di vita sia vincolato al più breve o se siano disgiunti
 
 \begin{itemize}
-  \item Nel primo caso si usa un solo identificatore \mintinline{rust}{fn f<'a>(p1: &'a i32, p2:&'a i32) {...}}
+  \item Nel primo caso si usa un solo identificatore per identifcare l'intersezione dei loro tempi di vita\\
+        \mintinline{rust}{fn f<'a>(p1: &'a i32, p2:&'a i32) {...}}
   \item Nel secondo si usano etichette diverse \mintinline{rust}{fn f<'a, 'b>(p1: &'a i32, p2:&'b i32) {...}}
 \end{itemize}
 
@@ -550,7 +553,7 @@ fn main() {
     let mut v: Vec<&str> = Vec::new();
     {
         let s= String::from("abc");
-        v.push(&s);     //error: `s` does not live long enough
+        v.push(&s);     //error: `s` does not live long enough. Il tempo di vita di v è limitata alla vita di vita di s.
     }
     println!("{:?}",v);
 }
@@ -657,6 +660,7 @@ struct Point {
     x: &'a i32,
     y: &'b i32,
 }
+
 fun scale<'a,'b,'c> (r: &'a i32, p: Point<'b, 'c>) -> i32 {
     r * (p.x * p.x + p.y * p.y)
 }   
@@ -688,9 +692,9 @@ Questo parte dal presupposto che se un metodo di un oggetto restituisce un dato 
         viene assegnato un nuovo valore.
   \item Può esistere, al più, un singolo riferimento mutabile ad un dato valore
 
-  \item \textbf{Oppure}, possono esistere molti riferimenti immutabili al medesimo valore. Ma fintanto che ne esiste almeno uno, il valore non può essere mutato.
+  \item \textbf{Oppure}, possono esistere molti riferimenti immutabili al medesimo valore. Ma fintanto che ne esiste almeno uno, il valore non può essere mutato. Principio del \textit{multiple reader and single writer} presente in molti ambiti dell'informatica.
 
-  \item Tutti i riferimenti devono avere una durata di vita inferiore a quella del valore a cui
+  \item Tutti i riferimenti, che sono pestiti del valore, devono avere una durata di vita inferiore a quella del valore a cui
         fanno riferimento
 
 \end{itemize}
@@ -703,13 +707,13 @@ Questo parte dal presupposto che se un metodo di un oggetto restituisce un dato 
   \begin{tabular}{>{\bfseries}l p{4.7cm} p{4.7cm}}
     % \hline
     \hline
-    \textbf{Proprietà}     & \textbf{\&T}                                                                    & \textbf{Box<T>}                                 \\
+    \textbf{Proprietà}     & \textbf{\&T}                                                                    & \textbf{Box<T>}                                            \\
     \hline
-    Possesso               & No: prestito                                                                    & Possessore unico                                \\
-    Rilascio               & A carico del possessore                                                         & Automatico al termine dello scope               \\
-    Validità               & Garantita dal compilatore                                                       & Garantita in fase di esecuzione                 \\
-    Nullabilità            & Mai nullo                                                                       & Mai nullo                                       \\
-    Aliasing  e mutabilità & Controllata: o molti riferimenti in sola lettura o un solo riferimento mutabile & Soggetta alla regole del possesso (no aliasing) \\
+    Possesso               & No: è un prestito                                                               & SI: Possessore unico, risolve il doppio rilascio del C/C++ \\
+    Rilascio               & A carico del possessore                                                         & Automatico al termine dello scope                          \\
+    Validità               & Garantita dal compilatore, il borrow checker                                    & Garantita in fase di esecuzione                            \\
+    Nullabilità            & Mai nullo                                                                       & Mai nullo                                                  \\
+    Aliasing  e mutabilità & Controllata: o molti riferimenti in sola lettura o un solo riferimento mutabile & Soggetta alla regole del possesso (no aliasing)            \\
 
     \hline
   \end{tabular}
@@ -718,9 +722,9 @@ Questo parte dal presupposto che se un metodo di un oggetto restituisce un dato 
 \section{Slice}
 Una slice (fetta) è una VISTA di una sequenza contigua di elementi, la cui lunghezza NON è nota in fase di compilazione, ma disponibile durante l'esecuzione.
 
-Internamente viene rappresentata come una tupla di due elementi, il primo dei quali punta al primo valore della sequenza, mentre il secondo indica il numero di elementi consecutivi. Una slice di elementi T ha tipo [T].
+Internamente viene rappresentata come \textbf{fat pointer} una tupla di due elementi, i primi 64 bits puntano al valore della sequenza, mentre i secondi 64 bits indicano il numero di elementi consecutivi. Una slice di elementi T ha tipo [T].
 
-Una slice \textbf{non possiede} i dati cui fa riferimento. Questi appartengono sempre ad un'altra variabile, da cui la slice viene derivata. Tutti i valori contenuti sono garantiti essere inizializzati, gli accessi sono verificati in fase di esecuzione.
+Una slice \textbf{non possiede}, è un prestito a tutti gli effetti, i dati cui fa riferimento. Questi appartengono sempre ad un'altra variabile, da cui la slice viene derivata. Tutti i valori contenuti sono garantiti essere inizializzati, gli accessi sono verificati in fase di esecuzione.
 
 È possibile ricavare una slice a partire da un array, ma anche da altri tipi di contenitori quali std::Vec<T>, String, Box<[T]>, etc.
 
@@ -745,7 +749,7 @@ relative alla correttezza degli accessi in memoria e del rilascio delle risorse.
   \item Non esiste il concetto di \textbf{riferimento nullo} e, di conseguenza, non c'è il rischio di dereferenziarlo
   \item Poiché il borrow checker vigila sulle assegnazioni dei riferimenti e sugli intervalli temporali in cui essi sono effettivamente usati impedendo accessi illeciti, non c'è il rischio di originare errori di
         segmentazione o accesso illegale ad aree ristrette di memoria, né la possibilità di avere riferimenti ad aree già rilasciate (dangling pointer)
-  \item Poiché in ogni istante il borrow checker è in grado di determinare la dimensione di un blocco di memoria cui un riferimento punta, non possono verificarsi \textbf{buffer overflow} né \textbf{buffer underflow}
+  \item Poiché in ogni istante il borrow checker è in grado di determinare la dimensione di un blocco di memoria cui un riferimento punta, vedi le slice, non possono verificarsi \textbf{buffer overflow} né \textbf{buffer underflow}
   \item Per lo stesso motivo, gli iteratori offerti da Rust \textbf{non eccedono} mai i loro limiti
 \end{itemize}
 

@@ -1,0 +1,229 @@
+\section{Gestione degli errori}
+
+\subsubsection{Errori ed eccezioni}
+
+Tutte le computazioni, come le funzioni chiamate, possono fallire prematuramente.
+A volte il risultato attenon non può essere genreato (log di 3), a volte non possono
+generare gli effeti collaterare( non cè scritto nulla sul file).
+Il paggio: ha iniziato a fare degli effetti collatewrali ma non li fa
+tutti (eg salvo metaà immagine poi il disco full).
+
+Questi fallimenti possono essere dovuti a cause attese,
+come un numero al posto di una stringa.
+
+Altri errori sono legati al sistema di esecuzione soggiacente (il pc, il cloud)
+in realtà le capacità sono limitate.
+
+Lo spazio finisce sia SSD sia RAM. A volte si rompono fisicamente.
+A volte ho perso la connessione di rete.
+
+Indipendentemente dalle cause che li hanno prodotti, i fallimenti possono essere
+catalogati in due gruppi principali
+
+Recuperabili quelli che non hanno comprosmeesso lo stato del programma,
+nel senso che possiamo tornare indietro, ho riportato lo stato incositene
+ad uno stato consistente
+
+Altri sono recuperabili, quindi ipediscono qualuncuq operazione di
+recupero. Ed occorre interrompere il processi
+
+Solitamente voglimao uscire dal processo in maniera pulita, negli
+altri occorre mettere in atto una strategia di ripristio di stato.
+
+Il punto in cui rilevo che c'è qualcosa che non va
+può essere difficile trovarlo, magari in una fuznion (eg se il
+diso è piano è la sys.write che fallisce ma non sa cosa farsene)
+Occorre che quella sys call li al suo chiamante che non è andata a buon
+fine.
+
+
+Ci serve che quando rilevo un fallimento possa interrompere la compiutazion
+corrente e ritornare al chiamanerte comunicando cosa c'è stato di andato storto.
+
+Ma questo aumenta la complessità ciclomatica del codice!
+
+
+
+\subsubsection{Spazio di scelta}
+Dato un tipo di errore che posso farci io, che spazio di scelt ho?
+
+In alcuni casi può essere causato da una causa treansitoria (vedi locked di un file, aspetto un po e top)
+ooopures server di rete non raggiungibile ora, dopo quanto tempo posso
+riporvare (exponential backoff per al rete).
+
+Altra domanda, se non ha senso risporvare l'esecuzzione, posso
+continuare comunque con altre operazioni?
+Eg leggo un file se una file è rotta la salto
+
+se devo leggere il file di config, non lo trovo, uso dei default.
+
+Si rompe qualcosa che deriva dall'utente, llo posso convolgere?
+
+Posso isolare l'errore e mantere consistente tutto il resto, vedi il DB. faccio
+il rollback di una sola transazione, non di tutto il DB.
+
+Si è verificato un Bug, allora la pianto subito.
+
+
+\subsection{Supporto sintattico alla gestione degli errori}
+
+Nei linguaggi C, java, python, c++  viene introditta il concetto di
+eccezione, tipo di dato che descrive un errore che viene lasnciato con throw
+e viene restituito al chimante.
+il chiamnte deve averre incluso la chiamta in un blocco try catch
+altrimenti risale fino al main o al primo try catch che lo gestisce
+altirmenti il pgm muore.
+
+QUesta idea che sembrava fantasmagoriica ma ha dato solo problemi,
+la fuznione va fino in fondo o no?
+
+Trows some exception se in java un metodo può lanciare un eccezione.
+
+error --> rompe la JVM eg stack overflow e sono unrecoverable (ti trapano lo stesso il blocco try catvh)
+Exception --> in 2 famiglie le run time  -> non catchabili nullpointer ececetopn alloa non servono
+e tutte le altre
+
+in più creo probli nello stack, devo tenere tracce del contesto delle eccezioni.
+In liinux non è possibile scrivere codice del kernel in C++ in linux(?), in C c'è un codice errore, te lo scelgi te.
+
+In Rust descrivo un tipo che si chiama Resiult
+
+ok() che racchiude il risultato
+err() che racchiude l'errore
+
+è una enum generica Enum Result<T, E>.
+
+
+la macro panic va usata con cautela.
+
+\begin{minted}[breaklines]{rust}
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+  }
+\end{minted}
+
+\subsection{I limiti della gestione delle eccezioni}
+
+
+
+\subsection{Gestioni delle eccezioni in Rust}
+
+
+
+\begin{minted}[breaklines]{rust}
+fn read_file(name: &str)-> Result<String,io::Error> {
+    let r1 = File::open(name);
+    let mut file = match r1 {
+        Err(why) => return Err(why),
+        Ok(file) => file,
+      };
+    let mut s = String::new();
+    let r2 = file.read_to_string(&mut s);
+    match (r2) {
+        Err(why) => Err(why),
+        Ok(_) => Ok(s),
+      }
+  }
+\end{minted}
+
+\subsection{Elaborare i risultati}
+
+Il metdoo ok trasforma il resutl in una Option,
+err trasforma il result in una Option
+
+
+il map trasorma il valroe buono e trasforma in un valore
+in un nuovo l'errore. ritorna un Resutl
+
+Contains permette di verficare se cntien un valore == è booleana.
+
+unwrap prova a dire per me è ok, ti ritonra l'errore altriemtni panic,
+non va benen perdiamo il controlllo
+
+expect, al posto du usare il messaggio dei errore che vi è nel messsaggio,
+lo decisiamo noi.
+
+\subsection{Gestire gli errori}
+
+\subsection{Panic}
+
+
+\subsection{Ignorare gli errori}
+
+
+\subsection{Propagare gli errori}
+nelle fuznion che scriviammo non abbiamo contesto sufficente per gestire
+
+l'errore quindi il ritorno al chiamnre è la più semplice.
+
+rust mette a disposizione l'operatore ? che applicato a RESULT
+
+se ritorna ok, da il valroe altriemnti, il ? comporta un
+ritorno immediato dell'errore al chiamante il quale la deve gestire.
+
+
+\begin{minted}[breaklines]{rust}
+fn read_file(name: &str) -> Result<String,io::Error> {
+  let mut file = File::open(name)?;
+  let mut s = String::new();
+  file.read_to_string(&mut s)?;
+  Ok(s)
+}
+
+
+\end{minted}
+
+\subsection{Altri modi di esprimere il fallimento}
+Posso convertire l'error in un Otpion
+
+\subsection{Propagare errori eterogenei}
+il ? è comodo ma ha un vincolo.
+
+1. se la funziona deve dire che ritorna un Result di che cosa?
+ma gli errori possono essere eterogenei nella stessa funizone. Eg
+data una stringa voglio convertire in un numero
+2 errori 1. il disco IO e 2. pars error. Non posso fare un result
+che ritorna a caso ma solo 1 tipo di errore
+
+
+Come gestiamo, usimo il polimorfismo, diciamo che la fuznione
+nella result c'è il tipo che ci interessa se è ok altrimenti un Box
+che implementa il trattto error box<dyn error::Error> e può essere costrto
+da qualsiasi tipo di errore.
+Pronlema se il chiamante vuole gestire in modo diverso i due errori, non può farlo
+si dovrebbe usare un downcastrest
+
+\begin{minted}[breaklines]{rust}
+fn sum_file(path: &Path) -> Result<i32, Box<dyn error::Error>> {
+  let mut file = File::open(path) ? ; // io::Error -> Box<dyn error::Error>
+  let mut contents = String::new();
+  file.read_to_string(&mut contents) ? ; // io::Error -> Box<dyn error::Error>
+  let mut sum = 0;
+  for line in contents.lines() {
+    sum += line.parse::<i32>() ? ; // ParseIntError -> Box<dyn error::Error>
+  }
+  Ok(sum)
+}
+
+fn handle_sum_file_errors(path: &Path) {
+  match sum_file(path) {
+    Ok(sum) => println!("sum is {}", sum),
+    Err(err) => {
+      if let Some(e) = err.downcast_ref::<io::Error>() {...} //tratto io::Error
+      else if let Some(e) = err.downcast_ref::<ParseIntError>() {...} //tratto ParseIntError
+      else { unreachable!(); } //non può capitare
+    }
+  }
+}
+\end{minted}
+
+
+\subsection{Propagare errori eterogenei}
+
+due strede con Enum, creo un
+
+problem, se può essere accettabile con 
+
+
+thiserror per le librerie ed anyhow per i programmi applicativi.
