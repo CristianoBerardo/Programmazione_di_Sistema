@@ -1,100 +1,182 @@
-\section{Gestione degli errori}
 
-\subsubsection{Errori ed eccezioni}
+\section{Errori ed eccezioni}
 
-Tutte le computazioni, come le funzioni chiamate, possono fallire prematuramente.
-A volte il risultato attenon non può essere genreato (log di 3), a volte non possono
-generare gli effeti collaterare( non cè scritto nulla sul file).
-Il paggio: ha iniziato a fare degli effetti collatewrali ma non li fa
-tutti (eg salvo metaà immagine poi il disco full).
+Tutte le computazioni, le funzioni chiamate, possono fallire prematuramente
+impedendo che possa essere restituito il valore atteso o che vengano eseguiti
+tutti, o parzialmente, gli effetti collaterali richiesti come la scrittura su file.
 
-Questi fallimenti possono essere dovuti a cause attese,
-come un numero al posto di una stringa.
 
-Altri errori sono legati al sistema di esecuzione soggiacente (il pc, il cloud)
-in realtà le capacità sono limitate.
 
-Lo spazio finisce sia SSD sia RAM. A volte si rompono fisicamente.
-A volte ho perso la connessione di rete.
+% A volte il risultato attenon non può essere genreato (log di 3), a volte non possono
+% generare gli effeti collaterare( non cè scritto nulla sul file).
+% Il paggio: ha iniziato a fare degli effetti collatewrali ma non li fa
+% tutti (eg salvo metaà immagine poi il disco full).
+
+Questi fallimenti possono essere dovuti a cause differenti
+
+\begin{itemize}
+  \item Alcune facilmente prevedibili come argomenti illeciti,
+        conversione da testo a numero, etc.
+  \item Altre dovute a limiti del sistema di elaborazione come memoria/spazio
+        su disco esauriti, malfunzionamento della rete o di altre periferiche, etc.
+\end{itemize}
+
+% Questi fallimenti possono essere dovuti a cause attese,
+% come un numero al posto di una stringa.
+
+% Altri errori sono legati al sistema di esecuzione soggiacente (il pc, il cloud)
+% in realtà le capacità sono limitate.
+
+% Lo spazio finisce sia SSD sia RAM. A volte si rompono fisicamente.
+% A volte ho perso la connessione di rete.
 
 Indipendentemente dalle cause che li hanno prodotti, i fallimenti possono essere
 catalogati in due gruppi principali
 
-Recuperabili quelli che non hanno comprosmeesso lo stato del programma,
-nel senso che possiamo tornare indietro, ho riportato lo stato incositene
-ad uno stato consistente
 
-Altri sono recuperabili, quindi ipediscono qualuncuq operazione di
-recupero. Ed occorre interrompere il processi
+\begin{itemize}
+  \item \textbf{Recuperabili}: non hanno compromesso lo stato del
+        programma, per cui è possibile attivare una strategia di ripristino
+  \item \textbf{Non recuperabili}: causano un'alterazione
+        impredicibile dello stato o che indicano l'impossibilità di procedere
+        ulteriormente nella computazione.
+\end{itemize}
 
-Solitamente voglimao uscire dal processo in maniera pulita, negli
-altri occorre mettere in atto una strategia di ripristio di stato.
+% Recuperabili quelli che non hanno comprosmeesso lo stato del programma,
+% nel senso che possiamo tornare indietro, ho riportato lo stato incositene
+% ad uno stato consistente
 
-Il punto in cui rilevo che c'è qualcosa che non va
-può essere difficile trovarlo, magari in una fuznion (eg se il
-diso è piano è la sys.write che fallisce ma non sa cosa farsene)
-Occorre che quella sys call li al suo chiamante che non è andata a buon
-fine.
+% Altri sono irrecuperabili, quindi ipediscono qualuncuq operazione di
+% recupero. Ed occorre interrompere il processi
+
+Nei casi irrecuperabili, occorre terminare il processo, eventaimente eseguendo
+qualche operazione di pulizia sull'ambiente esterno.
+
+% Solitamente voglimao uscire dal processo in maniera pulita, negli
+% altri occorre mettere in atto una strategia di ripristio di stato.
+
+Negli altri, occorre mettere in atto una strategia di ripristino dello stato
+come ritentatre l'operazione, saltare l'operazione, chiedere l'intervento
+dell'utente o amministratore, utilizzare strategia alternativa, etc.\newline
 
 
-Ci serve che quando rilevo un fallimento possa interrompere la compiutazion
-corrente e ritornare al chiamanerte comunicando cosa c'è stato di andato storto.
 
-Ma questo aumenta la complessità ciclomatica del codice!
+Non è detto che il punto in cui si verifica il fallimento possegga abbastanza
+contesto per discriminare come comportarsi. Occorre fare in modo che, in caso di
+fallimento della computazione all'interno di una funzione, il controllo torni al
+suo chiamante, corredato di una opportuna descrizione di quanto successo
+
+% Il punto in cui rilevo che c'è qualcosa che non va
+% può essere difficile trovarlo, magari in una fuznion (eg se il
+% diso è piano è la sys.write che fallisce ma non sa cosa farsene)
+% Occorre che quella sys call li al suo chiamante che non è andata a buon
+% fine.
 
 
+% Ci serve che quando rilevo un fallimento possa interrompere la compiutazion
+% corrente e ritornare al chiamanerte comunicando cosa c'è stato di andato storto.
 
-\subsubsection{Spazio di scelta}
-Dato un tipo di errore che posso farci io, che spazio di scelt ho?
+% Ma questo aumenta la complessità ciclomatica del codice!
 
-In alcuni casi può essere causato da una causa treansitoria (vedi locked di un file, aspetto un po e top)
-ooopures server di rete non raggiungibile ora, dopo quanto tempo posso
-riporvare (exponential backoff per al rete).
+Questo requisito tende ad aumentare la complessità del codice, introducendo rami
+diversi, if/else, switch/case, match, etc., lungo i quali la computazione può
+procedere, favorendo l'introduzione di errori logici legati alla quantità di
+dettagli cui occorre badare.
 
-Altra domanda, se non ha senso risporvare l'esecuzzione, posso
-continuare comunque con altre operazioni?
-Eg leggo un file se una file è rotta la salto
+Per questo motivo i linguaggi moderni introducono dei costrutti sintattici
+a supporto della gestione degli errori.
 
-se devo leggere il file di config, non lo trovo, uso dei default.
 
-Si rompe qualcosa che deriva dall'utente, llo posso convolgere?
+\subsection{Spazio di scelta}
 
-Posso isolare l'errore e mantere consistente tutto il resto, vedi il DB. faccio
-il rollback di una sola transazione, non di tutto il DB.
+Quando un operazione non ha successo si deve decidere come comportarsi nello
+spazio di scelta che abbiamo a disposizione.
 
-Si è verificato un Bug, allora la pianto subito.
+È possibile / sensato ritentare l'esecuzione?
+% Dato un tipo di errore che posso farci io, che spazio di scelt ho?
+
+Se l'errore è frutto di condizioni transitorie come ad esempio congestione di
+rete, file in uso, potrebbe avere senso, a patto di evitare cicli infiniti e
+introdurre opportune pause tra un tentativo e l'altro, ritentare l'esecuzione.
+
+% n alcuni casi può essere causato da una causa treansitoria (vedi locked di un file, aspetto un po e top)
+% ooopures server di rete non raggiungibile ora, dopo quanto tempo posso
+% riporvare (exponential backoff per al rete).
+
+Un'altra domanda sensata da porsi è se sia possibile continuare l'esecuzione
+utilizzando un valore di default o attivando una strategia alternativa per
+calcolare il valore mancante.
+
+
+È possibile coinvolgere l'utente nella risoluzione del problema? Se l'applicazione
+è interattiva  e l'errore deriva dal comportamente dell'utente questo potrebbe
+funzionare.
+
+È possibile isolare l'errore e mantenere il resto del sistema in funzione?
+È un bug o è stato violato un invariante, per cui occorre terminare il programma?
+
+
+% Altra domanda, se non ha senso risporvare l'esecuzzione, posso
+% continuare comunque con altre operazioni?
+% Eg leggo un file se una file è rotta la salto
+
+% se devo leggere il file di config, non lo trovo, uso dei default.
+
+% Si rompe qualcosa che deriva dall'utente, llo posso convolgere?
+
+% Posso isolare l'errore e mantere consistente tutto il resto, vedi il DB. faccio
+% il rollback di una sola transazione, non di tutto il DB.
+
+% Si è verificato un Bug, allora la pianto subito.
 
 
 \subsection{Supporto sintattico alla gestione degli errori}
 
-Nei linguaggi C, java, python, c++  viene introditta il concetto di
-eccezione, tipo di dato che descrive un errore che viene lasnciato con throw
+Il linguaggio C non fornisce alcun supporto sintattico alla modellazione degli
+errori. Lasciando completamente al programmatore la responsabilità di gestire la
+situazione.\newline
+
+In altri linguaggi come Java, Python, C++, C\#, etc.,  viene introdotto il concetto di
+eccezione, tipo di dato che descrive un errore che viene lanciato, \textit{throw},
 e viene restituito al chimante.
-il chiamnte deve averre incluso la chiamta in un blocco try catch
-altrimenti risale fino al main o al primo try catch che lo gestisce
-altirmenti il pgm muore.
 
-QUesta idea che sembrava fantasmagoriica ma ha dato solo problemi,
-la fuznione va fino in fondo o no?
+L'eccenzione risale fino al primo \textit{try-catch} che lo
+gestirò o fino al main dove incontrerà la morte.\newline
 
-Trows some exception se in java un metodo può lanciare un eccezione.
+Questa idea crea molti problemi anche solo nella conoscenza di tutte le classi
+di eccezione che possono essere lanciate, l'esempio lampante è Java che
+descrive le classi Error ed Exception con le varie differenze.
 
-error --> rompe la JVM eg stack overflow e sono unrecoverable (ti trapano lo stesso il blocco try catvh)
-Exception --> in 2 famiglie le run time  -> non catchabili nullpointer ececetopn alloa non servono
-e tutte le altre
+% QUesta idea che sembrava fantasmagoriica ma ha dato solo problemi,
+% la fuznione va fino in fondo o no?
 
-in più creo probli nello stack, devo tenere tracce del contesto delle eccezioni.
-In liinux non è possibile scrivere codice del kernel in C++ in linux(?), in C c'è un codice errore, te lo scelgi te.
+% Trows some exception se in java un metodo può lanciare un eccezione.
 
-In Rust descrivo un tipo che si chiama Resiult
+% error --> rompe la JVM eg stack overflow e sono unrecoverable (ti trapano lo stesso il blocco try catvh)
+% Exception --> in 2 famiglie le run time  -> non catchabili nullpointer ececetopn alloa non servono
+% e tutte le altre
 
-ok() che racchiude il risultato
-err() che racchiude l'errore
+Inoltre, si creano problemi per la gestione per la gestione dello stack
+nel quale si deve terere traccia del contesto in cui è stata lanciata l'eccezione.\newline
+% in più creo probli nello stack, devo tenere tracce del contesto delle eccezioni.
+% In liinux non è possibile scrivere codice del kernel in C++ in linux(?), in C c'è un codice errore, te lo scelgi te.
 
-è una enum generica Enum Result<T, E>.
+% In Rust descrivo un tipo che si chiama Resiult
+
+Rust non utilizza il concetto di eccezione, ma offre i tipi algebrici
+\mintinline{rust}{Result<T, E>} e \mintinline{rust}{Option<T>} per esprimere
+gli esiti delle computazioni.
+
+% ok() che racchiude il risultato
+% err() che racchiude l'errore
+% è una enum generica Enum Result<T, E>.
+
+% la macro panic va usata con cautela.
+
+Offre inoltre la macro \mintinline{rust}{panic!(... )} per forzare l'interruzione del
+thread corrente producendo una descrizione testuale di quanto successo.
 
 
-la macro panic va usata con cautela.
 
 \begin{minted}[breaklines]{rust}
 enum Result<T, E> {
@@ -104,11 +186,34 @@ enum Result<T, E> {
 \end{minted}
 
 \subsection{I limiti della gestione delle eccezioni}
+Il compilatore non è in grado di identificare dove vengano restituite eccezioni,
+conseguentemente, non forza l'utilizzo di costrutti in grado di gestirle.
 
+La generazione di un'eccezione blocca l'esecuzione del codice seguente e riporta
+tipicamente un singolo tipo di errore, rendendo onerosa la validazione
+contemporanea di più criteri.
+
+
+La possibilità che un'eccezione dello stesso tipo possa essere generata in parti
+diverse della computazione, ma gestita in un unico punto a monte, rende
+complessa la scelta delle contromisure da applicare, richiedendo l'ispezione
+manuale della catena delle chiamate fallite per identificare il punto di
+rottura.
+
+Per permettere la corretta contrazione dello stack e il ritorno al
+blocco \textit{try-catch} più recente occorre imporre una certa sovrastruttura allo
+stack ed al contesto di esecuzione. Tale sovrastruttura non si adatta
+particolarmente alle assunzioni che vengono fatte nel kernel di Linux e questo è
+uno dei principali motivi per cui non è possibile scrivere moduli kernel in C++
+per quel sistema operativo.
 
 
 \subsection{Gestioni delle eccezioni in Rust}
+Rust offre una risposta funzionale al problema della modellazione degli errori
+basata sul tipo algebrico generico \mintinline{rust}{Result<T, E>}.
 
+Questo costrutto modella l'unione di tutti i possibili risultati con successo T
+e tutti gli errori E che possono verificarsi nell'esecuzione di una funzione.
 
 
 \begin{minted}[breaklines]{rust}
@@ -129,38 +234,130 @@ fn read_file(name: &str)-> Result<String,io::Error> {
 
 \subsection{Elaborare i risultati}
 
-Il metdoo ok trasforma il resutl in una Option,
-err trasforma il result in una Option
+
+\mintinline{rust}{Result<T, E>} mette a disposizione svariati metodi che
+consentono di accedere ai dati contenuti al suo interno:
+
+\begin{itemize}
+
+  \item I metodi \mintinline{rust}{is_ok(&self)} e \mintinline{rust}{is_err(&self)} permettono, rispettivamente, di determinare se l'esito
+        di un'operazione ha avuto successo o meno
+  \item I metodi \mintinline{rust}{ok(self)} e \mintinline{rust}{err(self)} consumano il risultato trasformandolo in un oggetto di tipo
+        \mintinline{rust}{Option<T>} piuttosto che \mintinline{rust}{Option<E>}
+  \item Il metodo \mintinline{rust}{map(self, op: F)->Result<U,E>} applica la funzione al valore contenuto nel risultato,
+        se questo è ok, altrimenti lascia l'errore invariato
+  \item Il metodo \mintinline{rust}{contains(&self, x: &U)} restituisce vero se il risultato è valido e contiene un valore
+        che equivale all'argomento
+  \item Il metodo \mintinline{rust}{unwrap(self)->T} restituisce il valore contenuto, se è valido, ma invoca la macro
+        \mintinline{rust}{panic!(...)} se il risultato contiene un errore
+\end{itemize}
+% Il metdoo ok trasforma il resutl in una Option,
+% err trasforma il result in una Option
 
 
-il map trasorma il valroe buono e trasforma in un valore
-in un nuovo l'errore. ritorna un Resutl
+% il map trasorma il valroe buono e trasforma in un valore
+% in un nuovo l'errore. ritorna un Resutl
 
-Contains permette di verficare se cntien un valore == è booleana.
+% Contains permette di verficare se cntien un valore == è booleana.
 
-unwrap prova a dire per me è ok, ti ritonra l'errore altriemtni panic,
-non va benen perdiamo il controlllo
+% unwrap prova a dire per me è ok, ti ritonra l'errore altriemtni panic,
+% non va benen perdiamo il controlllo
 
-expect, al posto du usare il messaggio dei errore che vi è nel messsaggio,
-lo decisiamo noi.
+% expect, al posto du usare il messaggio dei errore che vi è nel messsaggio,
+% lo decisiamo noi.
 
 \subsection{Gestire gli errori}
 
-\subsection{Panic}
+Se l'invocazione di una funzione restituisce un valore di tipo \textit{Result} contenente
+un errore, occorre mettere in atto una strategia di gestione:
 
+
+\begin{itemize}
+  \item Ritentare l'esecuzione, evitando di entrare in un loop infinito
+  \item Ricostruire uno stato precedente all'errore (rollback)
+  \item Utilizzare una strategia alternativa per la computazione fallita
+  \item Registrare un messaggio nel log e propagare l'errore al chiamante
+  \item Propagare tout court l'errore al chiamante, delegando ad esso la corrispondente responsabilità
+  \item Terminare, in modo ordinato, il programma
+\end{itemize}
+
+Sebbene terminare il programma possa apparire facile, è sufficiente invocare la
+funzione \mintinline{rust}{std::process::exit(code: i32) -> !}, farlo in modo pulito può
+essere complesso.
+
+Occorre infatti garantire che non vengano lasciati oggetti persistenti, come
+file o altre risorse di sistema, in stati non coerenti. Per questo motivo
+Rust mette a disposizione la macro \mintinline{rust}{panic!(...)} che, oltre a terminare il
+thread corrente, esegue un processo di pulizia.
+
+\subsection{Panic}
+In alcune situazioni, lo stato del programma risulta così compromesso che non è
+pensabile eseguire azioni di ripristino: questo spesso è dovuto alla presenza di
+errori logici nel programma stesso, come l'accesso ad array al di fuori dei relativi
+limiti, divisioini intere per zero, fallimenti di assegnazione, etc.\newline
+
+In questi casi Rust offre la macro \mintinline{rust}{panic!(...)} che accetta
+argomenti simili a quelli offerti dalla macro \mintinline{rust}{println!(...)}
+per formulare un messaggio di errore.
+
+L'effetto dell'invocazione i questa macro è la contrazione dello stack, come nel
+caso delle eccezioni C++, la distruzione via \textit{.drop()} delle variabili che
+implementano il tratto Drop fino alla terminazione del thread corrente.
+
+Se il thread in cui è stato invocato è il thread principale dell'applicazione,
+il processo termina con un codice di errore non nullo, altrimenti \textbf{continua}.
 
 \subsection{Ignorare gli errori}
+In alcune situazioni, può capitare che l'errore, che potenzialmente viene
+restituito da una funzione, non possa di fatto succedere, a conseguenza di quanto
+si è appena verificato nel corso dell'esecuzione.
+
+Oppure che il programmatore assuma che non sia necessario mettere in atto una
+strategia di contenimento e gestione dell'errore, lasciando semplicemente
+terminare il processo.
+
+Il tipo \mintinline{rust}{Result<T, E>} mette a disposizione i metodi
+\mintinline{rust}{unwrap(...)} ed \mintinline{rust}{expect(...)} che restituisce
+il valore \textit{T}, se presente, ed invocano la macro \mintinline{rust}{panic!(...)}
+in caso di errore.
+
+\noindent
+\begin{tcolorbox}
+  \textbf{Nota:} \ \mintinline{rust}{expect(...)}  permette di indicare una
+  stringa che sarà usata al posto del messaggio standard generato da \mintinline{rust}{unwrap(...)},
+  nel caso si sia verificato un errore
+\end{tcolorbox}
+
 
 
 \subsection{Propagare gli errori}
-nelle fuznion che scriviammo non abbiamo contesto sufficente per gestire
+Nella maggior parte delle funzioni in cui si verifica un errore, non si sa quale
+strategia mettere in atto per ripristinare lo stato del programma dato il contesto
+insufficiente in cui ci si trova.
 
-l'errore quindi il ritorno al chiamnre è la più semplice.
+% nelle fuznion che scriviammo non abbiamo contesto sufficente per gestire
 
-rust mette a disposizione l'operatore ? che applicato a RESULT
+% l'errore quindi il ritorno al chiamnre è la più semplice.
 
-se ritorna ok, da il valroe altriemnti, il ? comporta un
-ritorno immediato dell'errore al chiamante il quale la deve gestire.
+Si può ovviare a questo problema restituendo un valore di tipo \textit{Result}.
+Questo porta, tuttavia, a costrutti alquanto complessi, con espressioni di
+controllo difficili da decodificare.
+
+
+% rust mette a disposizione l'operatore ? che applicato a RESULT
+
+% se ritorna ok, da il valroe altriemnti, il ? comporta un
+% ritorno immediato dell'errore al chiamante il quale la deve gestire.
+
+Per semplificare la sintassi, Rust offre l'operatore \textit{?} che può essere
+applicato a qualunque espressione che produce un valore di tipo \textit{Result<T, E>}.
+
+Se il risultato è di tipo \textit{Ok(v)}, l'operatore restituisce il valore \textit{v},
+altrimenti, se il risultato è di tipo \textit{Err(e)} la funzione corrente
+termina, ritornando il valore che incapsula l'errore.
+
+Questo prevede che l'errore di compatibile con l'errore \textit{E} che proviene
+dalla funzione chiamata.
 
 
 \begin{minted}[breaklines]{rust}
@@ -175,24 +372,74 @@ fn read_file(name: &str) -> Result<String,io::Error> {
 \end{minted}
 
 \subsection{Altri modi di esprimere il fallimento}
-Posso convertire l'error in un Otpion
+In alcune situazioni, può essere sufficiente distinguere se la computazione ha
+prodotto il proprio risultato, oppure indicare che non è stato possibile
+completarla.
+
+Per questi casi esiste il tipo \mintinline{rust}{Option<T>} che racchiude
+due alternative:
+
+\begin{itemize}
+  \item \mintinline{rust}{Some(T)}: usata per descrivere il risultato atteso
+  \item \mintinline{rust}{None}: he indica l'assenza di risultato, senza
+        descriverne le ragioni
+\end{itemize}
+
+L'operatore \textit{?} può essere applicato anche al tipo \textit{Option<T>},
+a condizione che la funzione in cui viene usato restituisca un \textit{Option<U>},
+con \textit{U} qualsiasi.
+
+
+\subsubsection{Result<T,E> e Option<U>}
+\mintinline{rust}{Result<T,E>} e \mintinline{rust}{Option<U>} sono correlati:
+
+Result offre il metodo \mintinline{rust}{ok(self)} che restituisce Option<T>, valorizzato con il dato in caso di
+successo (il dato risulta mosso da Result, che quindi diventa inaccessibile).
+
+Offre anche il metodo \mintinline{rust}{err(self)} che restituisce Option<E>, valorizzato con l'errore in caso di
+fallimento (anche in questo caso, con movimento)
+
 
 \subsection{Propagare errori eterogenei}
-il ? è comodo ma ha un vincolo.
+Quando una funzione produce diverse tipologie di errore, è necessario propagare
+i diversi errori così da poter specializzare le contromisure. Rust offre
+diversi modi per propagare errori eterogenei, la scelta spetta al programmatore
+sulla base delle sue esigenze
 
-1. se la funziona deve dire che ritorna un Result di che cosa?
-ma gli errori possono essere eterogenei nella stessa funizone. Eg
-data una stringa voglio convertire in un numero
-2 errori 1. il disco IO e 2. pars error. Non posso fare un result
-che ritorna a caso ma solo 1 tipo di errore
+% 1. se la funziona deve dire che ritorna un Result di che cosa?
+% ma gli errori possono essere eterogenei nella stessa funizone. Eg
+% data una stringa voglio convertire in un numero
+% 2 errori 1. il disco IO e 2. pars error. Non posso fare un result
+% che ritorna a caso ma solo 1 tipo di errore
+
+La libreria standard mette a disposizione l'implementazione generica del tratto
+\textit{From}, che converte qualsiasi valore che implementi il tratto \textit{Error}
+in \mintinline{rust}{Box<dyn error::Error>}.
 
 
-Come gestiamo, usimo il polimorfismo, diciamo che la fuznione
-nella result c'è il tipo che ci interessa se è ok altrimenti un Box
-che implementa il trattto error box<dyn error::Error> e può essere costrto
-da qualsiasi tipo di errore.
-Pronlema se il chiamante vuole gestire in modo diverso i due errori, non può farlo
-si dovrebbe usare un downcastrest
+
+% Come gestiamo, usimo il polimorfismo, diciamo che la fuznione
+% nella result c'è il tipo che ci interessa se è ok altrimenti un Box
+% che implementa il trattto error box<dyn error::Error> e può essere costrto
+% da qualsiasi tipo di errore.
+% Pronlema se il chiamante vuole gestire in modo diverso i due errori, non può farlo
+% si dovrebbe usare un downcastrest
+
+Gli oggetti-tratto richiedono l'utilizzo di fat pointer e vtable con il
+conseguente costo in termini di memoria.
+Durante la conversione vengono perse le informazione sul tipo dell'errore.
+
+Si può risalire allo specifico errore tramite l'utilizzo del \mintinline{rust}{downcast_ref} a
+patto che si conosca l'implementazione della funzione che genera gli errori.
+La conversione può avvenire in maniera implicita attraverso l'utilizzo
+dell'operatore \textit{?}.
+
+\begin{center}
+  \centering
+  \begin{minted}{rust}
+    impl<E: error::Error> From<E> for Box<dyn error::Error>;
+  \end{minted}
+\end{center}
 
 \begin{minted}[breaklines]{rust}
 fn sum_file(path: &Path) -> Result<i32, Box<dyn error::Error>> {
@@ -219,11 +466,166 @@ fn handle_sum_file_errors(path: &Path) {
 \end{minted}
 
 
-\subsection{Propagare errori eterogenei}
+\subsubsection{Errori custom}
+Per propagare errori eterogenei senza forzare il sistema dei tipi è possibile
+implementare degli errori custom.
 
-due strede con Enum, creo un
+Tutti gli errori custom devono implementare il tratto \textit{Error} e
+conseguentemente anche i tratti \textit{Debug} e \textit{Display}.
 
-problem, se può essere accettabile con 
+
+L'utilizzo di un \textit{enum} permette di racchiudere i diversi tipi di errore da
+gestire successivamente tramite l'utilizzo del costrutto \textit{match}.
+È necessario implementare il tratto From per convertire i diversi errori nel tipo custom da
+propagare.
+
+\begin{minted}{rust}
+#[derive(Debug)]
+enum SumFileError {
+  Io(io::Error),
+  Parse(ParseIntError),
+}
+\end{minted}
+
+\begin{center}
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.49\linewidth}
+      \begin{minted}[breaklines]{rust}
+impl From<io::Error> for SumFileError {
+  fn from(err: io::Error) -> Self { SumFileError::Io(err) }
+}
+impl From<ParseIntError> for SumFileError {
+  fn from(err: ParseIntError) -> Self { SumFileError::Parse(err) }
+}
+impl fmt::Display for SumFileError {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      SumFileError::Io(err) => write!(f, "IO error: {}", err),
+      SumFileError::Parse(err) => write!(f, "Parse error: {}", err),
+    }
+  }
+}
+impl error::Error for SumFileError {
+  fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+    Some(match self {
+    SumFileError::Io(err) => err,
+    SumFileError::Parse(err) => err,
+    })
+  }
+}       
+\end{minted}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill % Spazio elastico automatico per distanziare i due blocchi
+    % Secondo blocco: 40% dello spazio per l'immagine
+    \begin{minipage}{0.49\linewidth}
+
+      \begin{minted}[breaklines]{rust}
+fn sum_file(path: &Path) -> Result<i32, SumFileError> {
+  let mut file = File::open(path)?;
+  let mut contents = String::new();
+  file.read_to_string(&mut contents)?;
+  let mut sum = 0;
+  for line in contents.lines() {
+    sum += line.parse::<i32>()?;
+  }
+  Ok(sum)
+}
+
+fn handle_sum_file_errors(path: &Path) {
+  match sum_file(path) {
+    Ok(sum) => println!("the sum is {}", sum),
+    Err(SumFileError::Io(err)) => {...},
+    Err(SumFileError::Parse(err)) => {...},
+  }
+}
+        \end{minted}
 
 
-thiserror per le librerie ed anyhow per i programmi applicativi.
+    \end{minipage}
+  \end{minipage}
+\end{center}
+
+\subsubsection{Create thiserror}
+
+Un grosso aiuto all'implementazione di tipi che implementano il tratto \textit{Error}
+viene dal crate \textbf{thiserror}. Esso offre una implementazione della macro \textit{derive}
+specializzata per il tratto \textit{Error}.
+
+Definendo un tipo (enum, struct, unit) preceduto dall'attributo
+\mintinline{rust}{#[derive(Error, Debug)]} si ottiene l'implementazione
+automatica di questi due tratti:
+
+
+\begin{itemize}
+  \item L'attributo \mintinline{rust}{#[error("Messaggio con formato")]} posta di fronte alle singole
+        voci enumerative o all'intera struct genera l'implementazione del tratto \textit{Display}
+  \item L'attributo \mintinline{rust}{#[from]} posto di fronte ad un campo il cui tipo implementa il
+        tratto \textit{Error} genera l'implementazione del tratto \textit{From} a partire dal tipo del
+        campo
+\end{itemize}
+
+Questo approccio è particolarmente adatto nella creazione di librerie, dove si
+vogliono rendere i possibili errori parte della definizione del contratto (API).
+
+\begin{minted}{rust}
+[dependencies]
+thiserror = "1.0"
+
+#[derive(Error, Debug)]
+enum SumFileError {
+
+  #[error("IO error {0})"]
+  Io(#[from] io::Error),
+
+  #[error("Parse error {0})"]
+  Parse(#[from] ParseIntError),
+}
+\end{minted}
+
+\subsubsection{Create anyhow}
+
+Il crate \textbf{anyhow} definisce l'oggetto-tratto \textit{anyhow::Error} che semplifica la
+gestione idiomatica degli errori.
+Si può usare il tipo \textit{anyhow::Error} per incapsulare il valore di ritorno di
+una funzione che può fallire.
+
+Questo tipo offre un'implementazione automatica del tratto \mintinline{rust}{From<T: Error}, il
+che permette di utilizzare la notazione basata sull'operatore \textit{?} per propagare
+l'errore ritornato.
+
+Quando viene generato un errore è possibile aggiungere una descrizione che contestualizza ciò che è
+successo tramite i metodi \mintinline{rust}{context(...)} e \mintinline{rust}{with_context(...)}.
+
+Il messaggio di errore associato verrà sostituito dalla stringa indicata seguita
+dalla causa originale.
+
+Questo crate interopera correttamente con \textit{thiserror} e risulta adatto nella
+scrittura di codice applicativo, piuttosto che di librerie.
+In questo caso, la semplicità di scrittura del codice domina rispetto al
+controllo dell'informazione contenuta nell'errore generato, tenuto conto che
+sarà interpretato da persone.
+
+
+\begin{minted}[breaklines]{rust}
+fn sum_file(path: &Path) -> anyhow::Result<i32> {
+  let mut file = File::open(path).with_context(|| format!("Missing path {}", path)) ? ;
+  let mut contents = String::new();
+  file.read_to_string(&mut contents).context("File read error") ? ;
+  let mut sum = 0;
+  for line in contents.lines() {
+    sum += line.parse::<i32>().with_context(|| format!("Not a number: {}", line)) ? ;
+  }
+  Ok(sum)
+}
+fn handle_sum_file_errors(path: &Path) {
+  match sum_file(path) {
+    Ok(sum) => println!("sum is {}", sum),
+    Err(err) => {
+      if let Some(e) = err.downcast_ref::<io::Error>() {...} //tratto io::Error
+      else if let Some(e) = err.downcast_ref::<ParseIntError>() {...} //tratto ParseIntError
+      else { unreachable!(); } //non può capitare
+    }
+  }
+}  
+\end{minted}
