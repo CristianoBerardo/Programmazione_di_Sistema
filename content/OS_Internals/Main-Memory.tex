@@ -1511,6 +1511,44 @@ Approssimativamente con un timer a intervalli + un bit di riferimento. Esempio: 
   \end{minipage}
 \end{minipage}
 
+\section{Page Fault Frequency Algorithm}
+È attivato ad ogni evento di page fault, non al momento del riferimento alla pagina..
+
+È basato sull'intervallo $\tau$ della prima page fault.
+
+
+\begin{itemize}
+  \item Se $\tau < c$ se il page fault è più grande di quella desiderata, aggiungi un frame al Resident Set del processo
+  \item Se $\tau \geq c$ se la frequenza dei page fault è OK, rimuovi un frame dal Resident Set del processo con bit a 0.
+\end{itemize}
+
+poi pulisci, setta a 0, il bit di riferimento di tutte le altre pagine nel Resident Set.
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio12.png}
+  \caption{Esempio di frequenza di page fault con C = 3\footnote{In rosso le vittime. In Verde la pagina referenziata}}
+\end{figure}
+
+\section{Working Sets and Page Fault Rates}
+Vi è una relazione diretta tra il working set di un processo e il suo tasso di page fault.
+Il working set cambia nel tempo.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio13.png}
+\end{figure}
+
+\section{Allocazione in memoria del kernel}
+
+È trattata in maniera diversa rispetto alla memoria utente ed è spesso è allocata dal free-memory pool.
+
+Il kernel richiede memoria per strutture di dimensioni variabili. 
+Parte della memoria del kernel deve essere contigua, vedi I/O device.
+
+\section{Buddy System}
+
 
 \chapter{Approfondimento sulla Memoria Virtuale}
 
