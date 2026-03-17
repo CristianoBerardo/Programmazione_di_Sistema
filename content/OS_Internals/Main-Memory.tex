@@ -829,20 +829,42 @@ int main(){
 \subsubsection{Background}
 
 Il codice deve essere in memoria per essere eseguito,
-ma l'intero programma è raramente utilizzato interamente per via della gestione delle eccezioni, funzioni non utilizzate e larghe strutture dati.
+ma l'intero programma è raramente utilizzato interamente per via della
+gestione delle eccezioni, funzioni non utilizzate e larghe strutture dati.
 
 Tutto il programma non è necessario allo stesso tempo.
 
-Considera la possibilità di eseguire un programma parzialmente caricato: il programma non è più vincolato dai limiti della memoria fisica, ogni programma occupa meno memoria durante l'esecuzione, il che consente a più programmi di essere eseguiti contemporaneamente, aumentando l'utilizzo della CPU e il throughput senza aumentare i tempi di risposta o turnaround. Inoltre, è necessario meno I/O per caricare o scambiare programmi in memoria, il che significa che ogni programma utente viene eseguito più velocemente.
+Considera la possibilità di eseguire un programma parzialmente caricato:
+il programma non è più vincolato dai limiti della memoria fisica, ogni programma
+occupa meno memoria durante l'esecuzione, il che consente a più programmi di essere
+eseguiti contemporaneamente, aumentando l'utilizzo della CPU e il throughput senza
+aumentare i tempi di risposta o turnaround. Inoltre, è necessario meno I/O per
+caricare o scambiare programmi in memoria, il che significa che ogni programma utente
+viene eseguito più velocemente.\newline
+
+Stiamo parlando di loading dinamico e non abbiamo bisogno che tutto il programma
+sia tutto in RAM. La ram deve essere capiente abbastanza da contenre il kernel
++ la parte dei processi che stiamo eseguendo.
 
 \subsubsection{Memoria virtuale}
 
-\textbf{Virtual memory: } separazione tra memoria logica utente e memoria fisica; solo una parte del programma deve essere in memoria per l'esecuzione; lo spazio di indirizzamento logico può quindi essere molto più grande dello spazio di indirizzamento fisico; consente la condivisione degli spazi di indirizzamento da parte di più processi; consente una creazione di processi più efficiente; più programmi in esecuzione contemporaneamente; meno I/O necessario per caricare o scambiare processi in memoria.
+\textbf{Virtual memory: } separazione tra memoria logica utente e memoria fisica;
+solo una parte del programma deve essere in memoria per l'esecuzione; lo spazio
+di indirizzamento logico può quindi essere molto più grande dello spazio di
+indirizzamento fisico (RAM); consente la condivisione degli spazi di
+indirizzamento da parte di più processi; consente una creazione di processi più
+efficiente; più programmi in esecuzione contemporaneamente; meno I/O necessario
+per caricare o scambiare processi in memoria.
 
-\textbf{Virtual address space: } molto maggiore della memoria fisica; visualizzazione logica di come il processo è memorizzato in memoria; di solito inizia all'indirizzo 0, con indirizzi contigui fino alla fine dello spazio; nel frattempo, la memoria fisica è organizzata in frame di pagina; la MMU deve mappare gli indirizzi logici a quelli fisici.
+\noindent\textbf{Virtual address space: } molto maggiore della memoria fisica;
+visualizzazione logica di come il processo è memorizzato in memoria; di solito
+inizia all'indirizzo 0 ma non è detto, con indirizzi contigui fino alla fine
+dello spazio; nel frattempo, la memoria fisica è organizzata in frame di pagina;
+la MMU deve mappare gli indirizzi logici a quelli fisici.
 
-La virtual memory può essere implementata tramite: demand paging, demand segmentation.
+La virtual memory può essere implementata tramite: demand paging o demand segmentation.
 
+% demand paging: quando acceso alle tabelle delle pagine o avviene la traduzione o che devo accedere ad una pagina che è ancora virtuale, non c'è ancora
 
 \begin{center}
   \centering
@@ -870,7 +892,21 @@ La virtual memory può essere implementata tramite: demand paging, demand segmen
   \begin{minipage}{\linewidth}
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.6\linewidth}
-      Posso caricare un processo interamente in memoria al momento del caricamento, oppure posso caricare una pagina solo quando è necessaria. Il demand paging richiede meno I/O, non esegue I/O non necessario, richiede meno memoria, offre una risposta più rapida e consente più utenti. È simile a un sistema di paging con swapping.
+      Posso caricare un processo interamente in memoria al momento del caricamento, oppure posso caricare una pagina solo quando è necessaria. Il demand paging richiede meno I/O, non esegue I/O non necessario, richiede meno memoria, offre una risposta più rapida e consente più utenti. È simile a un sistema di paging con swapping.\newline
+
+      Il demand paging consiste nel caricare la prima pagina del processo e di comportarsi
+      come abbiamo fatto prima per i processi, swap in e swap out, ma lo fai a livello di pagina
+      page in e page out.
+
+      \textbf{Lazy swapper} non swappa mai pagine nella memoria fino a che quella pagina non è necessaria.
+
+
+      \begin{tcolorbox}
+        \textbf{Nota: } Uno swapper trasferisce in memoria/disco
+        l'intero processo. Quando invece si trasferiscono solo le singole pagine
+        (e non l'intero processo), si parla di pager e l'operazione si chiama
+        paging.
+      \end{tcolorbox}
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
@@ -882,16 +918,32 @@ La virtual memory può essere implementata tramite: demand paging, demand segmen
 
 \subsubsection{Basic Concepts}
 
-Con lo swapping, il pager indovina quali pagine saranno utilizzate prima di essere nuovamente scambiate. Invece, il pager porta in memoria solo quelle pagine necessarie. Come determinare quel set di pagine? È necessaria una nuova funzionalità della MMU per implementare il demand paging. Se le pagine necessarie sono già residenti in memoria, non c'è differenza rispetto al paging non a richiesta. Se la pagina necessaria non è residente in memoria, è necessario rilevare e caricare la pagina in memoria dallo storage senza modificare il comportamento del programma e senza che il programmatore debba modificare il codice.
+Con lo swapping, il pager indovina quali pagine saranno utilizzate prima di essere nuovamente
+scambiate. Invece, il pager porta in memoria solo quelle pagine necessarie. Come determinare
+quel set di pagine? È necessaria una nuova funzionalità della MMU per implementare il demand paging.
+Se le pagine necessarie sono già residenti in memoria (\textbf{Memory resident}), non c'è
+differenza rispetto al non demanding paging.
+
+Se la pagina necessaria NON è residente in memoria, è necessario rilevare e caricare la
+pagina in memoria dallo storage senza modificare il comportamento del programma e senza
+che il programmatore debba modificare il codice.
 
 
 \subsection{Come rilevare i page fault?}
 
 Possiamo usare un bit, \textbf{valid-invalid}, per tracciare se l'indirizzo è nella RAM o nella memoria secondaria.
 
+\begin{tcolorbox}
+  \textbf{Nota: } Vi è un problema dell'allineamento tra la memoria primaria e fisica.
+\end{tcolorbox}
+
 \begin{itemize}
-  \item valido (1): indica che la pagina associata è nello spazio di indirizzamento logico del processo ed esiste già nella RAM;
-  \item non valido (0): indica che la pagina non è nello spazio di indirizzamento logico del processo e non è nella RAM, il che significa che si verificherà un \textbf{page fault/trap nel kernel}.
+  \item valido (1): indica che la pagina associata è nello spazio di
+        indirizzamento logico del processo ed esiste già nella RAM;
+  \item non valido (0): indica che la pagina non è nello spazio di
+        indirizzamento logico del processo e non è nella RAM, il che significa che si
+        verificherà un \textbf{page fault/trap nel kernel}. Inizialmente, sono tutte
+        non valide.
 \end{itemize}
 
 
@@ -920,8 +972,8 @@ Possiamo usare un bit, \textbf{valid-invalid}, per tracciare se l'indirizzo è n
   % Primo blocco: 50% dello spazio per il codice
   \begin{minipage}{0.6\linewidth}
     \begin{enumerate}
-      \item Se c'è un riferimento a una pagina, il primo riferimento a quella pagina genera un trap al sistema operativo = page fault;
-      \item Se c'è un riferimento a una pagina, il primo riferimento genera un trap al sistema operativo;
+      \item Se c'è un riferimento a una pagina (invalida), il primo riferimento a quella pagina genera un trap al sistema operativo = page fault;
+      \item Il Sistema Operativo giarda un'altra tabella per decidere se:
             \begin{itemize}
               \item[] Riferimento non valido $\to$ abort
               \item[] Semplicemente non in memoria, deve essere caricata dal disco
@@ -948,7 +1000,7 @@ Tempo di accesso effettivo:
 
 \begin{itemize}
   \centering
-  \item[] EAT = (1 - p) x accesso in memoria + p (overhead page fault)
+  \item[] EAT = (1 - p) x accesso in memoria + p (overhead page fault + swap page out + swap page in)
 \end{itemize}
 
 Tempo di accesso in memoria = 200 nanosecondi; tempo medio di gestione del page fault = 8 millisecondi; un accesso su 1.000 causa un page fault. Sembra un numero piccolo, ma non lo è!
@@ -964,6 +1016,7 @@ Ipotizzando un tempo di accesso RAM = 200 nanosecondi, tempo medio di gestione d
 Se un accesso su 1.000 causa un page fault, allora EAT = 8,2 microsecondi.
 
 Questo è un rallentamento di un fattore 8,2 / 0,2 = 41!! Non è per niente buono!
+Peggio della TLB.
 
 \paragraph{}
 Questa è probabilmente la fonte principale di rallentamenti quando si elabora qualcosa.
@@ -972,11 +1025,18 @@ Questa è probabilmente la fonte principale di rallentamenti quando si elabora q
 
 
 
-Caso estremo - avviare un processo senza pagine in memoria.
-Il sistema operativo imposta il puntatore dell'istruzione alla prima istruzione del processo, che non è residente in memoria, causando un page fault. E questo accade per ogni pagina del processo al primo accesso, il che è noto come pure demand paging.
+Caso estremo - avviare un processo senza pagine in memoria. La prima fatch genererà subito un
+page falut.
+
+
+Il sistema operativo imposta il puntatore dell'istruzione alla prima istruzione del processo,
+che non è residente in memoria, causando un page fault. E questo accade per ogni pagina del
+processo al primo accesso, il che è noto come \textbf{pure demand paging}.
 
 In realtà, un certa istruzione potrebbe accedere a più pagine $\to$ più page fault.
-Considera il fetch e decode di un'istruzione che aggiunge 2 numeri dalla memoria e memorizza il risultato nuovamente in memoria. Il dolore è diminuito a causa della località di riferimento.
+Considera il fetch e decode di un'istruzione che aggiunge 2 numeri dalla memoria e
+memorizza il risultato nuovamente in memoria. Il dolore (pain) è diminuito a causa della
+località di riferimento, Locality of reference.
 
 
 Il supporto hardware necessario per il demand paging include:
@@ -988,7 +1048,8 @@ Il supporto hardware necessario per il demand paging include:
 
 \section{Instruction Restart}
 
-Considera un istruzione che può accedere a più locazioni di memoria
+Considera un istruzione che può accedere a più locazioni, indirizzi, di memoria.
+La sorgente e la destinzione in alcuni caso possono sovrapporsi.
 
 \begin{itemize}
   \item Back move
@@ -1001,22 +1062,29 @@ Considera un istruzione che può accedere a più locazioni di memoria
 Quando si verifica un page fault, il sistema operativo deve portare la
 pagina desiderata dalla memoria secondaria nella memoria principale.
 
-La maggior parte dei sistemi operativi mantiene una lista di frame liberi -- un pool di frame liberi per soddisfare tali richieste.
+La maggior parte dei sistemi operativi mantiene una lista di frame liberi -- un pool
+di frame liberi per soddisfare tali richieste.
+
+Il puntatore è inserito proprio nel frame e quando un frame è libero utilizzala per non
+allocare un'altra struttura per contenere la lista di frame.
+
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/rhsbgfw.png}
 \end{figure}
 
-I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota come zero-fill-on-demand -- il contenuto dei frame viene azzerato prima di essere allocato. All'avvio del sistema, tutta la memoria disponibile viene inserita nella lista dei frame liberi.
+I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota
+come zero-fill-on-demand -- il contenuto dei frame viene azzerato prima di essere allocato.
+All'avvio del sistema, tutta la memoria disponibile viene inserita nella lista dei frame liberi.
 
-\subsection{Passi nelrichiedere Paging - Worse Case}
+\subsection{Passi nel richiedere Paging - Worse Case}
 
 \begin{enumerate}
-  \item Trap all'operating system
+  \item Trap all'operating system con conseguente context switch
   \item Salva i registri utente e lo stato del processo
   \item Determina che l'interruzione è stata causata da un page fault
-  \item Controlla che il riferimento alla pagina sia legale e determina la posizione della pagina sul disco
+  \item Controlla che il riferimento alla pagina sia legale, altrimenti abort, e determina la posizione della pagina sul disco
   \item Emetti una lettura dal disco a un frame libero:
         \begin{itemize}
           \item[] Attendi in una coda per questo dispositivo fino a quando la richiesta di lettura non viene soddisfatta
@@ -1034,9 +1102,12 @@ I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota
 
 \subsection{Demand Paging Optimizations}
 
-Lo swap space è più veloce dell'I/O del file system anche se sullo stesso dispositivo; lo swap viene allocato in blocchi più grandi, richiedendo meno gestione rispetto al file system; copia l'intera immagine del processo nello spazio di swap al momento del caricamento del processo, quindi pagina dentro e fuori dallo spazio di swap; usato in BSD Unix più vecchio; demand page dal programma binario su disco, ma scarta piuttosto che paginare quando si libera un frame; usato in Solaris e BSD attuale; è ancora necessario scrivere nello spazio di swap per le pagine non associate a un file (come stack e heap) - memoria anonima - o per le pagine modificate in memoria ma non ancora scritte indietro al file system; i sistemi mobili tipicamente non supportano lo swapping, invece demand page dal file system e reclamano le pagine di sola lettura (come il codice).
+Lo swap space è più veloce dell'I/O del file system anche se sullo stesso dispositivo; lo swap viene allocato in blocchi più grandi, richiedendo meno gestione rispetto al file system; copia l'intera immagine del processo nello spazio di swap (backing store) al momento del caricamento del processo, quindi pagina dentro e fuori dallo spazio di swap; usato in BSD Unix più vecchio; demand page dal programma binario su disco, ma scarta piuttosto che paginare quando si libera un frame; usato in Solaris e BSD attuale; è ancora necessario scrivere nello spazio di swap per le pagine non associate a un file (come stack e heap) - memoria anonima - o per le pagine modificate in memoria ma non ancora scritte indietro al file system; i sistemi mobili tipicamente non supportano lo swapping, invece demand page dal file system e reclamano le pagine di sola lettura (come il codice).
 
 \subsection{Copy-on-Write}
+% Più efficiente perché è già in memoria. Tutto va bene se leggono e possono rimanere
+% condivise, ma quando inziano a modificarle devono essere copiate.
+% Perrmette di efficientare l'utilizzo di memoria, si copia solo quelle che vengono modificate.
 
 Copy-on-Write (COW) consente sia al processo padre che a quello figlio di condividere inizialmente le stesse pagine in memoria. Se uno dei processi modifica una pagina condivisa, solo allora la pagina viene copiata. COW consente una creazione di processi più efficiente poiché vengono copiate solo le pagine modificate. In generale, le pagine libere vengono allocate da un pool di pagine zero-fill-on-demand. Il pool dovrebbe sempre avere frame liberi per un'esecuzione rapida del demand page; non si vuole dover liberare un frame oltre ad altre elaborazioni su un page fault. Perché azzerare una pagina prima di allocarla? La variazione vfork() della system call fork() sospende il processo padre e il figlio utilizza lo spazio degli indirizzi copy-on-write del padre. Progettato per far sì che il figlio chiami exec(), molto efficiente.
 
@@ -1445,14 +1516,37 @@ Approssimativamente con un timer a intervalli + un bit di riferimento. Esempio: 
 
 \section{Swapping delle Pagine}
 
-Un processo può essere temporaneamente spostato dalla memoria all'HD e poi riportato in memoria per continuare l'esecuzione. Lo spazio di memoria logico totale dei processi può superare la memoria fisica.
+
+% Cosa si intende con swapping? gioco che coinvolge Ram e disco, fino ad ora abbiamo
+% parato di memoria primaria.
+% Scambio di contenuto tra backing store una pare del disco che non serve ad
+% ospitare il file syetma ma che serve a fare da memoria aggiuntiva
+% per aiutare la ram.
+
+% Un processo può essere fermo per qualche cosa, occupa memoria in ram,
+% Toglilo dalla memoria swap out o roll out e salviamolo sul backing store
+% e in questo meodo la ram viene liberata. Usato da altri processi per
+% esparndersi o altri programmi di venir eseguito.
+
+Fino ad ora abbiamo parlato di memoria primaria. Ora introduciamo anche la
+memoria secondaria, un disco veloce, chiamato \textbf{backing store} utilizzato
+come memoria aggiuntiva.
+
+
+Un processo, se è fermo per I/O o altro, può essere
+temporaneamente spostato dalla memoria all'HD e poi riportato in memoria per
+continuare l'esecuzione. Lo spazio di memoria logico totale dei processi può
+superare la memoria fisica. In questo modo viene liberato spazio in RAM per
+eseguire altri processi o per far espandere processi già esistenti.
 
 \paragraph{HD - Backing store} - disco veloce abbastanza grande da contenere copie di tutte
 le immagini di memoria di tutti gli utenti; deve fornire accesso diretto a queste
 immagini di memoria.
 
 
-\paragraph{Roll out, roll in} - variante dello swapping usata negli algoritmi di scheduling basati sulla priorità; il processo a bassa priorità viene rimosso dalla memoria (swap out) in modo che il processo a priorità più alta possa essere caricato ed eseguito.
+\paragraph{Roll out, roll in} - variante dello swapping usata negli algoritmi di
+scheduling basati sulla priorità; il processo a bassa priorità viene rimosso dalla
+memoria (swap out) in modo che il processo a priorità più alta possa essere caricato ed eseguito.
 
 \paragraph{}
 
@@ -1484,14 +1578,23 @@ possiedono immagini di memoria su disco.
   \end{minipage}
 \end{center}
 
+QUando lo riporto dentro posso portarlo in un posti diverso, è meno vincolato mettendolo in
+un'altra partizione solo se gli indirizzi sono rilocabili e dipende da come hai fatto binding
+degli indirizzi.
+
 
 \newpage
 \subsection{Tempo di Context Switch con lo Swapping}
 
-Se il prossimo processo da eseguire sulla CPU non è in memoria e la RAM è piena,
-occorre effettuare lo swap out di un processo e lo swap in del processo target. Il tempo di context switch può quindi essere molto elevato, ovvero la latenza per il trasferimento dati verso l'HD.
 
-\paragraph{Esempio: } processo da 100MB in swap verso l'hard disk con velocità di trasferimento di 50MB/sec:
+
+Se il prossimo processo da eseguire sulla CPU non è in memoria e la RAM è piena,
+occorre effettuare lo swap out di un processo e lo swap in del processo target.
+Il tempo di context switch può quindi essere molto elevato, ovvero la latenza
+per il trasferimento dati verso l'HD.
+
+\paragraph{Esempio: } processo da 100MB in swap verso l'hard disk con velocità di
+trasferimento di 50MB/sec:
 
 \begin{itemize}
   \item[] Tempo di swap out di 2 secondi
@@ -1527,8 +1630,14 @@ occorre effettuare lo swap out di un processo e lo swap in del processo target. 
   \end{minipage}
 \end{center}
 
+Oltre che per i singoli processi, la tecnica dello swapping è implementata anche a livello di
+pagine. Non tutte le pagine di un processo devono stare in memoria.
+
 
 \subsection{Swapping sui Sistemi Mobili}
+
+% Non si fa, si fa una cosa più semplice: chiedere all'applicazione di salvarsi i dati
+% altrimenti il kernel la termina.
 
 Lo swapping non viene tipicamente usato perché lo storage è piccolo, il flash drive ha un numero limitato di cicli di scrittura e il bus tra la memoria flash e la CPU è limitato.
 
@@ -1848,6 +1957,8 @@ Una tabella memorizza le informazioni su tutti questi segmenti: la base e il lim
 \end{figure}
 
 \subsubsection{Esempio di Architettura Intel IA-32}
+
+Lascia stare.
 
 \begin{center}
   \centering
