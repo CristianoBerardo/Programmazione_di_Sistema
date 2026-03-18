@@ -1544,10 +1544,32 @@ Il working set cambia nel tempo.
 
 È trattata in maniera diversa rispetto alla memoria utente ed è spesso è allocata dal free-memory pool.
 
-Il kernel richiede memoria per strutture di dimensioni variabili. 
+Il kernel richiede memoria per strutture di dimensioni variabili.
 Parte della memoria del kernel deve essere contigua, vedi I/O device.
 
 \section{Buddy System}
+
+Alloca memoria da segmenti di dimensioni fisse costituiti da pagine fisicamente
+contigue, solitamente allocate usando dimensioni di potenza di 2:
+
+\begin{itemize}
+  \item Soddisfa le richieste in unità di dimensioni potenza di 2
+  \item La richiesta viene arrotondata alla potenza di 2 più vicina
+  \item Quando è necessaria un'allocazione più piccola di quella disponibile, 
+  il chunk corrente viene diviso in due buddy della potenza di 2 successiva 
+  più bassa
+\end{itemize}
+
+Questo precesso continua fino a quando una dimensione adatta è trovata.
+
+\paragraph{Example: } assume 256KB chunk available, kernel requests 21KB.
+Split into $A_L$ and $A_R$ of 128KB each. One further divided into $B_L$ and $B_R$ of
+64KB. One further into $_CL$ and $C_R$ of 32KB each - one used to
+satisfy request. 
+
+Advantage: quickly coalesce unused chunks into larger chunk.
+
+Disadvantage: fragmentation
 
 
 \chapter{Approfondimento sulla Memoria Virtuale}
