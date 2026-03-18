@@ -593,12 +593,14 @@ Le applicazioni tipiche sono:
 \end{figure}
 
 \begin{tcolorbox}
-  \textbf{Nota: } \texttt{no\_mangle} dice al compilatore rust di
-  non modificare il nome della funzione durante la compilazione, rendendolo così
-  accessibile da altri linguaggi con il nome esatto specificato nel codice
-  sorgente. Altrimenti, il compilatore potrebbe applicare name mangling, una
-  tecnica che modifica i nomi delle funzioni per includere informazioni aggiuntive
-  come ad esempio i tipi dei parametri ad esempio \texttt{add\_i32\_i32}.
+  \textbf{Nota: } \texttt{\#[no\_mangle]} dice al compilatore Rust
+  di non modificare il nome della funzione durante la compilazione, rendendola
+  così accessibile da altri linguaggi con il nome esatto specificato nel codice
+  sorgente. Senza questo attributo, il compilatore applica il name mangling, una
+  tecnica che trasforma i nomi delle funzioni includendo informazioni aggiuntive
+  come il percorso del modulo e un hash univoco, producendo nomi come
+  \texttt{\_ZN7mycrate3add17h3f6a1c2b8e4d5f9eE}, illeggibili e non invocabili
+  direttamente da altri linguaggi.
 \end{tcolorbox}
 
 % mangle:suggeriemnto per rust addi32i32 che sono i parametnti
