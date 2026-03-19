@@ -1527,7 +1527,7 @@ poi pulisci, setta a 0, il bit di riferimento di tutte le altre pagine nel Resid
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio12.png}
+  \includegraphics[width=0.45\linewidth]{images/OS_internals/Main-memory/MM-esempio12.png}
   \caption{Esempio di frequenza di page fault con C = 3\footnote{In rosso le vittime. In Verde la pagina referenziata}}
 \end{figure}
 
@@ -1555,21 +1555,398 @@ contigue, solitamente allocate usando dimensioni di potenza di 2:
 \begin{itemize}
   \item Soddisfa le richieste in unità di dimensioni potenza di 2
   \item La richiesta viene arrotondata alla potenza di 2 più vicina
-  \item Quando è necessaria un'allocazione più piccola di quella disponibile, 
-  il chunk corrente viene diviso in due buddy della potenza di 2 successiva 
-  più bassa
+  \item Quando è necessaria un'allocazione più piccola di quella disponibile,
+        il chunk corrente viene diviso in due buddy della potenza di 2 successiva
+        più bassa
 \end{itemize}
 
 Questo precesso continua fino a quando una dimensione adatta è trovata.
 
-\paragraph{Example: } assume 256KB chunk available, kernel requests 21KB.
-Split into $A_L$ and $A_R$ of 128KB each. One further divided into $B_L$ and $B_R$ of
-64KB. One further into $_CL$ and $C_R$ of 32KB each - one used to
-satisfy request. 
+\textbf{Advantage}: quickly coalesce unused chunks into larger chunk.\newline
 
-Advantage: quickly coalesce unused chunks into larger chunk.
+\noindent\textbf{Disadvantage}: fragmentation
 
-Disadvantage: fragmentation
+\begin{center}
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
+
+      \paragraph{Example: } assume 256KB chunk available, kernel requests 21KB.
+      Split into $A_L$ and $A_R$ of 128KB each. One further divided into $B_L$ and $B_R$ of
+      64KB. One further into $_CL$ and $C_R$ of 32KB each - one used to
+      satisfy request.
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio14.png}
+
+    \end{minipage}
+  \end{minipage}
+\end{center}
+
+
+\section{Slab Allocator}
+
+\begin{center}
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
+      Alternate strategy use \textbf{slabs} - is one or more physically contiguous pages -
+      and \textbf{Cache} - consists of one or more slabs.
+
+
+      Single cache for each unique kernel data structure. Each cache ﬁlled
+      with objects - instantiations of the data structure.
+      When cache created, filled with objects marked as \texttt{free}, otherwise
+      when structures stored, objects marked as \texttt{used}.
+
+      If slab is full of used objects, next object allocated from empty
+      slab. If no empty slabs, new slab allocated.
+
+      Beneﬁts include no fragmentation, fast memory request satisfaction
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio15.png}
+
+    \end{minipage}
+  \end{minipage}
+\end{center}
+
+\paragraph{Example - Slab Allocator in Linux}
+
+For example process descriptor is of type \verb|struct task_struct| with
+approximately 1.7KB of memory.
+
+New task $\to$ allocate new structure from cache. Will use existing free
+\verb|struct task_struct|.
+
+Slab can be in three possible states:
+
+\begin{enumerate}
+  \item Full - all used
+  \item Empty - all free
+  \item Partial - some free, some used
+\end{enumerate}
+
+Upon request, slab allocator
+
+\begin{enumerate}
+  \item Uses free struct in partial slab
+  \item If none, takes one from empty slab
+  \item If no empty slab, create new empty
+\end{enumerate}
+
+Slab started in Solaris, now wide-spread for both kernel mode and user memory in
+various OSes. Linux 2.2 had SLAB, now has both SLOB and SLUB allocators
+
+
+\section{Prepaging}
+
+To reduce the large number of page faults that occurs at process startup,
+\textbf{prepaging} can be used to bring in more than just the demand page.
+Prepage all or some of the pages a process will need, before they are referenced,
+but if prepaged pages are unused, I/O and memory was wasted.
+
+\paragraph{Example: } Assume \textit{s} pages are prepaged and $\alpha$ of the pages is
+used
+
+\begin{itemize}
+  \item \textit{s} cost of $s \cdot \alpha$ save pages faults > or < than the cost of prepaging. $s \cdot (1 - \alpha)$ unnecessary  pages?
+  \item $\alpha$ near zero $\to$ prepaging loses
+\end{itemize}
+
+\section{Page Size}
+
+Sometimes OS designers have a choice, especially if running on custom-built CPU.
+Page size selection must take into consideration:
+
+\begin{itemize}
+  \item Fragmentation
+  \item Page table size
+  \item I/O overhead
+  \item Locality
+  \item Resolution
+  \item TLB size and effectiveness
+  \item Number of page faults
+\end{itemize}
+
+Always power of 2, usually in the range $2^{12}\,(4096 \text{byte})$ to $2^{22}\,(4194304 \text{byte})$.
+On average, growing over time.
+
+\section{TLB Reach}
+\textbf{TLB Reach} - The amount of memory accessible from the TLB.
+
+\begin{center}
+  \begin{equation}
+    \text{TLB Reach} = \text{TLB Size} \times \text{Page Size}
+  \end{equation}
+\end{center}
+
+Ideally, the working set of each process is stored in the TLB, otherwise there
+is a high degree of page faults.
+
+
+\begin{itemize}
+  \item \textbf{Increase the Page Size: } This may lead to an increase in fragmentation as not all
+        applications require a large page size
+  \item \textbf{Provide Multiple Page Sizes: }This allows applications that
+        require larger page sizes the opportunity to use them without an increase in
+        fragmentation
+\end{itemize}
+
+\paragraph{Example: Program structure}
+
+\texttt{int[128,128] data;}, Each row is stored in one page.
+
+
+\begin{center}
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
+      \begin{minted}[breaklines]{c}
+// Program 1
+  for (j = 0; j <128; j++) 
+    for (i = 0; i < 128; i++) 
+      data[i,j] = 0;
+\end{minted}
+      $128 \times 128$ page faults.
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \begin{minted}[breaklines]{c}
+// Program 2
+  for (i = 0; i <128; i++) 
+    for (j = 0; j < 128; j++) 
+      data[i,j] = 0;
+\end{minted}
+      $128 \times 128$ page faults.
+    \end{minipage}
+  \end{minipage}
+\end{center}
+
+\section{I/O interlock}
+
+\begin{center}
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
+      \textbf{I/O Interlock} - Pages must sometimes be locked into memory.
+      Consider I/O - Pages that are used for copying
+      a ﬁle from a device must be locked from being selected for eviction by a page
+      replacement algorithm
+
+      \textbf{Pinning} of pages to lock into memory.
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=\textwidth]{images/OS_internals/Main-memory/MM-esempio16.png}
+    \end{minipage}
+  \end{minipage}
+\end{center}
+
+\subsection{Windows example}
+
+Uses demand paging with clustering. Clustering brings in pages
+surrounding the faulting page. Processes are assigned working set minimum and working set
+maximum. Working set minimum is the minimum number of pages the
+process is guaranteed to have in memory. A process may be assigned as many pages up to its working set
+maximum. When the amount of free memory in the system falls below a
+threshold, automatic working set trimming is performed to
+restore the amount of free memory. Working set trimming removes pages from processes that have
+pages in excess of their working set minimum
+
+
+\subsection{Solaris example}
+
+
+\begin{center}
+  \centering
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
+      Maintains a list of free pages to assign faulting processes.
+      Lotsfree - threshold parameter (amount of free memory) to. gin paging.
+      Desfree - threshold parameter to increasing paging. Minfree - threshold
+      parameter to being swapping. Paging is performed by pageout process.
+      Pageout scans pages using modiﬁed clock algorithm. Scanrate is the rate at
+      which pages are scanned. This ranges from slowscan to fastscan. Pageout is
+      called more frequently depending upon the amount of free memory available.
+      Priority paging gives priority to process code pages
+
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=\textwidth]{images/OS_internals/Main-memory/MM-esempio17.png}
+    \end{minipage}
+  \end{minipage}
+\end{center}
+
+
+\section{Performance of Demand Paging}
+
+Stages in Demand Paging (worse case)
+
+\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \item Trap to the operating system
+  \item Save the user registers and process state
+  \item Determine that the interrupt was a page fault
+  \item Check that the page reference was legal and determine the location of the page on the disk
+  \item Issue a read from the disk to a free frame:
+        \begin{itemize}
+          \setlength{\itemsep}{0pt}
+          \item Wait in a queue for this device until the read request is serviced
+          \item Wait for the device seek and/or latency time
+          \item Begin the transfer of the page to a free frame
+        \end{itemize}
+  \item While waiting, allocate the CPU to some other user
+  \item Receive an interrupt from the disk I/O subsystem (I/O completed)
+  \item Save the registers and process state for the other user
+  \item Determine that the interrupt was from the disk
+  \item Correct the page table and other tables to show page is now in memory
+  \item Wait for the CPU to be allocated to this process again
+  \item Restore the user registers, process state, and new page table, and then resume the interrupted instruction
+\end{enumerate}
+
+
+
+
+
+% \begin{center}
+%   \centering
+%   \begin{minipage}{1\linewidth}
+%     % Primo blocco: 50% dello spazio per il codice
+%     \begin{minipage}{0.65\linewidth}
+%       \begin{enumerate}
+%         \item Trap to the operating system
+%         \item Save the user registers and process state
+%         \item Determine that the interrupt was a page fault
+%         \item Check that the page reference was legal and determine the location of the page on the disk
+%         \item Issue a read from the disk to a free frame:
+%               \begin{itemize}
+%                 \item Wait in a queue for this device until the read request is serviced
+%                 \item Wait for the device seek and/or latency time
+%                 \item Begin the transfer of the page to a free frame
+%               \end{itemize}
+%         \item While waiting, allocate the CPU to some other user
+%         \item Receive an interrupt from the disk I/O subsystem (I/O completed)
+%         \item Save the registers and process state for the other user
+%         \item Determine that the interrupt was from the disk
+%         \item Correct the page table and other tables to show page is now in memory
+%         \item Wait for the CPU to be allocated to this process again
+%         \item Restore the user registers, process state, and new page table, and then resume the interrupted instruction
+%       \end{enumerate}
+
+%     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+%     \hfill
+%     \begin{minipage}{0.3\linewidth}
+%       \includegraphics[width=\textwidth]{images/OS_internals/Main-memory/MM-esempio18.png}
+%       \captionof{figure}{Need for page replacement}
+%     \end{minipage}
+%   \end{minipage}
+% \end{center}
+
+
+% VERSIONE GEMINI
+
+\begin{flushleft} % Sostituisce center per allineare l'intero blocco a sinistra
+  \begin{minipage}{1\linewidth}
+    % Primo blocco: 65% dello spazio per il codice
+    \begin{minipage}{0.65\linewidth}
+      \raggedright % <-- Questo comando forza il testo ad allinearsi a sinistra
+      \begin{enumerate}
+        \item Trap to the operating system
+        \item Save the user registers and process state
+        \item Determine that the interrupt was a page fault
+        \item Check that the page reference was legal and determine the location of the page on the disk
+        \item Issue a read from the disk to a free frame:
+              \begin{itemize}
+                \item Wait in a queue for this device until the read request is serviced
+                \item Wait for the device seek and/or latency time
+                \item Begin the transfer of the page to a free frame
+              \end{itemize}
+        \item While waiting, allocate the CPU to some other user
+        \item Receive an interrupt from the disk I/O subsystem (I/O completed)
+        \item Save the registers and process state for the other user
+        \item Determine that the interrupt was from the disk
+        \item Correct the page table and other tables to show page is now in memory
+        \item Wait for the CPU to be allocated to this process again
+        \item Restore the user registers, process state, and new page table, and then resume the interrupted instruction
+      \end{enumerate}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill
+    \begin{minipage}{0.3\linewidth}
+      \centering % Centra l'immagine all'interno della sua colonna (opzionale)
+      \includegraphics[width=\textwidth]{images/OS_internals/Main-memory/MM-esempio18.png}
+    \end{minipage}
+  \end{minipage}
+\end{flushleft}
+
+Cosa è cambiato esattamente: Sostituito \\begin{center} con \\begin{flushleft}:
+Questo sposta l'intero blocco principale (quello largo 1\\linewidth) verso il
+margine sinistro della pagina, invece di tenerlo in mezzo.
+
+Rimosso il comando \\centering globale: Era ridondante e causava l'allineamento
+centrale non desiderato del testo.
+
+Aggiunto \\raggedright: Inserito subito dopo l'apertura della prima minipage,
+dice a LaTeX di allineare tutto il contenuto di quella colonna a sinistra,
+disabilitando la giustificazione automatica che a volte crea spazi vuoti
+antiestetici nelle colonne strette.
+
+
+\subsection{Priority Allocation}
+
+Use a proportional allocation scheme using priorities rather
+than size.
+If process $P_i$ generates a page fault:
+\begin{itemize}
+  \item select for replacement one of its frames
+  \item select for replacement a frame from a process with lower
+        priority number
+\end{itemize}
+
+\subsection{Memory Compression}
+
+An alternative to paging is \textbf{memory compression}.
+
+
+\textbf{Memory compression} - rather than paging out modiﬁed frames to swap space, we
+compress several frames into a single frame, enabling the system to reduce
+memory usage without resorting to swapping pages.
+
+Consider the following free-frame-list consisting of 6 frames
+
+
+
+
+\begin{center}
+  \centering
+  \begin{minipage}{0.75\linewidth}
+
+    \includegraphics[width=0.47\textwidth]{images/OS_internals/Main-memory/MM-esempio19.png}
+    \hfill
+    \includegraphics[width=0.47\textwidth]{images/OS_internals/Main-memory/MM-esempio20.png}
+
+  \end{minipage}
+\end{center}
+
+Assume that this number of free frames falls below a certain threshold that
+triggers page replacement. The replacement algorithm (say, an LRU approximation
+algorithm) selects four frames -- 15, 3, 35, and 26 to place on the free-frame
+list. It ﬁrst places these frames on a modiﬁed-frame list. Typically, the
+modiﬁed-frame list would next be written to swap space, making the frames
+available to the free-frame list. An alternative strategy is to compress a
+number of frames{\\mdash}say, three{\\mdash}and store their compressed versions n
+a single page frame.
+
 
 
 \chapter{Approfondimento sulla Memoria Virtuale}
