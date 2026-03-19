@@ -45,9 +45,9 @@ Tutti questi livelli contengono una copia dello stesso sottoinsieme di dati.
 \end{figure}
 
 \newpage
-\section{Relocation problem}
+\section{Problema della riallocazione}
 
-Si presenta il problem rialocation: l'indirizzo deve essere scalato a quello reale.
+Si presenta il problema di riallocazione: l'indirizzo deve essere scalato a quello reale.
 Come si può risolvere?
 
 \begin{itemize}
@@ -109,7 +109,7 @@ Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un somm
 
 
 
-\section{Address binding}
+\section{Binding degli indirizzi}
 
 Quando scriviamo un programma C, vogliamo utilizzare indirizzi simbolici e vogliamo che sia il compilatore a trasformarlo in indirizzi relativi.
 Il linker decide di riallocare a valori assoluti.
@@ -163,7 +163,7 @@ Il binding degli indirizzi di istruzioni e dati agli indirizzi di memoria può a
 \end{center}
 
 
-\section{Memory Managment Unit - MMU}
+\section{Memory Management Unit - MMU}
 Ho bisogno di un modo per passare dalla memoria virtuale alla memoria hardware e viceversa, soprattutto quando gli indirizzi sono diversi in fase di esecuzione. Introduciamo il concetto di \textbf{processo di binding}.
 
 
@@ -220,12 +220,12 @@ Gli indirizzi logici e fisici coincidono negli schemi di binding al tempo di com
 
 Il programma utente lavora con indirizzi logici; \textbf{non vede mai i veri indirizzi fisici}. Se si stampa l'indirizzo di una variabile in un programma C, viene stampato il valore logico e non il valore fisico reale!
 
-\subsection{Relocatin register}
+\subsection{Registro di riallocazione}
 Se abbiamo una MMU basta su Relocation register, gli indirizzi logici sono calcolati al volo. Viene utilizzato quando si vuole ritardare il binding fino alla fase di esecuzione.
 
-Oltre che al relocation register ci sono anche altri modi per caricare nuovi processi in memoria: \textbf{Dynamic loading}  e \textbf{dynamic loading}
+Oltre che al relocation register ci sono anche altri modi per caricare nuovi processi in memoria: \textbf{Dynamic loading}  e \textbf{dynamic linking}
 
-\subsection{Dynamic loading}
+\subsection{Caricamento dinamico}
 % il pgm non è detto che può stare tutto in memoria. e non è detto che lo voglio tutto subito in memoria.
 % perché? spero una parte o tutto non mi serva più (è fatta in sequenza cencetto di località soazione e temprale).
 
@@ -258,7 +258,7 @@ Il SO può aiutare fornendo librerie per implementare il caricamento dinamico.
 % Utile per le librerie! è utile per le shared librery, una sola copia in memoria e tutti la vedono: tutti la trovano già caricata MA spazio di indirizzamento condiviso!!
 % Problema del versioning delle liberie shared, normalmente basta aggiornare.
 
-\subsection{Static vs Dynamic Linking}
+\subsection{Linking Statico vs Dinamico}
 \textbf{Linking statico} - librerie di sistema e codice di programma sono tutti combinati dal linker nell'immagine del programma binario in fase di compilazione. Problema: grandi eseguibili.
 
 \noindent\textbf{Linking dinamico} - il linking è rinviato fino alla fase di esecuzione del programma.\newline
@@ -826,7 +826,7 @@ int main(){
   \end{minipage}
 \end{center}
 
-\subsubsection{Background}
+\subsubsection{Contesto}
 
 Il codice deve essere in memoria per essere eseguito,
 ma l'intero programma è raramente utilizzato interamente per via della
@@ -884,7 +884,7 @@ La virtual memory può essere implementata tramite: demand paging o demand segme
   \end{minipage}
 \end{center}
 
-\subsubsection{Demand Paging}
+\subsubsection{Paginazione su Richiesta - Demand Paging}
 
 
 \begin{center}
@@ -916,7 +916,7 @@ La virtual memory può essere implementata tramite: demand paging o demand segme
   \end{minipage}
 \end{center}
 
-\subsubsection{Basic Concepts}
+\subsubsection{Concetti di Base}
 
 Con lo swapping, il pager indovina quali pagine saranno utilizzate prima di essere nuovamente
 scambiate. Invece, il pager porta in memoria solo quelle pagine necessarie. Come determinare
@@ -1046,7 +1046,7 @@ Il supporto hardware necessario per il demand paging include:
   \item[] Riavvio dell'istruzione
 \end{itemize}
 
-\section{Instruction Restart}
+\section{Riavvio dell'Istruzione}
 
 Considera un istruzione che può accedere a più locazioni, indirizzi, di memoria.
 La sorgente e la destinzione in alcuni caso possono sovrapporsi.
@@ -1078,7 +1078,7 @@ I sistemi operativi tipicamente allocano i frame liberi tramite una tecnica nota
 come zero-fill-on-demand -- il contenuto dei frame viene azzerato prima di essere allocato.
 All'avvio del sistema, tutta la memoria disponibile viene inserita nella lista dei frame liberi.
 
-\subsection{Passi nel richiedere Paging - Worse Case}
+\subsection{Passi nel richiedere Paging - Caso Peggiore}
 
 \begin{enumerate}
   \item Trap all'operating system con conseguente context switch
@@ -1100,11 +1100,11 @@ All'avvio del sistema, tutta la memoria disponibile viene inserita nella lista d
   \item Ripristina i registri utente, lo stato del processo e la nuova tabella delle pagine, quindi riprendi l'istruzione interrotta
 \end{enumerate}
 
-\subsection{Demand Paging Optimizations}
+\subsection{Ottimizzazioni della Paginazione su Richiesta}
 
 Lo swap space è più veloce dell'I/O del file system anche se sullo stesso dispositivo; lo swap viene allocato in blocchi più grandi, richiedendo meno gestione rispetto al file system; copia l'intera immagine del processo nello spazio di swap (backing store) al momento del caricamento del processo, quindi pagina dentro e fuori dallo spazio di swap; usato in BSD Unix più vecchio; demand page dal programma binario su disco, ma scarta piuttosto che paginare quando si libera un frame; usato in Solaris e BSD attuale; è ancora necessario scrivere nello spazio di swap per le pagine non associate a un file (come stack e heap) - memoria anonima - o per le pagine modificate in memoria ma non ancora scritte indietro al file system; i sistemi mobili tipicamente non supportano lo swapping, invece demand page dal file system e reclamano le pagine di sola lettura (come il codice).
 
-\subsection{Copy-on-Write}
+\subsection{Copia su Scrittura (Copy-on-Write)}
 % Più efficiente perché è già in memoria. Tutto va bene se leggono e possono rimanere
 % condivise, ma quando inziano a modificarle devono essere copiate.
 % Perrmette di efficientare l'utilizzo di memoria, si copia solo quelle che vengono modificate.
@@ -1306,7 +1306,7 @@ Nel caso peggiore, l'algoritmo scorre l'intera lista.
   \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/jnyfg.png}
 \end{figure}
 
-\subsection{Miglioramento del Second-Chance Algorithm}
+\subsection{Miglioramento dell'Algoritmo della Seconda Chance}
 
 Possiamo migliorare l'algoritmo usando il bit di riferimento e il bit di modifica (se disponibile) in concerto. Prendiamo la coppia ordinata (riferimento, modifica):
 \begin{itemize}
@@ -1340,7 +1340,7 @@ Si basa sull'argomento che la pagina con il contatore più basso è stata probab
 Prendiamo un pool di frame liberi, sempre disponibile quando necessario, non trovato al momento del page fault. Leggiamo la pagina in un frame libero e selezioniamo una vittima da espellere e aggiungiamo al pool dei frame liberi. Quando è conveniente, espelliamo la vittima, possibilmente tenendo una lista di pagine modificate. Quando lo storage secondario è altrimenti inattivo, scriviamo le pagine lì e impostiamo a non sporco. Possibilmente, manteniamo intatti i contenuti del frame libero e annotiamo cosa c'è dentro; se viene referenziato di nuovo prima di essere riutilizzato, non c'è bisogno di caricare nuovamente i contenuti da disco. Generalmente utile per ridurre la penalità se viene selezionato il frame vittima sbagliato.
 
 
-\subsection{Applications and Page Replacement}
+\subsection{Applicazioni e Sostituzione delle Pagine}
 
 Tutti questi algoritmi di sostituzione delle pagine sono basati su ipotesi e non possono prevedere con precisione il futuro accesso alle pagine. Tuttavia, alcune applicazioni, come i database, hanno una migliore conoscenza dei loro modelli di accesso alla memoria e possono utilizzare questa conoscenza per ottimizzare le prestazioni. Le applicazioni che richiedono molta memoria possono causare un doppio buffering, in cui il sistema operativo mantiene una copia della pagina in memoria come buffer I/O, mentre l'applicazione mantiene la pagina in memoria per il proprio lavoro. In questi casi, il sistema operativo può fornire un accesso diretto al disco, bypassando il buffering e altre funzionalità del sistema operativo, consentendo all'applicazione di gestire direttamente l'I/O del disco.
 
@@ -1562,9 +1562,9 @@ contigue, solitamente allocate usando dimensioni di potenza di 2:
 
 Questo precesso continua fino a quando una dimensione adatta è trovata.
 
-\textbf{Advantage}: quickly coalesce unused chunks into larger chunk.\newline
+\textbf{Vantaggio}: unisce rapidamente i chunk inutilizzati in chunk più grandi.\newline
 
-\noindent\textbf{Disadvantage}: fragmentation
+\noindent\textbf{Svantaggio}: frammentazione
 
 \begin{center}
   \centering
@@ -1572,10 +1572,10 @@ Questo precesso continua fino a quando una dimensione adatta è trovata.
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.65\linewidth}
 
-      \paragraph{Example: } assume 256KB chunk available, kernel requests 21KB.
-      Split into $A_L$ and $A_R$ of 128KB each. One further divided into $B_L$ and $B_R$ of
-      64KB. One further into $_CL$ and $C_R$ of 32KB each - one used to
-      satisfy request.
+      \paragraph{Esempio: } assumiamo che sia disponibile un chunk di 256KB, il kernel richiede 21KB.
+      Viene diviso in $A_L$ e $A_R$ di 128KB ciascuno. Uno viene ulteriormente diviso in $B_L$ e $B_R$ di
+      64KB. Uno viene ulteriormente diviso in $_CL$ e $C_R$ di 32KB ciascuno - uno viene usato per
+      soddisfare la richiesta.
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
     \begin{minipage}{0.3\linewidth}
@@ -1593,19 +1593,19 @@ Questo precesso continua fino a quando una dimensione adatta è trovata.
   \begin{minipage}{1\linewidth}
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.65\linewidth}
-      Alternate strategy use \textbf{slabs} - is one or more physically contiguous pages -
-      and \textbf{Cache} - consists of one or more slabs.
+      Una strategia alternativa utilizza gli \textbf{slab} - composti da una o più pagine fisicamente contigue -
+      e la \textbf{Cache} - costituita da uno o più slab.
 
 
-      Single cache for each unique kernel data structure. Each cache ﬁlled
-      with objects - instantiations of the data structure.
-      When cache created, filled with objects marked as \texttt{free}, otherwise
-      when structures stored, objects marked as \texttt{used}.
+      Una singola cache per ogni struttura dati univoca del kernel. Ogni cache è riempita
+      con oggetti - istanziazioni della struttura dati.
+      Quando la cache viene creata, viene riempita con oggetti marcati come \texttt{free}, altrimenti
+      quando le strutture vengono memorizzate, gli oggetti sono marcati come \texttt{used}.
 
-      If slab is full of used objects, next object allocated from empty
-      slab. If no empty slabs, new slab allocated.
+      Se uno slab è pieno di oggetti usati, il prossimo oggetto viene allocato da uno
+      slab vuoto. Se non ci sono slab vuoti, viene allocato un nuovo slab.
 
-      Beneﬁts include no fragmentation, fast memory request satisfaction
+      I vantaggi includono l'assenza di frammentazione e la soddisfazione rapida delle richieste di memoria
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
@@ -1616,69 +1616,69 @@ Questo precesso continua fino a quando una dimensione adatta è trovata.
   \end{minipage}
 \end{center}
 
-\paragraph{Example - Slab Allocator in Linux}
+\paragraph{Esempio - Allocatore Slab in Linux}
 
-For example process descriptor is of type \verb|struct task_struct| with
-approximately 1.7KB of memory.
+Per esempio, il descrittore di processo è di tipo \verb|struct task_struct| con
+approssimativamente 1.7KB di memoria.
 
-New task $\to$ allocate new structure from cache. Will use existing free
-\verb|struct task_struct|.
+Nuovo task $\to$ alloca una nuova struttura dalla cache. Utilizzerà una
+\verb|struct task_struct| libera esistente.
 
-Slab can be in three possible states:
-
-\begin{enumerate}
-  \item Full - all used
-  \item Empty - all free
-  \item Partial - some free, some used
-\end{enumerate}
-
-Upon request, slab allocator
+Lo slab può essere in tre possibili stati:
 
 \begin{enumerate}
-  \item Uses free struct in partial slab
-  \item If none, takes one from empty slab
-  \item If no empty slab, create new empty
+  \item Full - tutto usato
+  \item Empty - tutto libero
+  \item Partial - alcuni liberi, alcuni usati
 \end{enumerate}
 
-Slab started in Solaris, now wide-spread for both kernel mode and user memory in
-various OSes. Linux 2.2 had SLAB, now has both SLOB and SLUB allocators
+Su richiesta, l'allocatore slab
+
+\begin{enumerate}
+  \item Usa uno struct libero in uno slab parziale
+  \item Se nessuno, ne prende uno da uno slab vuoto
+  \item Se non c'è uno slab vuoto, ne crea uno nuovo vuoto
+\end{enumerate}
+
+Lo slab è nato in Solaris, ora è diffuso sia per il kernel mode che per la memoria utente in
+vari SO. Linux 2.2 aveva SLAB, ora ha sia gli allocatori SLOB che SLUB
 
 
 \section{Prepaging}
 
-To reduce the large number of page faults that occurs at process startup,
-\textbf{prepaging} can be used to bring in more than just the demand page.
-Prepage all or some of the pages a process will need, before they are referenced,
-but if prepaged pages are unused, I/O and memory was wasted.
+Per ridurre il grande numero di page fault che si verificano all'avvio del processo,
+il \textbf{prepaging} può essere utilizzato per caricare più della semplice pagina richiesta.
+Si precaricano tutte o alcune delle pagine che un processo necessiterà, prima che vengano referenziate,
+ma se le pagine precaricate non vengono utilizzate, l'I/O e la memoria sono stati sprecati.
 
-\paragraph{Example: } Assume \textit{s} pages are prepaged and $\alpha$ of the pages is
-used
-
-\begin{itemize}
-  \item \textit{s} cost of $s \cdot \alpha$ save pages faults > or < than the cost of prepaging. $s \cdot (1 - \alpha)$ unnecessary  pages?
-  \item $\alpha$ near zero $\to$ prepaging loses
-\end{itemize}
-
-\section{Page Size}
-
-Sometimes OS designers have a choice, especially if running on custom-built CPU.
-Page size selection must take into consideration:
+\paragraph{Esempio: } Assumiamo che \textit{s} pagine sono precaricate e $\alpha$ delle pagine viene
+utilizzato
 
 \begin{itemize}
-  \item Fragmentation
-  \item Page table size
-  \item I/O overhead
-  \item Locality
-  \item Resolution
-  \item TLB size and effectiveness
-  \item Number of page faults
+  \item \textit{s} costo di $s \cdot \alpha$ risparmia page fault > o < del costo del prepaging. $s \cdot (1 - \alpha)$ pagine non necessarie?
+  \item $\alpha$ vicino a zero $\to$ il prepaging perde
 \end{itemize}
 
-Always power of 2, usually in the range $2^{12}\,(4096 \text{byte})$ to $2^{22}\,(4194304 \text{byte})$.
-On average, growing over time.
+\section{Dimensione della Pagina}
+
+Talvolta i progettisti di SO hanno una scelta, specialmente se eseguono su CPU custom-built.
+La selezione della dimensione della pagina deve prendere in considerazione:
+
+\begin{itemize}
+  \item Frammentazione
+  \item Dimensione della tabella delle pagine
+  \item Overhead dell'I/O
+  \item Località
+  \item Risoluzione
+  \item Dimensione ed efficacia del TLB
+  \item Numero di page fault
+\end{itemize}
+
+Sempre potenze di 2, solitamente nell'intervallo $2^{12}\,(4096 \text{byte})$ a $2^{22}\,(4194304 \text{byte})$.
+In media, crescente nel tempo.
 
 \section{TLB Reach}
-\textbf{TLB Reach} - The amount of memory accessible from the TLB.
+\textbf{TLB Reach} - La quantità di memoria accessibile dal TLB.
 
 \begin{center}
   \begin{equation}
@@ -1686,21 +1686,21 @@ On average, growing over time.
   \end{equation}
 \end{center}
 
-Ideally, the working set of each process is stored in the TLB, otherwise there
-is a high degree of page faults.
+Idealmente, il working set di ogni processo è memorizzato nel TLB, altrimenti c'è
+un alto grado di page fault.
 
 
 \begin{itemize}
-  \item \textbf{Increase the Page Size: } This may lead to an increase in fragmentation as not all
-        applications require a large page size
-  \item \textbf{Provide Multiple Page Sizes: }This allows applications that
-        require larger page sizes the opportunity to use them without an increase in
-        fragmentation
+  \item \textbf{Aumentare la Dimensione della Pagina: } Questo può portare a un aumento della frammentazione poiché non tutte
+        le applicazioni richiedono una grande dimensione di pagina
+  \item \textbf{Fornire Dimensioni di Pagina Multiple: } Questo consente alle applicazioni che
+        richiedono dimensioni di pagina più grandi l'opportunità di utilizzarle senza un aumento della
+        frammentazione
 \end{itemize}
 
-\paragraph{Example: Program structure}
+\paragraph{Esempio: Struttura del programma}
 
-\texttt{int[128,128] data;}, Each row is stored in one page.
+\texttt{int[128,128] data;} - ogni riga è memorizzata in una pagina.
 
 
 \begin{center}
@@ -1736,12 +1736,12 @@ is a high degree of page faults.
   \begin{minipage}{1\linewidth}
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.65\linewidth}
-      \textbf{I/O Interlock} - Pages must sometimes be locked into memory.
-      Consider I/O - Pages that are used for copying
-      a ﬁle from a device must be locked from being selected for eviction by a page
-      replacement algorithm
+      \textbf{I/O Interlock} - Le pagine devono talvolta essere bloccate in memoria.
+      Consideriamo l'I/O - Le pagine che vengono utilizzate per copiare
+      un file da un dispositivo devono essere bloccate ed evitare di essere selezionate per l'espulsione da un algoritmo
+      di sostituzione delle pagine
 
-      \textbf{Pinning} of pages to lock into memory.
+      \textbf{Pinning} delle pagine per bloccarle in memoria.
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
@@ -1751,19 +1751,19 @@ is a high degree of page faults.
   \end{minipage}
 \end{center}
 
-\subsection{Windows example}
+\subsection{Esempio Windows}
 
-Uses demand paging with clustering. Clustering brings in pages
-surrounding the faulting page. Processes are assigned working set minimum and working set
-maximum. Working set minimum is the minimum number of pages the
-process is guaranteed to have in memory. A process may be assigned as many pages up to its working set
-maximum. When the amount of free memory in the system falls below a
-threshold, automatic working set trimming is performed to
-restore the amount of free memory. Working set trimming removes pages from processes that have
-pages in excess of their working set minimum
+Utilizza paginazione su richiesta con clustering. Il clustering carica le pagine
+circostanti alla pagina che genera il fault. Ai processi vengono assegnati un working set minimo e un working set
+massimo. Il working set minimo è il numero minimo di pagine che
+il processo è garantito di avere in memoria. Un processo può essere assegnato fino a un numero di pagine pari al suo working set
+massimo. Quando la quantità di memoria libera nel sistema scende sotto una
+soglia, viene eseguita automaticamente la riduzione del working set
+per ripristinare la quantità di memoria libera. La riduzione del working set rimuove pagine dai processi che hanno
+pagine in eccesso rispetto al loro working set minimo
 
 
-\subsection{Solaris example}
+\subsection{Esempio Solaris}
 
 
 \begin{center}
@@ -1771,14 +1771,14 @@ pages in excess of their working set minimum
   \begin{minipage}{1\linewidth}
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.65\linewidth}
-      Maintains a list of free pages to assign faulting processes.
-      Lotsfree - threshold parameter (amount of free memory) to. gin paging.
-      Desfree - threshold parameter to increasing paging. Minfree - threshold
-      parameter to being swapping. Paging is performed by pageout process.
-      Pageout scans pages using modiﬁed clock algorithm. Scanrate is the rate at
-      which pages are scanned. This ranges from slowscan to fastscan. Pageout is
-      called more frequently depending upon the amount of free memory available.
-      Priority paging gives priority to process code pages
+      Mantiene una lista di pagine libere da assegnare ai processi che generano fault.
+      Lotsfree - parametro di soglia (quantità di memoria libera) per iniziare il paging.
+      Desfree - parametro di soglia per aumentare il paging. Minfree - parametro di
+      soglia per iniziare lo swapping. Il paging viene eseguito dal processo pageout.
+      Pageout scansiona le pagine usando un algoritmo clock modificato. Scanrate è la velocità con
+      cui le pagine vengono scansionate. Questo varia da slowscan a fastscan. Pageout viene
+      chiamato più frequentemente a seconda della quantità di memoria libera disponibile.
+      Il paging con priorità dà priorità alle pagine di codice del processo
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
@@ -1789,30 +1789,30 @@ pages in excess of their working set minimum
 \end{center}
 
 
-\section{Performance of Demand Paging}
+\section{Performance del Demand Paging}
 
-Stages in Demand Paging (worse case)
+Fasi della Paginazione su Richiesta (caso peggiore)
 
 \begin{enumerate}
   \setlength{\itemsep}{0pt}
-  \item Trap to the operating system
-  \item Save the user registers and process state
-  \item Determine that the interrupt was a page fault
-  \item Check that the page reference was legal and determine the location of the page on the disk
-  \item Issue a read from the disk to a free frame:
+  \item Trap al sistema operativo
+  \item Salva i registri utente e lo stato del processo
+  \item Determina che l'interruzione è stata causata da un page fault
+  \item Verifica che il riferimento alla pagina sia legale e determina la posizione della pagina sul disco
+  \item Emetti una lettura dal disco a un frame libero:
         \begin{itemize}
           \setlength{\itemsep}{0pt}
-          \item Wait in a queue for this device until the read request is serviced
-          \item Wait for the device seek and/or latency time
-          \item Begin the transfer of the page to a free frame
+          \item Attendi in una coda per questo dispositivo fino a quando la richiesta di lettura non viene soddisfatta
+          \item Attendi il tempo di seek e/o latenza del dispositivo
+          \item Inizia il trasferimento della pagina a un frame libero
         \end{itemize}
-  \item While waiting, allocate the CPU to some other user
-  \item Receive an interrupt from the disk I/O subsystem (I/O completed)
-  \item Save the registers and process state for the other user
-  \item Determine that the interrupt was from the disk
-  \item Correct the page table and other tables to show page is now in memory
-  \item Wait for the CPU to be allocated to this process again
-  \item Restore the user registers, process state, and new page table, and then resume the interrupted instruction
+  \item Mentre aspetti, assegna la CPU a qualche altro utente
+  \item Ricevi un'interruzione dal sottosistema I/O del disco (I/O completato)
+  \item Salva i registri e lo stato del processo per l'altro utente
+  \item Determina che l'interruzione è stata causata dal disco
+  \item Correggi la tabella delle pagine e altre tabelle per mostrare che la pagina è ora in memoria
+  \item Attendi che la CPU venga assegnata di nuovo a questo processo
+  \item Ripristina i registri utente, lo stato del processo e la nuova tabella delle pagine, quindi riprendi l'istruzione interrotta
 \end{enumerate}
 
 
@@ -1862,23 +1862,23 @@ Stages in Demand Paging (worse case)
     \begin{minipage}{0.65\linewidth}
       \raggedright % <-- Questo comando forza il testo ad allinearsi a sinistra
       \begin{enumerate}
-        \item Trap to the operating system
-        \item Save the user registers and process state
-        \item Determine that the interrupt was a page fault
-        \item Check that the page reference was legal and determine the location of the page on the disk
-        \item Issue a read from the disk to a free frame:
+        \item Trap al sistema operativo
+        \item Salva i registri utente e lo stato del processo
+        \item Determina che l'interruzione è stata causata da un page fault
+        \item Verifica che il riferimento alla pagina sia legale e determina la posizione della pagina sul disco
+        \item Emetti una lettura dal disco a un frame libero:
               \begin{itemize}
-                \item Wait in a queue for this device until the read request is serviced
-                \item Wait for the device seek and/or latency time
-                \item Begin the transfer of the page to a free frame
+                \item Attendi in una coda per questo dispositivo fino a quando la richiesta di lettura non viene soddisfatta
+                \item Attendi il tempo di seek e/o latenza del dispositivo
+                \item Inizia il trasferimento della pagina a un frame libero
               \end{itemize}
-        \item While waiting, allocate the CPU to some other user
-        \item Receive an interrupt from the disk I/O subsystem (I/O completed)
-        \item Save the registers and process state for the other user
-        \item Determine that the interrupt was from the disk
-        \item Correct the page table and other tables to show page is now in memory
-        \item Wait for the CPU to be allocated to this process again
-        \item Restore the user registers, process state, and new page table, and then resume the interrupted instruction
+        \item Mentre aspetti, assegna la CPU a qualche altro utente
+        \item Ricevi un'interruzione dal sottosistema I/O del disco (I/O completato)
+        \item Salva i registri e lo stato del processo per l'altro utente
+        \item Determina che l'interruzione è stata causata dal disco
+        \item Correggi la tabella delle pagine e altre tabelle per mostrare che la pagina è ora in memoria
+        \item Attendi che la CPU venga assegnata di nuovo a questo processo
+        \item Ripristina i registri utente, lo stato del processo e la nuova tabella delle pagine, quindi riprendi l'istruzione interrotta
       \end{enumerate}
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
@@ -1904,25 +1904,25 @@ antiestetici nelle colonne strette.
 
 \subsection{Priority Allocation}
 
-Use a proportional allocation scheme using priorities rather
-than size.
-If process $P_i$ generates a page fault:
+Utilizza uno schema di allocazione proporzionale usando le priorità piuttosto
+che la dimensione.
+Se il processo $P_i$ genera un page fault:
 \begin{itemize}
-  \item select for replacement one of its frames
-  \item select for replacement a frame from a process with lower
-        priority number
+  \item seleziona per la sostituzione uno dei suoi frame
+  \item seleziona per la sostituzione un frame da un processo con
+        numero di priorità inferiore
 \end{itemize}
 
-\subsection{Memory Compression}
+\subsection{Compressione della Memoria}
 
-An alternative to paging is \textbf{memory compression}.
+Un'alternativa alla paginazione è la \textbf{compressione della memoria}.
 
 
-\textbf{Memory compression} - rather than paging out modiﬁed frames to swap space, we
-compress several frames into a single frame, enabling the system to reduce
-memory usage without resorting to swapping pages.
+\textbf{Compressione della memoria} - invece di effettuare il paging out dei frame modificati nello spazio di swap,
+comprimi diversi frame in un singolo frame, consentendo al sistema di ridurre
+l'utilizzo della memoria senza ricorrere allo swapping delle pagine.
 
-Consider the following free-frame-list consisting of 6 frames
+Considera la seguente free-frame-list costituita da 6 frame
 
 
 
@@ -1938,14 +1938,14 @@ Consider the following free-frame-list consisting of 6 frames
   \end{minipage}
 \end{center}
 
-Assume that this number of free frames falls below a certain threshold that
-triggers page replacement. The replacement algorithm (say, an LRU approximation
-algorithm) selects four frames -- 15, 3, 35, and 26 to place on the free-frame
-list. It ﬁrst places these frames on a modiﬁed-frame list. Typically, the
-modiﬁed-frame list would next be written to swap space, making the frames
-available to the free-frame list. An alternative strategy is to compress a
-number of frames{\\mdash}say, three{\\mdash}and store their compressed versions n
-a single page frame.
+Supponiamo che questo numero di frame liberi scenda sotto una certa soglia che
+attiva la sostituzione delle pagine. L'algoritmo di sostituzione (ad esempio, un algoritmo di approssimazione
+LRU) seleziona quattro frame -- 15, 3, 35 e 26 da inserire nella free-frame
+list. Prima posiziona questi frame in una modified-frame list. Tipicamente, la
+modified-frame list verrebbe poi scritta nello spazio di swap, rendendo i frame
+disponibili alla free-frame list. Una strategia alternativa è comprimere un
+certo numero di frame{\\mdash}diciamo, tre{\\mdash}e memorizzare le loro versioni compresse in
+un singolo frame di pagina.
 
 
 
@@ -2315,12 +2315,12 @@ Ogni entry ha un address e una span, che indica il numero di pagine che la entry
 TLB possiede la translation table entries (TTEs), per un accesso hardware più rapido.
 La cache di TTEs risiede nel transaltion storage buffer (TSB), includendo un entry per le pagine recentemente accedute.\newline
 
-Virtual adress recerence causa una TLB seach:
+Virtual address reference causa una TLB search:
 
-Se è miss, l'hardware va a cercaare nella memoria TSB guardando dentro la TTE corrispondente all'address.
+Se è miss, l'hardware va a cercare nella memoria TSB guardando dentro la TTE corrispondente all'address.
 \begin{itemize}
   \item Se è hit, la CPU copia la TSB entry nella TLB e la traduzione viene completata
-  \item Se no match, il kernel interrompe la ricerca nella hash table. Il kernel crea una TTE dall'apropriata hash table e la memorizza nella TSB, Interrupt handler ritorna il controllo alla MMU, la quale completa la traduzione dell'address.
+  \item Se no match, il kernel interrompe la ricerca nella hash table. Il kernel crea una TTE dall'appropriata hash table e la memorizza nella TSB, Interrupt handler ritorna il controllo alla MMU, la quale completa la traduzione dell'address.
 
 \end{itemize}
 
@@ -2431,7 +2431,7 @@ L'attuale generazione dell'architettura CISC ha 64 bit, il che è enorme (> 16 e
 \end{figure}
 
 
-\section{Example: ARM Architecture}
+\section{Esempio: Architettura ARM}
 
 Nei moderni processori ARM installati sugli smartphone sono CPU 64bit con particolare attenzione ai consumi energetici.
 Un livello di paginazione per sezione, due livelli si pagine più piccole.
