@@ -47,6 +47,79 @@ La lettura e scrittura avviene in incrementi di pagina (come i settori), ma non 
 \paragraph{}
 L'SSD è un dispositivo complesso che integra un processore per verificare lo stato di tutti i settori, cancellare e scrivere blocchi, ecc.
 
+\section{Algoritmi del Controller NAND Flash}
+
+
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    Poiche non e possibile sovrascrivere in-place, le pagine finiscono per contenere un mix di dati validi e non validi.
+    Per tracciare quali blocchi logici sono validi, il controller mantiene una tabella \textbf{flash
+      translation layer} (FTL).
+    Implementa inoltre la \textbf{garbage collection} per liberare lo spazio occupato dalle pagine non valide.
+    Riserva \textbf{overprovisioning} per fornire spazio di lavoro alla GC.
+    Ogni cella ha una vita utile limitata, quindi e necessario il \textbf{wear leveling} per distribuire uniformemente le scritture.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/2026-03-22-16-53-48.png}
+  \end{minipage}
+\end{center}
+
+
+\section{Memoria Volatile}
+
+La DRAM viene spesso usata come dispositivo di mass-storage; tecnicamente non e memoria secondaria
+perche e volatile, ma puo ospitare file system ed essere usata come storage secondario molto veloce.
+
+I RAM drive (chiamati anche RAM disk) si presentano come dispositivi a blocchi raw,
+solitamente formattati con un file system.
+
+
+I computer hanno gia buffering e caching via RAM: perche usare i RAM drive?
+
+\begin{itemize}
+  \item Cache e buffer sono allocati/gestiti da programmatore, sistema operativo e hardware
+  \item I RAM drive sono sotto il controllo diretto dell'utente
+  \item Sono presenti in tutti i principali sistemi operativi. Ad esempio Linux \texttt{/dev/ram}, MacOS \texttt{diskutil}
+\end{itemize}
+
+Sono usati come storage temporaneo ad alta velocita. I programmi possono condividere rapidamente grandi quantita di dati leggendo/scrivendo sul RAM drive.
+
+\section{Struttura del Disco}
+
+
+I dischi vengono indirizzati come grandi array monodimensionali di blocchi logici,
+dove il blocco logico e la minima unita di trasferimento.
+Il low-level formatting crea i blocchi logici sul supporto fisico.
+
+L'array monodimensionale di blocchi logici viene mappato in modo sequenziale
+nei settori del disco:
+
+\begin{itemize}
+    \item Il settore 0 e il primo settore della prima traccia del cilindro piu esterno
+    \item La mappatura procede in ordine lungo quella traccia, poi sulle altre tracce dello stesso cilindro, quindi sui restanti cilindri dall'esterno verso l'interno
+    \item L'indirizzamento logico-fisico dovrebbe essere semplice, salvo eccezioni dovute a bad sector e al numero non costante di settori per traccia
+\end{itemize}
+
+  \subsection{Collegamento del Disco}
+
+  Lo storage host-attached viene raggiunto tramite porte di I/O collegate ai bus di I/O. Sono disponibili vari bus,
+  tra cui advanced technology attachment (ATA), serial ATA (SATA), eSATA, serial attached SCSI (SAS),
+  universal serial bus (USB) e fibre channel (FC). Il piu comune e SATA.
+
+  Poiche la NVM e molto piu veloce degli HDD, e stata introdotta una nuova interfaccia ad alte prestazioni,
+  NVM express (NVMe), che si collega direttamente al bus PCI.
+  I trasferimenti dati su bus sono gestiti da processori elettronici specializzati chiamati
+  controller (o host-bus adapter, HBA).
+
+\begin{itemize}
+    \item Un host controller lato computer del bus e un device controller lato dispositivo
+    \item Il computer inserisce i comandi nell'host controller tramite porte di I/O memory-mapped; l'host controller invia messaggi al device controller e i dati sono trasferiti via DMA tra dispositivo e DRAM del computer
+\end{itemize}
+
+
 \section{Scheduling del Disco}
 
 Il sistema operativo è responsabile dell'uso efficiente dell'hardware; per il disco ciò significa avere un accesso rapido e una buona \textbf{larghezza di banda} del disco. La \textbf{bandwidth} è il numero totale di byte trasferiti, diviso per il tempo totale tra la prima richiesta di servizio e il completamento dell'ultimo trasferimento.
@@ -83,7 +156,15 @@ Il braccio del disco parte da un'estremità e si sposta verso l'altra. Questo no
   \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/Immagine 2024-05-22 183628.png}
 \end{figure}
 
-\paragraph{NOTA: } non ci sono richieste da 0 a 65, quindi possiamo saltare quella zona.
+\begin{tcolorbox}
+  \textbf{Nota:} non ci sono richieste da 0 a 65, quindi possiamo saltare quella zona.
+\end{tcolorbox}
+
+L'algoritmo SCAN e talvolta chiamato algoritmo dell'ascensore.
+Nell'illustrazione il movimento totale della testina e di 208 cilindri.
+Si noti pero che, se le richieste sono distribuite uniformemente, la densita maggiore si trova all'estremita opposta del disco,
+e quelle richieste attendono piu a lungo.
+
 
 
 \subsection{C-SCAN}
@@ -122,7 +203,7 @@ operazioni di scrittura sono prevalentemente \textbf{asincrone}.
 Non vi sono testine del disco né latenza rotazionale, ma c'è ancora margine per l'ottimizzazione. L'NVM è migliore nell'I/O casuale, l'HDD nell'I/O sequenziale; le operazioni di input/output al secondo (IOPS) sono molto più elevate con NVM (centinaia di migliaia vs centinaia).
 
 
-\section{Gestione dei Dispositivi}
+\section{Rilevamento e Correzione degli Errori}
 
 Un aspetto fondamentale di molte parti dell'informatica è il \textbf{Rilevamento e Correzione degli Errori}.
 
@@ -217,6 +298,49 @@ Simile al NAS, fornisce accesso allo storage tramite rete. A differenza del NAS,
 
 Il NAS viene presentato come un normale file system, mentre lo storage cloud è basato su API, con programmi che usano le API per fornire l'accesso. Si usano le API a causa della latenza e degli scenari di guasto (i protocolli NAS non funzionerebbero bene).
 
+
+\subsection{Storage Array}
+
+Si possono collegare semplicemente dischi singoli oppure array di dischi. Questo evita lo svantaggio del NAS legato al consumo di banda di rete.
+Uno storage array ha uno o piu controller e offre funzionalita ai sistemi host collegati.
+
+\begin{itemize}
+    \item Porte per connettere gli host all'array
+    \item Memoria e software di controllo (talvolta anche NVRAM, ecc.)
+    \item Da pochi dischi fino a migliaia
+    \item RAID, hot spare, hot swap (discussi in seguito)
+    \item Storage condiviso $\rightarrow$ maggiore efficienza
+    \item Funzionalita tipiche di alcuni file system: snapshots, cloni, thin provisioning, replication,
+      deduplication, ecc.
+\end{itemize}
+
+
+\subsection{Storage Area Network  - SAN}
+
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    Comune negli ambienti di storage di grandi dimensioni: piu host collegati a piu
+    storage array, con elevata flessibilita.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/2026-03-22-17-19-31.png}
+  \end{minipage}
+\end{center}
+
+Una SAN e composta da uno o piu storage array collegati a uno o piu switch Fibre
+Channel oppure a una rete InfiniBand (IB).
+Anche gli host si collegano a questi switch.
+
+Lo storage viene reso disponibile tramite LUN,
+con masking da specifici array verso specifici server.
+E facile aggiungere o rimuovere storage, aggiungere nuovi host e assegnare loro capacita.
+Perche mantenere reti separate per storage e comunicazioni?
+Si considerino iSCSI e FCoE.
+
+
 \subsection{Array Ridondante di Dischi Indipendenti - RAID}
 
 RAID - più dischi forniscono affidabilità tramite ridondanza.
@@ -233,6 +357,19 @@ Se i dischi speculari si guastano indipendentemente, si consideri un disco con 1
 \begin{equation*}
   \text{MTDL } = 100\,000^2 / (2*10) = 500 * 10^6 \text{ hours or 57 000 years! }
 \end{equation*}
+
+RAID mirror: 2 dischi
+
+\begin{equation*}
+  \text{MTTF(1st_fail) = MTTF/2 = 100,000/2 = 50,000 hours}
+  \text{Prob(2nd_fail_during_repair) = MTTR/MTTF = 10/100,000 = 10-4}
+
+  \text{Tempo medio alla perdita di dati = MTTF(1st_fail+2nd_fail_during_repair)}
+
+  \text{MTTF(fail+fail_during_repair) = MTTF(1st_fail) /Prob(2nd_fail_during_repair) = MTTF2/(2*MTTR) = 1010/(2*10) = 5*108 hours or 57,000 years!}
+\end{equation*}
+
+\vspace{1cm}
 
 Diversi miglioramenti nelle tecniche di utilizzo dei dischi coinvolgono l'uso di
 più dischi che lavorano in modo cooperativo.
@@ -254,16 +391,95 @@ Il RAID all'interno di un array di storage può comunque fallire se l'array si g
 
 
 \begin{figure}[h!]
-  \begin{minipage}[h!]{0.5\textwidth}
-    \centering
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmfdg.png}
-    \caption{Schemi RAID}
-  \end{minipage}
-  \begin{minipage}[h!]{0.5\textwidth}
-    \centering
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmnfdg.png}
+  \begin{minipage}{0.75\linewidth}
+    \begin{minipage}[h!]{0.47\textwidth}
+      \centering
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmfdg.png}
+      \caption{Schemi RAID}
+    \end{minipage}
+    \begin{minipage}[h!]{0.47\textwidth}
+      \centering
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmnfdg.png}
+    \end{minipage}
   \end{minipage}
 \end{figure}
+
+
+\section{Altre Funzionalita}
+Indipendentemente da dove sia implementato il RAID, si possono aggiungere altre funzionalita utili.
+Uno snapshot e una vista del file system prima che avvenga un insieme di modifiche
+(cioe in uno specifico istante temporale).
+
+La replication e la duplicazione automatica delle scritture tra siti separati,
+utile per ridondanza e disaster recovery. Puo essere sincrona o asincrona.
+
+Un disco hot spare e un disco non usato normalmente, che entra in funzione automaticamente
+se un disco si guasta, per sostituirlo e ricostruire il set RAID quando possibile.
+Questo riduce il tempo medio di riparazione.
+
+
+\section{Estensioni}
+
+
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    Il solo RAID non previene ne rileva la
+    corruzione dei dati o altri errori: copre soprattutto i
+    guasti dei dischi. Solaris ZFS aggiunge checksum su tutti i dati
+    e i metadati.
+    I checksum sono mantenuti insieme ai puntatori agli oggetti,
+    per verificare che l'oggetto sia quello corretto
+    e che non sia stato modificato.
+
+    ZFS puo rilevare e correggere la corruzione
+    di dati e metadati. Inoltre elimina il concetto tradizionale di volumi e partizioni.
+
+    I dischi sono allocati in \textbf{pool}. I file system che usano un pool lo condividono,
+    allocando e rilasciando spazio in modo simile alle chiamate
+    \verb|malloc()| e \verb|free()| per la memoria.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/2026-03-22-17-32-18.png}
+    \captionof{figure}{Volumi e file system tradizionali}
+  \end{minipage}
+\end{center}
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/2026-03-22-17-32-56.png}
+    \captionof{figure}{ZFS e storage a pool}
+  \end{minipage}
+\end{center}
+
+
+\section{Object Storage}
+Nel calcolo general-purpose, i file system tradizionali non sono sempre sufficienti su scala molto grande.
+Un approccio alternativo e partire da uno storage pool e inserirvi oggetti.
+
+Un oggetto e semplicemente un contenitore di dati. Non esiste navigazione del pool per trovare oggetti
+(niente strutture a directory, pochi servizi): e un modello orientato alle macchine, non all'utente.
+
+Sequenza tipica:
+
+\begin{itemize}
+  \item Creare un oggetto nel pool e ricevere un object ID
+  \item Accedere all'oggetto tramite quell'ID
+  \item Eliminare l'oggetto tramite quell'ID
+\end{itemize}
+
+Software di gestione dell'object storage come Hadoop file system
+(HDFS) e Ceph determinano dove memorizzare gli oggetti e come proteggerli,
+tipicamente mantenendo N copie su N sistemi nel cluster di object storage.
+Il modello e scalabile orizzontalmente, content-addressable e non strutturato.
+
 
 
 \chapter{Interfaccia del File System}
