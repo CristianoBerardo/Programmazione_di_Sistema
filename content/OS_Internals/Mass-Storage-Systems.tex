@@ -98,25 +98,25 @@ L'array monodimensionale di blocchi logici viene mappato in modo sequenziale
 nei settori del disco:
 
 \begin{itemize}
-    \item Il settore 0 e il primo settore della prima traccia del cilindro piu esterno
-    \item La mappatura procede in ordine lungo quella traccia, poi sulle altre tracce dello stesso cilindro, quindi sui restanti cilindri dall'esterno verso l'interno
-    \item L'indirizzamento logico-fisico dovrebbe essere semplice, salvo eccezioni dovute a bad sector e al numero non costante di settori per traccia
+  \item Il settore 0 e il primo settore della prima traccia del cilindro piu esterno
+  \item La mappatura procede in ordine lungo quella traccia, poi sulle altre tracce dello stesso cilindro, quindi sui restanti cilindri dall'esterno verso l'interno
+  \item L'indirizzamento logico-fisico dovrebbe essere semplice, salvo eccezioni dovute a bad sector e al numero non costante di settori per traccia
 \end{itemize}
 
-  \subsection{Collegamento del Disco}
+\subsection{Collegamento del Disco}
 
-  Lo storage host-attached viene raggiunto tramite porte di I/O collegate ai bus di I/O. Sono disponibili vari bus,
-  tra cui advanced technology attachment (ATA), serial ATA (SATA), eSATA, serial attached SCSI (SAS),
-  universal serial bus (USB) e fibre channel (FC). Il piu comune e SATA.
+Lo storage host-attached viene raggiunto tramite porte di I/O collegate ai bus di I/O. Sono disponibili vari bus,
+tra cui advanced technology attachment (ATA), serial ATA (SATA), eSATA, serial attached SCSI (SAS),
+universal serial bus (USB) e fibre channel (FC). Il piu comune e SATA.
 
-  Poiche la NVM e molto piu veloce degli HDD, e stata introdotta una nuova interfaccia ad alte prestazioni,
-  NVM express (NVMe), che si collega direttamente al bus PCI.
-  I trasferimenti dati su bus sono gestiti da processori elettronici specializzati chiamati
-  controller (o host-bus adapter, HBA).
+Poiche la NVM e molto piu veloce degli HDD, e stata introdotta una nuova interfaccia ad alte prestazioni,
+NVM express (NVMe), che si collega direttamente al bus PCI.
+I trasferimenti dati su bus sono gestiti da processori elettronici specializzati chiamati
+controller (o host-bus adapter, HBA).
 
 \begin{itemize}
-    \item Un host controller lato computer del bus e un device controller lato dispositivo
-    \item Il computer inserisce i comandi nell'host controller tramite porte di I/O memory-mapped; l'host controller invia messaggi al device controller e i dati sono trasferiti via DMA tra dispositivo e DRAM del computer
+  \item Un host controller lato computer del bus e un device controller lato dispositivo
+  \item Il computer inserisce i comandi nell'host controller tramite porte di I/O memory-mapped; l'host controller invia messaggi al device controller e i dati sono trasferiti via DMA tra dispositivo e DRAM del computer
 \end{itemize}
 
 
@@ -305,13 +305,13 @@ Si possono collegare semplicemente dischi singoli oppure array di dischi. Questo
 Uno storage array ha uno o piu controller e offre funzionalita ai sistemi host collegati.
 
 \begin{itemize}
-    \item Porte per connettere gli host all'array
-    \item Memoria e software di controllo (talvolta anche NVRAM, ecc.)
-    \item Da pochi dischi fino a migliaia
-    \item RAID, hot spare, hot swap (discussi in seguito)
-    \item Storage condiviso $\rightarrow$ maggiore efficienza
-    \item Funzionalita tipiche di alcuni file system: snapshots, cloni, thin provisioning, replication,
-      deduplication, ecc.
+  \item Porte per connettere gli host all'array
+  \item Memoria e software di controllo (talvolta anche NVRAM, ecc.)
+  \item Da pochi dischi fino a migliaia
+  \item RAID, hot spare, hot swap (discussi in seguito)
+  \item Storage condiviso $\rightarrow$ maggiore efficienza
+  \item Funzionalita tipiche di alcuni file system: snapshots, cloni, thin provisioning, replication,
+        deduplication, ecc.
 \end{itemize}
 
 
@@ -722,23 +722,36 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
 
 
 \begin{figure}[h!]
-  \begin{minipage}[h!]{0.5\textwidth}
+  \begin{minipage}[h!]{0.47\textwidth}
     \centering
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfsbv.png}
     \caption{Schemi RAID}
   \end{minipage}
-  \begin{minipage}[h!]{0.5\textwidth}
+  \begin{minipage}[h!]{0.47\textwidth}
     \centering
-    \begin{tabular}{c|c}
-      Pro               & Contro                                \\
-      \hline
-      Generale          & Inefficiente                          \\
-      Scalabile         & Nessuna condivisione di file          \\
-      Facile da cercare & Duplicazione di file in più directory
-    \end{tabular}
+    \begin{table}[h!]
+      \centering
+      \begin{tabular}{c|c}
+        Pro               & Contro                                \\
+        \hline
+        Generale          & Inefficiente                          \\
+        Scalabile         & Nessuna condivisione di file          \\
+        Facile da cercare & Duplicazione di file in più directory
+      \end{tabular}
+    \end{table}
 
   \end{minipage}
 \end{figure}
+
+
+Absolute or relative path name.
+Creating a new file is done in current directory.
+Delete a file
+\verb|rm <file-name>|.
+Creating a new subdirectory is done in current directory
+\verb|mkdir <dir-name>|
+Example: if in current directory /mail
+\verb|mkdir count|
 
 
 
@@ -778,6 +791,85 @@ Come garantiamo l'assenza di cicli? Consentiamo solo link a file, non a sottodir
   \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/dngf.png}
 \end{figure}
 
+
+\section{File System Mounting}
+A file system must be mounted before it can be accessed. A unmounted file system is mounted at a
+mount point
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/2026-03-22-17-53-56.png}
+\end{figure}
+
+\section{File Sharing}
+
+Sharing of files on multi-user systems is desirable.
+Sharing may be done through a protection scheme.
+On distributed systems, files may be shared across a network.
+Network File System (NFS) is a common distributed file-sharing
+method.
+If multi-user system:
+
+\begin{itemize}
+  \item \textbf{User IDs} identify users, allowing permissions and
+        protections to be per-user
+  \item \textbf{Group IDs} allow users to be in groups, permitting group
+        access rights
+  \item Owner of a file / directory
+  \item Group of a file / directory
+\end{itemize}
+
+\subsection{File Sharing - Remote File Systems }
+
+Uses networking to allow file system access between systems
+
+\begin{itemize}
+  \item Manually via programs like FTP
+  \item Automatically, seamlessly using distributed file systems
+  \item Semi automatically via the world wide web
+\end{itemize}
+
+Client-server model allows clients to mount remote file systems from
+servers:
+
+\begin{itemize}
+  \item Server can serve multiple clients
+  \item Client and user-on-client identification is insecure or complicated
+  \item NFS is standard UNIX client-server file sharing protocol
+  \item CIFS is standard Windows protocol
+  \item Standard operating system file calls are translated into remote calls
+\end{itemize}
+
+Distributed Information Systems (distributed naming services) such
+as LDAP, DNS, NIS, Active Directory implement unified access to
+information needed for remote computing
+
+
+\subsection{File Sharing - Failure Modes}
+
+All file systems have failure modes, for example corruption of directory structures or other nonuser data, called metadata.
+Remote file systems add new failure modes, due to network
+failure, server failure.
+Recovery from failure can involve state information about
+status of each remote request.
+
+Stateless protocols such as NFS v3 include all information in
+each request, allowing easy recovery but less security.
+
+
+\subsection{File Sharing - Consistency Semantics}
+
+Specify how multiple users are to access a shared file
+simultaneously.
+Tend to be less complex
+due to disk I/O and network latency (for remote file systems). Andrew File
+System (AFS) implemented complex remote file sharing semantics. Unix file
+system (UFS) implements: ! Writes to an open file visible immediately to other
+users of the same open file ! Sharing file pointer to allow multiple users to
+read and write concurrently. AFS has session semantics ! Writes only visible to
+sessions starting after the file is closed
+
+
 \section{Protezione}
 
 Il problema:
@@ -790,3 +882,28 @@ Tipi di accesso: - Lettura - Scrittura - Esecuzione - Aggiunta - Eliminazione - 
 
 \paragraph{}
 Tutti i sistemi operativi forniscono questa opzione di base.
+
+\subsection{Access Lists and Groups}
+Mode of access: read, write, execute. Three classes of users on Unix / Linux:
+
+\begin{itemize}
+  \item Owner access 7 $\to$ RWX (111)
+  \item Group access 6 $\to$ RW- (110)
+  \item Public access 1 $\to$ --X (001)
+\end{itemize}
+
+
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    For a particular file (say game) or subdirectory, define an
+    appropriate access.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/2026-03-22-18-06-47.png}
+  \end{minipage}
+\end{center}
+
+
