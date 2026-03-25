@@ -63,7 +63,7 @@ L'SSD è un dispositivo complesso che integra un processore per verificare lo st
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{images/2026-03-22-16-53-48.png}
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-22-16-53-48.png}
   \end{minipage}
 \end{center}
 
@@ -326,7 +326,7 @@ Uno storage array ha uno o piu controller e offre funzionalita ai sistemi host c
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{images/2026-03-22-17-19-31.png}
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-22-17-19-31.png}
   \end{minipage}
 \end{center}
 
@@ -360,13 +360,10 @@ Se i dischi speculari si guastano indipendentemente, si consideri un disco con 1
 
 RAID mirror: 2 dischi
 
+Con 2 dischi in mirror: $\mathrm{MTTF}_1 = \mathrm{MTTF}/2$ e $P_2 = \mathrm{MTTR}/\mathrm{MTTF}$.
+
 \begin{equation*}
-  \text{MTTF(1st_fail) = MTTF/2 = 100,000/2 = 50,000 hours}
-  \text{Prob(2nd_fail_during_repair) = MTTR/MTTF = 10/100,000 = 10-4}
-
-  \text{Tempo medio alla perdita di dati = MTTF(1st_fail+2nd_fail_during_repair)}
-
-  \text{MTTF(fail+fail_during_repair) = MTTF(1st_fail) /Prob(2nd_fail_during_repair) = MTTF2/(2*MTTR) = 1010/(2*10) = 5*108 hours or 57,000 years!}
+  \mathrm{MTTDL} = \frac{\mathrm{MTTF}^2}{2\cdot\mathrm{MTTR}} = \frac{(100000)^2}{2\cdot10} = 5\cdot10^8\ \text{hours} \approx 57000\ \text{years}
 \end{equation*}
 
 \vspace{1cm}
@@ -442,7 +439,7 @@ Questo riduce il tempo medio di riparazione.
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{images/2026-03-22-17-32-18.png}
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-22-17-32-18.png}
     \captionof{figure}{Volumi e file system tradizionali}
   \end{minipage}
 \end{center}
@@ -454,7 +451,7 @@ Questo riduce il tempo medio di riparazione.
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{images/2026-03-22-17-32-56.png}
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-22-17-32-56.png}
     \captionof{figure}{ZFS e storage a pool}
   \end{minipage}
 \end{center}
@@ -725,22 +722,19 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
   \begin{minipage}[h!]{0.47\textwidth}
     \centering
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfsbv.png}
-    \caption{Schemi RAID}
   \end{minipage}
   \begin{minipage}[h!]{0.47\textwidth}
     \centering
-    \begin{table}[h!]
-      \centering
-      \begin{tabular}{c|c}
-        Pro               & Contro                                \\
-        \hline
-        Generale          & Inefficiente                          \\
-        Scalabile         & Nessuna condivisione di file          \\
-        Facile da cercare & Duplicazione di file in più directory
-      \end{tabular}
-    \end{table}
+    \begin{tabular}{c|c}
+      Pro               & Contro                                \\
+      \hline
+      Generale          & Inefficiente                          \\
+      Scalabile         & Nessuna condivisione di file          \\
+      Facile da cercare & Duplicazione di file in più directory \\
+    \end{tabular}
 
   \end{minipage}
+  \caption{Directory ad albero}
 \end{figure}
 
 
@@ -798,7 +792,7 @@ mount point
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.5\linewidth]{images/2026-03-22-17-53-56.png}
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/images/2026-03-22-17-53-56.png}
 \end{figure}
 
 \section{File Sharing}
@@ -902,7 +896,7 @@ Mode of access: read, write, execute. Three classes of users on Unix / Linux:
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{images/2026-03-22-18-06-47.png}
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-22-18-06-47.png}
   \end{minipage}
 \end{center}
 
