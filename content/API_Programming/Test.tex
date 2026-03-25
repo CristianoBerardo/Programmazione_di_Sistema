@@ -1,43 +1,60 @@
 \section{Test}
 
-Un test non può dimostrare la correttezza di un programma, ma può solo dimostrare che è errato.
+La parte di testing può solo confermare la presenza di difetti, bug, ma non la loro assenza.
 
 Perché testare allora?
 \begin{itemize}
-  \item condfidenza
-  \item previene le regressioni, rompiano il codice che prima funzionava
+  \item Un test verifica automaticamente il comportamento del codice
+  \item Non dimostra l'assenza di errori
+  \item Aumenta la confidenza nel sistema
+  \item Previene regressioni nel tempo
 \end{itemize}
 
-inventimento per il futuro. parte essenziale per l'esperizna di èrogrammatore
+I test sono fondamentali per mantenere codice di qualità.
 
-\paragraph{Esempio}
+\paragraph{Esempio: problema reale - divisione per zero}
 
 \begin{minted}[breaklines]{rust}
 fn divide(a: i32, b: i32) -> i32 {
   a / b
 }
- \end{minted}
+\end{minted}
 
+Funziona fino a che $b\,\neq 0$. Questo caso limite, a run-time, farà andare in panic il programma.
+Per accorgercene automaticamente dobbiamo introdurre il concetto di \textit{unit test}, test di unità.
 
-ci arrgogiamo che la divisione per zero è gestita in amlo modo solo a runtime.
-
-Ci sono molti tipologie di test. I primi sono l'analisi statica del programma
-fronito di default da IDE avanzati come Visual Studio Code o Rustrover
+Ci sono molte tipologie di test. La più semplice, fornita direttamente dall'IDE di sviluppo,
+è l'analisi statica del programma, che ci avverte in caso di variabili non usate, errori di sintassi, etc.
 
 \section{Test di unità}
 
-Un test di unità, o \textbf{unit test}, valuta il comportamento di un singolo componente software
-(funzione, struttura dati, …), indipendentemente dal resto del sistema
+Un test di unità, o \textbf{unit test}, valuta, in maniera isolata, il comportamento di un singolo
+componente software, funzione, struttura dati, etc, indipendentemente dal resto
+del sistema. Ne sollecita il comportamento tipico, ovvero confrome all'uso per
+cui è stato progettato, sia quello agli estremi o oltre il suo previsto capo di
+utilizzo.
 
-Piccola funzione che mira ad usare im maniera isolata predicemndole il risultato.
-Nel caso di Rust trovmiao la macro assert o notAssert che verifica che l'easpettativa sia
-soddisfatta o meno.
-
-Con cargo test vengono esesguite le funzioni di test per verificare se il codice
-è sano o meno, anche aggiungendo codice.
+Tale sollecitazione viene esercitata tramite frammenti di codice che invocano il
+componente e verificano che esso risponda in modo atteso, confrontando i
+valori ritornati dalla funzione/contenuti nella struttura dati dopo la sollecitazione
+con valori/ccondizioni di essere attesi sulla base delle specifiche.
 
 
-I test sollevano un comportamento
+% Il test di unità è una funzione che mira ad usare in maniera isolata e atomica
+% un componente software, predicendone il risultato.
+
+Nel caso di Rust, troviamo la macro \mintinline{rust}|assert| e \mintinline{rust}|assert_eq|,
+che verificano che l'aspettativa sia soddisfatta o meno.
+% Nel caso di Rust trovmiao la macro assert o notAssert che verifica che l'easpettativa sia
+% soddisfatta o meno.
+
+Nell'ambiente Cargo, i test vengono eseguiti con il comando \verb|cargo test|.
+
+% Con cargo test vengono esesguite le funzioni di test per verificare se il codice
+% è sano o meno, anche aggiungendo codice.
+
+
+% I test sollevano un comportamento
 
 \begin{minted}[breaklines]{rust}
 #[test]
@@ -47,31 +64,56 @@ fn test_divide() {
 \end{minted}
 
 \begin{tcolorbox}
-  \textbf{Nota:} Verifica un caso tipico ma non copre errori. Un test singolo non
+  \textbf{Nota:} Verifica un caso tipico ma non copre errori, un test singolo non
   basta!
 \end{tcolorbox}
 
 Proprio per questo motivo dobbiamo andare a testare i casi limite.
 
-Gli unit test sono dei with box text scritti direttamente dal programmatore. Siamo
-in grado di predire che determianti parateri in ingresso portano a un certo risultato in uscita.
+Gli unit test sono considerati test with box, ovvero test che si basano sulla conoscenza del codice sorgente, e
+normalmente sono scritti ed eseguiti direttamente dal programmatore.
+In questo caso siamo in grado di predire che determianti parateri in ingresso portano a un certo risultato in uscita.
 
-Eg granello di sabbia in un orologio meccanico vs goccia d'acqua in un orologio al quarzo.
+% Gli unit test sono dei with box text scritti direttamente dal programmatore. Siamo
+% in grado di predire che determianti parateri in ingresso portano a un certo risultato in uscita.
+
+% Eg granello di sabbia in un orologio meccanico vs goccia d'acqua in un orologio al quarzo.
+
+\begin{itemize}
+  \item Presuppongono la conoscenza dei  meccanismi interni al componente, allo scopo di verificare come
+        questi reagiscono in presenza di casi limite
+  \item Il loro numero dipende dalla complessità ciclomatica del modulo testato
+  \item La loro qualità è alla base del processo di refactoring cui un artefatto software tipicamente è soggetto
+        nel corso del suo naturale ciclo di vita
+\end{itemize}
+
+Il costo delle modifiche che vengono evidenziate da questo tipo di test è
+normalmente basso. Tuttavia i benefici che la scrittura di test ben fatti portano alla
+qualità del codice sono alti e compensano abbondantemente nel medio termine i
+maggiori costi dovuti alla scrittura dei test.
 
 \subsection{Quanti test fare}
-La complessità ciclomatica è una misura del numero di for, if etc
+Il loro numero dipende dalla complessità ciclomatica \footnote{Complessità di un programma. Misura direttamente il numero di cammini linearmente indipendenti attraverso il grafo di controllo di flusso.} del modulo testato.
 
-Meglio due fuznioi semplici in cascata che una unica.
-Spesso si utilizza il refactoring per semplificare il codice.
+% La complessità ciclomatica è una misura del numero di for, if etc
+Meglio due funzioni semplici in cascata che una unica complessa.
+Spesso di utilizza il refactoring per semplificare il codice.
 
+% Meglio due fuznioi semplici in cascata che una unica.
+% Spesso si utilizza il refactoring per semplificare il codice.
 
-I test sono importatni averli dall'inizio dopo non hanno senso.
+\begin{tcolorbox}
+  \textbf{Nota:} I test sono importanti averli dall'inizio così da specificare la funzionalità del software e arricchire la documentazione.
+\end{tcolorbox}
+
+% I test sono importatni averli dall'inizio dopo non hanno senso.
 
 \section{Test dei casi limite}
 
 È fondamentale testare i casi limite. Per questo Rust offre la possibilità
-di scrivere \verb|#[should_panic]| avvertendo il compilatore che ci
-aspettiamo che la funzione vada in panic.
+di scrivere \mintinline{rust}|#[should_panic]| avvertendo il compilatore che ci
+aspettiamo che la funzione vada in panic. Verifica che il codice fallisca
+quando deve effettivamente fallire.
 
 \begin{minted}[breaklines]{rust}
 #[test]
@@ -97,31 +139,36 @@ I test devono verificare:
 
 Nel momento in cui dobbiamo testare una funzione vi sono due possibilità
 
-I test fanno parte della speficifca del test
-
 \begin{itemize}
-  \item Le specifiche specifiche non sono chiare, non sappiamo come gestire un
-        errore. I test sono molto utile alla specifica, perché in linguaggio naturale
-        sarebbe difficile esprimere tutte le casistiche, altrimenti il lavoro sarebbe
-        già fatto
+  \item Le specifiche non sono chiare, non sappiamo come gestire un
+        errore. Con il linguaggio naturale sarebbe difficile esprimere tutte le casistiche
   \item Quando mi rendo conto che il comportamento non può essere determinato
-        dal cliente finale dato che è una scelta mia progettuale di cui non è a
-        conoscenza il cliente. Non potendomi appelare a lui posso dire che alcune
-        volte mi torna un i32 e altre volte nulla o un errore, quindi cambiio la firma usando Option o Result
+        dal cliente finale, dato che è una scelta progettuale.
+        A questo punto si è costretti a riflettere come migliorare il codice (ritornare un Option o un Result al posto di un intero, etc.)
 \end{itemize}
 
-\begin{minted}[breaklines]{rust}
+\begin{center}
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
 fn divide(a: i32, b: i32) -> Option<i32> {
   if b == 0 { None }
   else { Some(a / b) }
 }
-
+\end{minted}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
 #[test]
 fn test_divide_safe() {
   assert_eq!(divide(2,1), Some(2));
   assert_eq!(divide(1,0), None);
 }
 \end{minted}
+  \end{minipage}
+\end{center}
+
+
 
 Questo processo ha reso il nostro codice più safe.
 
@@ -131,40 +178,82 @@ Questo processo ha reso il nostro codice più safe.
 
 \section{Test di integrazione}
 
-Fino ad ora abbimao visto i singoli test, ma il nostro sistema è un
-composto di fuznio che ne chaimano altre e che interagiscono tra loro.
+Fino ad ora abbimao visto i singoli test, ma il nostro sistema è
+composto da varie funzioni che ne chiamano altre e che interagiscono tra loro.
 
-Per questo dobbiamo complicare i test e iniziare a palrale di test di
-intrgazione o integration test.
+Un test di integrazione valuta il comportamento all'interfaccia di due moduli
+software. Si focalizza sul determinare la correttezza di tale interfaccia,
+evidenziando le incongruenze tra le parti che stanno interagendo
 
-Guardiamo l'interazione tra due o più moduli software per verificare
-se funzionano correttamente insieme.
+% Per questo dobbiamo complicare i test e iniziare a palrale di test di
+% intrgazione o integration test.
 
-Mentre nell'unit test posso scegliere con presicone i casi limiti in questo caso
-li devo trattare a black box. se copllettivamente rispetto all'imput danno
-l'output atteso.
+% Guardiamo l'interazione tra due o più moduli software per verificare
+% se funzionano correttamente insieme.
 
-Poiché siamo a balckbox applichero l'integratopn test dopo aver testato
-i test di unità.
+Come nel caso dei test di unità, è costituito da frammenti di codice che
+sollecitano l'interazione tra due parti:
 
-Inoltre gli intregation test sono più difficili e costoso da gestire in caso di errore
+\begin{itemize}
+  \item A differenza dei test di unità, tuttavia, ignora volutamente la
+        struttura interna dei moduli che stanno interagendo, assumendo il loro
+        corretto comportamento - sul piano individuale - alle specifiche definite.
+        Infatti parliamo di test a black box.
+  \item Per questo motivo viene eseguito solo su oggetti che hanno
+        correttamente superato il test di unità
+\end{itemize}
+
+% Mentre nell'unit test posso scegliere con presicone i casi limiti in questo caso
+% li devo trattare a black box. se copllettivamente rispetto all'imput danno
+% l'output atteso.
+
+% Poiché siamo a balckbox applichero l'integratopn test dopo aver testato
+% i test di unità.
+
+% Inoltre gli intregation test sono più difficili e costoso da gestire in caso di errore
 
 
-\begin{center}
+I costi delle modifiche che occorre introdurre se un test di integrazione
+fallisce sono generalmente più elevati. In quanto richiedono il ridisegno di
+una o entrambe le parti che interagiscono.
+
+Questa tipologia di test sono co-progettati da sviluppatori e tester, ma eseguiti
+solo dagli ultimi.
+
+\begin{flushleft}
   \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \paragraph{Esempio: }
 
+    Il modulo A rappresenta la persistenza con l'accesso al database; mente il modulo B
+    rappresenta la logica applicativa.
+
+    I test di integrazione possono verificare che:
+
+    \begin{itemize}
+      \item I dati presenti nel modulo di persistenza siano
+            correttamente interpretati dalla logica
+            applicativa
+      \item Gli errori del livello di persistenza siano
+            propagati correttamente
+      \item Le transazioni siano coerenti
+    \end{itemize}
   \end{minipage}%
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
     \includegraphics[width=\linewidth]{content/API_Programming/images/2026-03-24-13-43-14.png}
   \end{minipage}
-\end{center}
+\end{flushleft}
 
 
-\section{Test di integrazione: modulo Repository}
 
-\begin{minted}[breaklines]{rust}
+\subsection{Test di integrazione: modulo Repository}
+
+
+\begin{center}
+  \begin{minipage}{0.7\linewidth}
+    \begin{minted}[breaklines]{rust}
 pub struct OrderRepository {
   data: HashMap<u32, f64>;
 }
@@ -180,14 +269,19 @@ impl OrderRepository {
   }
 }
 \end{minted}
-
-\begin{center}
-  \begin{minipage}{0.65\linewidth}
-    Contiene la logica applicativa. Si appoggia sulle funzionalità del
-    modulo precedente.
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.3\linewidth}
+  \begin{minipage}{0.25\linewidth}
+    Modulo base che offre la capacità di memorizzare coppie chiave/valore.
+    E di reperire il valore data la chiave
+
+  \end{minipage}
+\end{center}
+
+\subsection{Test di integrazione: modulo Service}
+
+\begin{center}
+  \begin{minipage}{0.7\linewidth}
     \begin{minted}[breaklines]{rust}
 pub struct OrderService<'a> {
   repo: &'a mut OrderRepository
@@ -203,14 +297,21 @@ impl<'a> OrderService<'a> {
   }
 }
 \end{minted}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.25\linewidth}
+    Contiene la logica applicativa. Si appoggia sulle funzionalità del
+    modulo precedente.
+
   \end{minipage}
 \end{center}
 
 \subsection{Test di integrazione: esempio di test}
 
+
 \begin{center}
   \begin{minipage}{0.47\linewidth}
-    \begin{minted}[breaklines]{rust}    
+    \begin{minted}[breaklines]{rust}
 // caso normale
 #[test]
 fn test_apply_discount_integration() {
@@ -248,32 +349,72 @@ fn test_apply_discount_not_found() {
 \end{center}
 
 
-\section{Test di integrazione: razionale}
+\subsection{Test di integrazione: razionale}
 
-Unit test: verifica una sinola fuznone
-Integration test: verifica l'integrazione che il sistema fuznioi
+\begin{itemize}
+  \item Coinvolgono più elementi
+  \item Verificano il flusso completo, lo stato condiviso e la gestione degli errori
+  \item Non verificano dettagli inerni alle strutture, black box test, bensì verificano il comportamento globale
+\end{itemize}
+
+% Unit test: verifica una sinola fuznone
+% Integration test: verifica l'integrazione che il sistema fuznioi
+
+\begin{tcolorbox}
+  \textbf{Unit test: } Verifica una singola funzione\\
+  \textbf{Integration test: } Verifica che il sistema funzioni davvero insieme
+\end{tcolorbox}
 
 
-\section{Test complessivi - end-to-end}
 
-Viene fatta solitamente con il cliente e a sistema completo.
+\section{Test complessivi - end-to-end test}
 
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[width=\linewidth]{content/API_Programming/images/2026-03-24-13-59-21.png}
-\end{figure}
+    I test end-to-end valuta il comportamento del prodotto finito, sia nei suoi aspetti,
+    cosa deve/non deve fare, che non funzionale come aspetti quali sicurezza, affidabilità, etc.
+
+    È basato su modelli di comportamento tratti da casi d'uso reali.
+    Progettato ed eseguito da tester, allo scopo di non farsi influenzare dalle
+    assunzioni fatte durante lo sviluppo.
+
+    Questi test verificano che il sistema sia confrome alle aspettative del committente/cliente il quale
+    è lui ad eseguire i test.
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-03-24-13-59-21.png}
+  \end{minipage}
+\end{center}
+
 
 
 \section{Cosa fanno i test}
 
-I test trovano i bug ma non possono dimostrale l'assenza di essi.
-per poter garantire che non vi sono bug dovremmo avere una logica formale
-come per la programazione concorrente.
-Eg un mutex può essere usato da uno e un unico thread
+\begin{itemize}
+  \item I test trovano i bug ma non possono dimostrale l'assenza di essi
+  \item Documentano il comportamento del software, anche prima che il software
+        stesso sia stato scritto, perché permettono di specificare il comportamento
+        atteso
+  \item Migliorano il design, in quanto portano a riflettere sulla struttura
+        del codice. Riflettendo sul comportamento di un dato modulo, è possibile
+        identificare debolezze strutturali e mancate specifiche
+\end{itemize}
 
-I Test forniscono una documentazione del software, miglioranod la compresione
-ma anche il design del codice.
+\begin{tcolorbox}
+  \textbf{Nota: } I test aiutano ad aumentare la confidenza nel codice
+\end{tcolorbox}
+
+
+% per poter garantire che non vi sono bug dovremmo avere una logica formale
+% come per la programazione concorrente.
+% Eg un mutex può essere usato da uno e un unico thread
+
+% I Test forniscono una documentazione del software, miglioranod la compresione
+% ma anche il design del codice.
 
 \section{Il flusso di lavoro con i test}
 
@@ -287,19 +428,42 @@ ma anche il design del codice.
 
 \section{Test in Rust}
 
-con \verb|#[cfg(test)]| sono con cargo test viene eseguito, altrimenti
-il compilatore lo ignora e l'eseguibile è più leggero.
+I \textbf{test di unità} possono essere scritti nel modulo da testare o, meglio, in un
+suo sotto-modulo chiamato convenzionalmente `tests'.
+
+Il sotto-modulo contenente i test è preceduto dall'annotazione \mintinline{rust}|#[cfg(test)]|.
+Questo informa il compilatore che il codice contenuto al suo interno deve essere
+incluso solo quando la compilazione avviene con il comando \verb|cargo test|.\newline
+
+I \textbf{test di integrazione} sono invece contenuti in una cartella separata denominata
+tests, a lato della cartella src del progetto.
+
+\begin{itemize}
+  \item Sono scritti come se i singoli frammenti di codice fossero i
+        consumatori del crate che deve essere testato
+  \item I file sorgente all'interno della cartella di test importano i simboli
+        pubblici oggetto di valutazione tramite istruzioni di tipo \mintinline{rust}|use...|
+  \item Solo le librerie possono avere test di integrazione: per questo si
+        creano programmi formati da un eseguibile contenente un main banale e da una
+        libreria che contiene la logica applicativa
+\end{itemize}
+
+\subsection{Sintassi dei test}
 
 
-I test di integrazine stanno fuori dal nostro modulo e vedono solo le fuznioni ubliche
-Funzionano nìmeglio se abbiamo un main e una lib
-
-\begin{minted}[breaklines]{rust}
+\begin{center}
+  \begin{minipage}{0.3\linewidth}
+    \begin{minted}[breaklines]{rust}
 // funzione da testare
 fn sum(a: i32, b: i32) -> i32 {
   a + b
 }
+\end{minted}
 
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.65\linewidth}
+    \begin{minted}[breaklines]{rust}
 #[cfg(test)]
 mod tests {
   fn sum_inputs_outputs() -> Vec<((i32, i32), i32)> {
@@ -314,21 +478,21 @@ mod tests {
 }
 \end{minted}
 
-
-\section{Sintassi dei test}
-
-Vi è una sintassi chiamata \textbf{AAA}:
-
-\begin{itemize}
-  \item Arrange: Preparazione dei valori su cui operare
-  \item Act: Esecuzione del codice da testare
-  \item Assert: Verifica, mediante asserzioni, che i risultati ottenuti siano
-\end{itemize}
+  \end{minipage}
+\end{center}
 
 
-\begin{center}
+\begin{flushleft}
   \begin{minipage}{0.65\linewidth}
-    
+    \raggedright
+    La struttura generale di una funzione etichettata con \mintinline{rust}|\#[test]| è la seguente \textbf{struttura AAA}:
+
+
+    \begin{itemize}
+      \item \textbf{Arrange}: Preparazione dei valori su cui operare
+      \item \textbf{Act}: Esecuzione del codice da testare
+      \item \textbf{Assert}: Verifica, mediante asserzioni, che i risultati ottenuti siano
+    \end{itemize}
   \end{minipage}%
   \hfill
   \begin{minipage}{0.3\linewidth}
@@ -345,26 +509,74 @@ assert_eq!(result, 3);
 }
 \end{minted}
   \end{minipage}
-\end{center}
+\end{flushleft}
 
-perché usare assert\_eq rispetto che assert? 
-quando eq si rompe, eq(5, 7), mi aspettavo 7 mi hai dato 5.
+\subsection{Asserzioni}
+
+Rust offre varie macro procedurali per verificare le asserzioni, tra cui
+
+\begin{itemize}
+  \item \mintinline{rust}|assert!( boolean_condition ) | - impone che la condizione sia vera
+  \item \mintinline{rust}|assert_eq!( expected, actual ) | - impone l'eguaglianza tra i due valori
+  \item \mintinline{rust}|assert_ne!( expected, actual ) | - impone la disuguaglianza tra i due valori
+\end{itemize}
+
+Per verificare che un'espressione generi la condizione di panico, è possibile
+annotare il test anche con l'annotazione \mintinline{rust}|#[should_panic(expected = "msg")]|.
+In questo caso, viene verificato che venga generata una condizione di panico riportante "msg".
+
+Se una funzione di test restituisce un valore di tipo \mintinline{rust}|Result<T, Error>|, è
+possibile utilizzare la condizione di errore che indica che il test è fallito.
 
 
 \section{Eseguire i test}
 
-Usando \verb|cargo test| vengono invocate tutte le funzioni di test.
-prima unit poi integration naviganndo tra le varie cartelle del progetto.
+Il comando \verb|cargo test| ricompila il programma con la direttiva "test" ed esegue
+tutti i test contenuti nel package. Compresi quelli eventualmente presenti all'interno
+della documentazione.
+Viene riportato un report dettagliato che infica ogni singolo fallimento, dove
+viene evidenziato il risultato atteso e quello realmente ottenuto seguito da un
+riassunto con il nome di tutte le funzioni di test che sono fallite.
 
+È possibile eseguire solo alcuni test, specificando il nome della funzione, o una sua
+sottoparte, come ulteriore parametro del comando.
 
-Quando la base di test è molto almpia pure i tempo auemnta. usiamo 
+\begin{center}
+  \mintinline{rust}|cargo test add_ |  esegue solo i test che contengono "add\_" nel nome
+\end{center}
 
---ignored 
+Se uno o più test è decorato con l'attributo \mintinline{rust}|#[ignore]|, viene
+normalmente tralasciato dall'esecuzione, a meno che non vengano inclusi esplicitamente con
+\begin{center}
+  \mintinline{rust}|cargo test -- --ignored|  esegue solo i test ignorati
+\end{center}
+
 
 \section{Automatizzare la creazione di test}
 Alcui sistemi devono essere provati con molti dati diversi, una lib può essere
 rstest dando la possibilità di scrivere funzioni con parametri paramtrici
 invocando la funzione test più volte tante quante sono i case definiti.
+
+
+\subsection{Test parametrici con rstest}
+
+Ogni singolo test è basato sul paradigma AAA, Arrange, Act, Assert. La fase di
+Arrangement porta spesso a creare codice ripetitivo, volto a popolare strutture
+dati con i necessari valori iniziali necessari all'esecuzione del test.
+Normalmente, le funzioni di test sono prive di parametri, dovendo poter essere
+invocate direttamente dal motore di test.
+
+La libreria \textbf{rstest} permette di creare test parametrici, costituiti cioè
+da funzioni dotate parametri in ingresso. Tali funzioni devono essere precedute
+dall'attributo \mintinline{rust}|#[rstest]|
+
+I parametri possono essere forniti in due modi alternativi:
+
+\begin{itemize}
+  \item Tramite funzioni annotate con l'attributo \mintinline{rust}|#[fixture]|,
+        il cui nome deve coincidere con il nome del parametro di ingresso presente nei test
+  \item Tramite un elenco di tuple alternative, descritte tramite l'attributo \mintinline{rust}|#[case(...)]|
+\end{itemize}
 
 
 
@@ -380,6 +592,34 @@ fn test_sum(#[case] a: i32,
   assert_eq!(sum(a, b), expected);
 }
 \end{minted}
+
+
+\section{Riassunto}
+
+\begin{itemize}
+  \item Verificano la correttezza dell'interazione tra due o più moduli
+  \item Validano il contratto dell'interfaccia (tipi, semantica, protocollo di chiamata)
+  \item Assumono che i singoli moduli abbiano già superato i test di unità
+  \item Individuano:
+        \begin{itemize}
+          \item Incongruenze semantiche
+          \item Errori di orchestrazione
+          \item Problemi di gestione degli errori
+          \item Violazioni di invarianti condivise
+        \end{itemize}
+  \item In Rust:
+        \begin{itemize}
+          \item Collocati nella cartella tests/
+          \item Compilati come crate separati
+          \item Testano esclusivamente l'API pubblica
+        \end{itemize}
+  \item Costi:
+        \begin{itemize}
+          \item Setup più complesso
+          \item Correzioni architetturali potenzialmente costose
+        \end{itemize}
+\end{itemize}
+
 
 
 
