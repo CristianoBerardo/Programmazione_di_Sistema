@@ -386,16 +386,17 @@ in Rust viene esplicitato perché dobbiamo dire che operazione facciamo su quel 
 pub struct Point{
   x: i32, //privati
   y: i32,
-
-  impl Point {
-    pub fn new(x: i32, y: i32) -> Self {
-      Point { x, y }
-    }
-
-    pub fn length(&self) -> i32{
-      (self.x * self.x + self.y * self.y).isqrt()
-    }
 }
+
+impl Point {
+  pub fn new(x: i32, y: i32) -> Self {
+    Point { x, y }
+  }
+
+  pub fn length(&self) -> i32{
+    (self.x * self.x + self.y * self.y).isqrt()
+  }
+
 \end{minted}
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
