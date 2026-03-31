@@ -1392,12 +1392,23 @@ che una pagina si mantenga traccia dell'accesso.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.5\linewidth]{content/OS_Internals/images/2026-03-30-12-25-13.png}
 \end{figure}
 
-\begin{equation*}
-  f = \frac{10}{12} = 0.83\,\to\,83\%
-\end{equation*}
+
+\begin{center}
+  \begin{minipage}{0.3\linewidth}
+    \begin{equation*}
+      f = \frac{10}{12} = 0.83\,\to\,83\%
+    \end{equation*}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.65\linewidth}
+    \centering
+    \includegraphics[width=0.7\linewidth]{content/OS_Internals/images/2026-03-30-12-25-13.png}
+
+  \end{minipage}%
+\end{center}
+
 
 \paragraph{Implementazione con contatore: } Ogni voce di pagina ha un contatore;
 ogni volta che la pagina viene referenziata, sia in lettura o scrittura, si copia il clock nel contatore, il tempo di accesso.
@@ -1785,9 +1796,10 @@ frequenza rispetto al tempo
 Invece di rendere dimamica la sliding window, guardiamo l'effetto che otteniamo allocando
 più o meno frame.
 
-\begin{minipage}{1\linewidth}
-  % Primo blocco: 50% dello spazio per il codice
+
+\begin{flushleft}
   \begin{minipage}{0.65\linewidth}
+    \raggedright
     Si stabilisce un tasso di page fault (PFF) "accettabile" e si usa la politica di sostituzione locale.
     \begin{itemize}
       \item[-] Se il tasso effettivo è troppo basso, il processo perde un frame
@@ -1795,15 +1807,17 @@ più o meno frame.
     \end{itemize}
 
     Troviamo 2 soglie per evitare oscillazioni.
-  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    Aumentando il numero di frame, m, si abbassa il tasso di page fault.
+
+  \end{minipage}%
   \hfill
   \begin{minipage}{0.3\linewidth}
+    \centering
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/fmh.png}
-
-    Aumentando il numero di frame, m, si abbassa il tasso di page fault.
     \captionof{figure}{PFF}
   \end{minipage}
-\end{minipage}
+\end{flushleft}
+
 
 \section{Page Fault Frequency Algorithm}
 
@@ -1832,13 +1846,13 @@ In rosso le vittime. In Verde la pagina referenziata con residence set a 1.
 \begin{center}
   \begin{minipage}{0.45\linewidth}
     \centering
-    \includegraphics[width=0.45\linewidth]{images/OS_internals/Main-memory/MM-esempio12.png}
+    \includegraphics[width=\linewidth]{images/OS_internals/Main-memory/MM-esempio12.png}
     \captionof{figure}{Esempio di frequenza di page fault con C = 3}
   \end{minipage}%
   \hfill
   \begin{minipage}{0.45\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{images/2026-03-31-13-35-34.png}
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-31-13-35-34.png}
   \end{minipage}
 \end{center}
 
@@ -1884,7 +1898,7 @@ L'inizio di questo esempio è da considerarsi come un transitorio in questo esem
 \begin{center}
   \begin{minipage}{0.45\linewidth}
     Vi è una relazione diretta tra il working set di un processo e il suo tasso di page fault.
-Il working set cambia nel tempo.
+    Il working set cambia nel tempo.
   \end{minipage}%
   \hfill
   \begin{minipage}{0.45\linewidth}
@@ -2032,21 +2046,23 @@ Per dimensionare correttamente le pagine dobbimao tenere conto di diversi fattor
 \begin{itemize}
   \item Frammentazione interna $\to$ più grande è la pagina e più frammentazione interna avremo. Meglio piccole.
   \item Dimensione della tabella delle pagine $\to$ più grande è la pagina e meno righe nella page table, quindi meno memoria per la page table. Meglio grandi.
-  \item Risoluzione 
+  \item Risoluzione
   \item Overhead dell'I/O $\to$ più grande è la pagina e più ammortizzo il costo di I/O. Meglio grandi.
   \item Numero di page fault $\to$ più grande è la pagina e meno page fault
   \item Località $\to$ più grande è la pagina e più probabilmente avrò località, ma se è troppo grande rischio di avere un tasso di page fault più alto dato che una data funzione è presente in una pagina non caricata.
   \item Dimensione ed efficacia del TLB -> meglio pagine più grandi così con lo stesso hw "vede" più memoria (TLB reach)
 \end{itemize}
 
-Dire che aumentare la dimensione della pagina riduce il numero di page fault non è sempre vero, 
+Dire che aumentare la dimensione della pagina riduce il numero di page fault non è sempre vero,
 dato che il page fault è decisa da:
 
-\begin{center}
-  \begin{equation*}
-    \text{Page Fault} = f(m, A, s) \quad \text{Dove: m è il page size, A è l'algoritmo di sostituzione e s è la stringa di riferimento} 
-  \end{equation*}
-\end{center}
+\begin{gather*}
+  \text{Page Fault} = f(m, A, w) \\
+  \text{Dove: } \textit{m} \text{ è il numero di frame, } \textit{A} \text{ è l'algoritmo di sostituzione e } \textit{w} \text{ è la stringa di riferimento}
+\end{gather*}
+
+\paragraph{}
+
 
 Sempre potenze di 2, solitamente nell'intervallo $2^{12}\,(4096 \text{byte})$ a $2^{22}\,(4194304 \text{byte})$.
 In media, crescente nel tempo.
@@ -2057,6 +2073,7 @@ In media, crescente nel tempo.
 \begin{equation*}
   \text{TLB Reach} = \text{TLB Size} \times \text{Page Size}
 \end{equation*}
+\paragraph{}
 
 Idealmente, il working set di ogni processo dovrebbe essere memorizzato nel TLB, altrimenti c'è
 un alto grado di page fault.
@@ -2077,7 +2094,7 @@ un alto grado di page fault.
 
 \begin{center}
   \centering
-  \begin{minipage}{0.6\linewidth}
+  \begin{minipage}{0.85\linewidth}
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.45\linewidth}
       \begin{minted}[breaklines]{c}
