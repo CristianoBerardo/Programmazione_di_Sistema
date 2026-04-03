@@ -378,7 +378,10 @@ fn save(data: &Data, path: &str) -> Result<()> {
                     .truncate(true)
                     .open(path)?;
 
-  f.write_all(serde_json::to_string(data)?.as_bytes())?;
+  f.write_all(
+      serde_json::to_string(data)?
+      .as_bytes()
+    )?;
   Ok(())
 }
 \end{minted}
