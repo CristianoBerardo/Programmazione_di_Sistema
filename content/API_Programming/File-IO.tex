@@ -214,18 +214,18 @@ L'implementazione del tratto \verb|Read| mette a disposizione diversi metodi per
 le operazioni più comuni di I/O
 
 \begin{description}
-  \item[\texttt{read\_to\_end(buf: \&mut Vec<u8>) -> Result<usize>}] - continua a leggere
+  \item \mintinline{rust}|read_to_end(buf: &mut Vec<u8>) -> Result<usize>|  - continua a leggere
         fino all'EOF: si limita a richiamare il metodo \texttt{read()} fino a
         quando quest'ultimo non ritorna un valore \texttt{Ok(0)} o un errore fatale.
-  \item[\texttt{read\_to\_string(buf: \&mut String) -> Result<usize>}] - continua a
-        leggere fino all'EOF e riceve come parametro una \texttt{\&mut String}.
-  \item[\texttt{read\_exact(buf: \&mut [u8]) -> Result<()>}] - prova a leggere l'esatto
+  \item \mintinline{rust}|read_to_string(buf: &mut String) -> Result<usize>| - continua a
+        leggere fino all'EOF e riceve come parametro una \mintinline{rust}|&mut String|.
+  \item \mintinline{rust}|read_exact(buf: &mut [u8]) -> Result<()>| - prova a leggere l'esatto
         numero di byte necessario a riempire completamente \textit{buf}; se non
         riesce ritorna \verb|ErrorKind::UnexpectedEof|.
-  \item[\texttt{bytes() -> Bytes<Self>}] - ritorna un iteratore sui byte, gli
+  \item \mintinline{rust}|bytes() -> Bytes<Self>| - ritorna un iteratore sui byte, gli
         elementi dell'iteratore sono dei \texttt{Result<u8, io::Error>}
-  \item[\texttt{chain<R: Read>(next: R) -> Chain<Self, R>}] - permette di concatenare due reader
-  \item[\texttt{take(limit: u64) -> Take<Self>}]  - limita il numero di byte che possono essere letti da un reader
+  \item \mintinline{rust}|chain<R: Read>(next: R) -> Chain<Self, R>| - permette di concatenare due reader
+  \item \mintinline{rust}|take(limit: u64) -> Take<Self>|  - limita il numero di byte che possono essere letti da un reader
 \end{description}
 
 
@@ -290,11 +290,11 @@ alla sua fine \texttt{SeekFrom::End(n: i64)} o alla posizione corrente \texttt{S
 Il tratto offre i seguenti metodi:
 
 \begin{itemize}
-  \item \texttt{fn seek(\&mut self, pos: SeekFrom) -> Result<u64>}: posiziona il cursore alla posizione
+  \item \mintinline{rust}|fn seek(&mut self, pos: SeekFrom) -> Result<u64>|: posiziona il cursore alla posizione
         (in byte) indicata dal parametro pos e ritorna la nuova posizione del cursore
-  \item \texttt{fn rewind(\&mut self) -> Result<()>}: posiziona il
+  \item \mintinline{rust}|fn rewind(&mut self) -> Result<()>|: posiziona il
         cursore all'inizio del flusso
-  \item \texttt{fn stream\_position(\&mut self) -> Result<u64>}: restituisce la
+  \item \mintinline{rust}|fn stream_position(&mut self) -> Result<u64>|: restituisce la
         posizione corrente del cursore rispetto all'inizio del flusso
 \end{itemize}
 
@@ -349,8 +349,8 @@ elementari e di alcuni tipi della libreria standard.
 Si inseriscono, nel file Cargo.toml, le dipendenze
 
 \begin{itemize}
-  \item \verb|serde = { version = "1.0", features = ["derive"] }|
-  \item \verb|serde_json = "1.0"|
+  \item[] \verb|serde = { version = "1.0", features = ["derive"] }|
+  \item[] \verb|serde_json = "1.0"|
 \end{itemize}
 
 
