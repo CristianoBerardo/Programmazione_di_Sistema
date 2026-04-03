@@ -1,0 +1,295 @@
+\section{Smart Pointer}
+Ogni valore manipolato da un programma è memorizzato nello spazio di indirizzamento del processo.
+L'operatore \mintinline{rust}|&| (e \mintinline{rust}|&mut| in Rust) permette, in C, C++ e Rust, di ottenere l'indirizzo del primo byte in cui è memorizzato.
+Nel caso di Rust, tale operatore attiva il borrow checker che vigila sull'uso che viene fatto dell'indirizzo ottenuto, imponendo tutti i vincoli di sanità necessari a fornire le garanzie date dal modello del linguaggio.
+
+L'operazione duale, detta dereferenza (\textit{dereferencing}) o risoluzione del riferimento, trasforma un indirizzo nel corrispondente valore puntato.
+Si esprime con l'operatore \mintinline{rust}|*|.
+Quando viene applicato ad un puntatore nativo o ad un riferimento Rust, il compilatore dà accesso al dato puntato.
+
+Sia Rust che C++ permettono di ridefinire il comportamento degli operatori del linguaggio per tipi arbitrari e di definire tipi generici.
+Questi meccanismi abilitano la definizione di tipi che "sembrano" puntatori (dal punto di vista sintattico) ma che hanno ulteriori caratteristiche, portando all'introduzione degli "smart pointer".
+Tra le loro caratteristiche troviamo:
+\begin{itemize}
+  \item Garanzia di inizializzazione e rilascio.
+  \item Conteggio dei riferimenti.
+  \item Accesso esclusivo con attesa.
+\end{itemize}
+
+\subsection{Uso dei puntatori}
+Tramite l'uso di puntatori è possibile costruire strutture dati dinamiche (grafi, alberi, liste), esponendo però il programmatore a problemi legati alla deduzione di correttezza.
+Le regole restrittive del borrow checker di Rust impediscono la creazione di strutture cicliche con i soli riferimenti, garantendo che ogni valore sia parte di un solo albero.
+Per avere più possessori o strutture cicliche si ricorre agli smart pointer come \verb|Rc<T>|, \verb|Arc<T>| e \verb|Weak<T>|.
+
+\section{Smart pointer in Rust}
+Rust offre una grande varietà di smart pointer per gestire i puntatori che "possiedono" i dati a cui puntano.
+Alcuni ricalcano le astrazioni del C++ (\verb|Box|, \verb|Rc|, \verb|Arc|, \verb|Weak|), mentre altri sono peculiari di Rust (\verb|Cell|, \verb|RefCell|, \verb|Cow|).
+Sono realizzati mediante \verb|struct| che implementano i tratti \verb|Deref| e \verb|DerefMut|.
+
+\begin{minted}[breaklines]{rust}
+trait Deref {
+    type Target: ?Sized;
+    fn deref(&self) -> &Self::Target;
+}
+
+trait DerefMut: Deref {
+    fn deref_mut(&mut self) -> &mut Self::Target;
+}
+\end{minted}
+
+\subsection{\texttt{std::Box<T>}}
+Questa struttura incapsula un puntatore ad un blocco allocato dinamicamente sullo \textit{heap} all'atto della sua costruzione (tramite \mintinline{rust}|Box::new()|).
+Il dato puntato è posseduto dal \verb|Box|: quando esce dal proprio scope, il blocco viene rilasciato automaticamente tramite il tratto \verb|Drop| (anticipabile con \mintinline{rust}|drop(b)|).
+Se mosso, il possesso passa alla destinazione.
+Se \verb|T| ha dimensione non nota (\verb|?Sized|), \verb|Box| diventa un \textit{fat pointer}.
+
+\begin{center}
+  \begin{minipage}{0.5\linewidth}
+    \begin{tcolorbox}[title=Esempio di Box]
+      \begin{minted}[breaklines]{rust}
+fn produce(odd: bool) -> Box<i32> {
+    let mut b = Box::new(0);
+    if odd { *b = 5; }
+    return b;
+}
+
+fn main() {
+    let b1 = produce(false);
+    println!("b1: {}", b1);
+    let b2 = produce(true);
+    drop(b1);
+    println!("b2: {}", b2);
+}
+\end{minted}
+    \end{tcolorbox}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-17-08-46.png}
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-17-09-30.png}
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-17-10-22.png}
+  \end{minipage}
+\end{center}
+
+
+\begin{tcolorbox}
+  \textbf{Nota:} b1 diventa inaccessibile già dopo la chiamata alla macro \verb|text|
+\end{tcolorbox}
+
+
+
+\section{Conteggio dei Riferimenti}
+
+\subsection{\texttt{std::rc::Rc<T>}}
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    Quando occorre disporre di più possessori di uno stesso dato immutabile, si usa \verb|Rc<T>|.
+    Internamente mantiene una copia del dato e due contatori: riferimenti forti e deboli.
+    Ad ogni clonazione del puntatore, il contatore viene incrementato; uscendo dallo scope viene decrementato e, arrivato a 0, il blocco viene rilasciato.
+    Non è \textit{thread-safe} (per la concorrenza si usa \verb|Arc<T>|).
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-16-46-12.png}
+  \end{minipage}
+\end{center}
+
+
+
+Tutti i metodi di \verb|Rc| sono chiamati nella forma estesa per evitare omonimia coi metodi del dato incapsulato:
+\mintinline{rust}|Rc::<T>::strong_count(&a)|
+
+
+
+\begin{center}
+  \begin{minipage}{0.6\linewidth}
+    \begin{minted}[breaklines]{rust}
+enum List {
+    Cons(i32, Rc<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    let b = Rc::new(Cons(3, Rc::clone(&a)));
+    let c = Rc::new(Cons(4, Rc::clone(&a)));
+}
+\end{minted}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.35\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-16-48-42.png}
+  \end{minipage}
+\end{center}
+
+
+\subsection{\texttt{std::rc::Weak<T>}}
+Se si costruisse una sequenza circolare con \verb|Rc<T>|, la memoria non potrebbe più essere rilasciata.
+Per dipendenze circolari si usa \verb|Weak<T>|, che contiene un riferimento senza possesso al blocco allocato.
+Si genera con \mintinline{rust}|Rc::downgrade(&rc)| e si promuove a \verb|Rc<T>| (se ancora in vita) con il metodo \mintinline{rust}|upgrade()|, che ritorna un \mintinline{rust}|Option<Rc<T>>|.
+
+\section{Interior Mutability}
+Il borrow checker garantisce che valgano invarianti esclusivi: un solo riferimento mutabile, oppure più riferimenti immutabili.
+Tuttavia, il modulo \verb|std::cell| offre contenitori per \textit{mutabilità condivisa e controllata} in contesti single-thread.
+
+\subsection{\texttt{std::cell::Cell<T>}}
+
+
+\begin{center}
+  \begin{minipage}{0.75\linewidth}
+    Implementa l'interior mutability tramite metodi che non richiedono la mutabilità del contenitore.
+    Non consente di creare riferimenti al dato, ma solo di inserire o estrarre.
+    Metodi principali: \mintinline{rust}|get()|, \mintinline{rust}|take()|, \mintinline{rust}|replace()|, \mintinline{rust}|into_inner()|.
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.2\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-16-52-31.png}
+  \end{minipage}
+\end{center}
+
+
+
+\begin{minted}[breaklines]{rust}
+use std::cell::Cell;
+struct SomeStruct {
+    a: u8,
+    b: Cell<u8>,
+}
+
+let my_struct = SomeStruct { a: 0, b: Cell::new(1) };
+// my_struct.a = 100; // ERRORE: `my_struct` è immutabile
+my_struct.b.set(100); // OK: anche se `my_struct` è immutabile, `b` è una Cell e può essere modificata
+//assert_eq!(my_struct.b.get(), 100);
+\end{minted}
+
+\subsection{\texttt{std::cell::RefCell<T>}}
+
+\begin{center}
+  \begin{minipage}{0.75\linewidth}
+    Simula riferimenti condivisi e mutabili verificati in fase di esecuzione (a runtime) anziché compilazione.
+    Tentativi di violazione (es. chiamare \mintinline{rust}|borrow_mut()| mentre c'è già un prestito) generano \verb|panic|.
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.2\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-16-53-49.png}
+  \end{minipage}
+\end{center}
+
+
+
+\begin{minted}[breaklines]{rust}
+use std::cell::RefCell;
+let c = RefCell::new(5);
+{
+    let mut m = c.borrow_mut();
+    assert!(c.try_borrow().is_err());
+    *m = 6;
+}
+\end{minted}
+
+\section{Altri Smart Pointer e Metodi}
+\subsection{\texttt{std::borrow::Cow<'a, B>}}
+Smart pointer che implementa il meccanismo \textit{clone on write} tramite \verb|enum| (\verb|Borrowed|, \verb|Owned|) .
+Se si modifica un dato condiviso, il dato viene clonato; se era già posseduto, si modifica direttamente l'originale.
+
+\subsection{Smart pointer e metodi (\texttt{self})}
+L'argomento \verb|self| di un metodo può avere tipo \verb|Box<Self>|, \verb|Rc<Self>| ecc..
+Il tipo deve essere dichiarato in modo esplicito (es. \mintinline{rust}|fn func(self: Rc<Self>)|) e l'invocazione passa la proprietà.
+
+\begin{minted}[breaklines]{rust}
+impl Node {
+    fn append_to(self: Rc<Self>, parent: &mut Node) {
+        parent.children.push(self);
+    }
+}
+\end{minted}
+
+
+
+\section{Esempio: Albero doppiamente collegato}
+Un albero dove i nodi figli conoscono il padre e viceversa si implementa combinando \verb|Rc|, \verb|RefCell| e \verb|Weak|.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.45\linewidth]{content/API_Programming/images/2026-04-03-16-33-26.png}
+\end{figure}
+
+\begin{minted}[breaklines]{rust}
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
+
+#[derive(Debug)]
+struct Node {
+    name: String,
+    parent: RefCell<Weak<Node>>,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
+impl Node {
+    fn new(name: &str) -> Rc<Self> {
+        Rc::new(Node {
+            name: name.to_string(),
+            parent: RefCell::new(Weak::new()),
+            children: RefCell::new(Vec::new()),
+        })
+    }
+
+    fn add_child(parent: Rc<Node>, child: Rc<Node>) {
+        *child.parent.borrow_mut() = Rc::downgrade(&parent);
+        parent.children.borrow_mut().push(child);
+    }
+
+    fn print_tree(node: &Rc<Node>, depth: usize) {
+        println!("{}{}", " ".repeat(depth * 2), node.name);
+        for child in node.children.borrow().iter() {
+            Node::print_tree(child, depth + 1);
+        }
+    }
+    fn get_root(node: &Rc<Node>)-> Rc<Node> {
+        let mut n = node.clone();
+        loop {
+            let parent = n.parent.borrow().upgrade();
+            match parent {
+                Some(p) => n = p.clone(),
+                None => break,
+            }
+        }
+    
+    }
+    fn main() {
+        let root = Node::new("root");
+        let child1 = Node::new("child1");
+        let child2 = Node::new("child2");
+        Node::add_child(root.clone(), child1.clone());
+        Node::add_child(root.clone(), child2);
+        Node::add_child(child1.clone(), Node::new("subchild"));
+        Node::print_tree(&Node::get_root(&child1), 0);
+    }
+}
+
+//root
+//  child1
+//      subchild
+//  child2
+\end{minted}
+
+
+\section{Cheat Sheet dei Container in Rust}
+Per facilitare la comprensione del layout in memoria dei vari container e puntatori intelligenti:
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\linewidth]{content/API_Programming/images/2026-04-03-16-31-58.png}
+\end{figure}
