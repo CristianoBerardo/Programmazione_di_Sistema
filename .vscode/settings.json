@@ -25,6 +25,8 @@
   },
   "latex-workshop.latex.autoBuild.run": "never",
   "latex-workshop.view.pdf.viewer": "tab",
+  // "latex-workshop.linting.chktex.enabled": true,
+  // "latex-workshop.linting.lacheck.enabled": true,
   "latex-workshop.latex.tools": [
     {
       "name": "pdflatex",

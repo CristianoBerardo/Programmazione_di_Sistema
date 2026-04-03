@@ -783,6 +783,17 @@ anche all'interno di costrutti di controllo del flusso come:
   \mintinline{rust}{while let <pattern> = <value> ...  }
 \end{center}
 
+\begin{minted}[breaklines]{rust}
+pub fn make_filter (filter: Option<String>) -> anyhow::Result<String> {
+  if let None = filter {
+          return Ok("default_column_name".to_string());
+  }else if let Some(column) = filter {
+          return Ok(column.to_string());
+  }
+}
+\end{minted}
+
+
 Tali costrutti verificano se il valore fornito corrisponda o meno al pattern indicato e, nel caso,
 eseguono le necessarie assegnazioni alle variabili contenute nel pattern.
 
