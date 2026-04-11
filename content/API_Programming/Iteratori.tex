@@ -72,6 +72,62 @@ trait IntoIterator where Self::IntoIter: Iterator<Item=Self::Item> {
 \end{minted}
 
 \subsection{Implementare un iteratore in Rust}
+
+
+\begin{center}
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+struct Words<'a> {
+  text: &'a str,
+}
+impl<'a> Words<'a> {
+  fn new(text: &'a str) -> Self {
+    Self { text }
+  }
+}
+struct WordsIter<'a> {
+  text: &'a str,
+  pos: usize,
+}
+\end{minted}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+impl<'a> IntoIterator for Words<'a> {
+  type Item = &'a str;
+  type IntoIter = WordsIter<'a>;
+  fn into_iter(self) -> Self::IntoIter {
+    WordsIter {
+      text: self.text,
+      pos: 0,
+    }
+  }
+}
+\end{minted}
+  \end{minipage}
+\end{center}
+
+Esempio di implementazione di un iteratore per una parola:
+
+
+\begin{minted}[breaklines]{rust}
+impl<'a> Iterator for WordsIter<'a> {
+type Item = &'a str;
+  fn next(&mut self) -> Option<Self::Item> {
+    let bytes = self.text.as_bytes();
+    let len = bytes.len();
+    // elimino gli spazi iniziali
+    while self.pos < len && bytes[self.pos].is_ascii_whitespace() { self.pos += 1; }
+    if self.pos >= len { return None; }
+    let start = self.pos;
+    // estraggo tutto il contenuto non bianco
+    while self.pos < len && !bytes[self.pos].is_ascii_whitespace() { self.pos += 1; }
+    Some(&self.text[start..self.pos])
+  }
+}
+\end{minted}
+
 Esempio di implementazione di un iteratore per un range di valori personalizzato:
 
 \begin{minted}[breaklines]{rust}
@@ -113,6 +169,44 @@ impl<const FROM: isize, const TO: isize> Iterator for MyRangeIterator<FROM, TO> 
 } 
 \end{minted}
 
+
+
+
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    Caratteristice:
+
+    \begin{itemize}
+      \item L'iteratore è pigro: viene generato un nuovo valore solo quando viene chiamato \verb|next()|
+      \item Non esegue allocazioni
+      \item Il risultato ha un tempo di vita collegato al tempo di vita del valore iniziale
+      \item \textbf{pos} rappresenta la posizione corrente nell'analisi
+    \end{itemize}
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \begin{minted}[breaklines]{rust}
+fn main() {
+  let line = "INFO 2025-05-10 user=alice action=login";
+  let words = Words::new(line);
+  for w in words {
+    println!("{}", w);
+  }
+}
+//INFO
+//2025-05-10
+//user=alice
+//action=login
+   \end{minted}
+  \end{minipage}
+\end{flushleft}
+
+
+
+
+
 \section{Iteratori e possesso}
 I contenitori presenti nella libreria standard mettono normalmente a disposizione tre metodi per ricavare un iteratore ai dati contenuti al loro interno:
 
@@ -123,7 +217,10 @@ I contenitori presenti nella libreria standard mettono normalmente a disposizion
 \end{itemize}
 
 È comune, per tali contenitori, dichiarare tre implementazioni distinte del tratto \verb|IntoIterator|: una per il tipo \verb|Container| (\mintinline{rust}|into_iter()|), una per il tipo \verb|&Container| (\mintinline{rust}|iter()|), e una per il tipo \verb|&mut Container| (\mintinline{rust}|iter_mut()|).
-In alcuni casi (come \verb|HashSet<T>|, \verb|HashMap<T>|) la terza implementazione non è fornita perché romperebbe le astrazioni.
+% In alcuni casi (come \verb|HashSet<T>|, \verb|HashMap<T>|) la terza implementazione non è fornita perché romperebbe le astrazioni.
+Non tutte le collezioni espongono tutte le forme di iterazione mutabile nello stesso modo: in
+particolare, la possibilità di mutare gli elementi dipende dalle garanzie che la struttura deve
+preservare
 
 \begin{minted}[breaklines]{rust}
 let mut v = vec![String::from("a"), String::from("b"), String::from("c")];
@@ -132,12 +229,15 @@ for s in &v { println!("{}", s); } // s ha tipo &String
 
 for s in &mut v { s.push_str("1"); } // s ha tipo &mut String. Modifico il contenuto del vettore 
 
-for s in v { println!("{}", s); } // s ha tipo String. invalido il contenuto del vettore 
+for s in v { println!("{}", s); } // s ha tipo String. invalido il contenuto del vettore che non è più utilizzabile dopo il ciclo
 \end{minted}
 
 \subsection{Derivare un iteratore}
-Tra i metodi dotati di un'implementazione di default del tratto \verb|Iterator| c'è anche il metodo \mintinline{rust}|into_iter()| che si limita a restituire l'iteratore stesso.
-Questo significa che è possibile utilizzare la sintassi del ciclo \verb|for| indicando direttamente un iteratore.
+% Tra i metodi dotati di un'implementazione di default del tratto \verb|Iterator| c'è anche il metodo \mintinline{rust}|into_iter()| che si limita a restituire l'iteratore stesso.
+% Questo significa che è possibile utilizzare la sintassi del ciclo \verb|for| indicando direttamente un iteratore.
+
+Ogni iteratore implementa \verb|IntoIterator| restituendo sé stesso
+Per questo motivo un iteratore può essere usato direttamente in un ciclo for
 
 \begin{minted}[breaklines]{rust}
 let mut v = vec![String::new("a"), String::new("b"), String::new("c")]; 
@@ -171,52 +271,211 @@ v.iter()
 \end{center}
 
 
+\subsection{Adattatori: trasformare gli elementi}
 
-
-I principali adattatori:
 \begin{itemize}
-  \item \mintinline{rust}|map(self, f)|: Esegue la chiusura ricevuta come argomento su ogni elemento dell'iteratore ritornato.
-  \item \mintinline{rust}|filter(self, predicate)|: Ritorna un iteratore che restituisce solo gli elementi per i quali l'esecuzione della chiusura ritorna \verb|true|.
-  \item \mintinline{rust}|filter_map(self, f)|: Concatena in maniera concisa filter e map; l'iteratore risultante conterrà solo elementi per i quali la chiusura ritorna \verb|Some(B)|.
-  \item \mintinline{rust}|flatten(self)|: Ritorna un iteratore dal quale sono state rimosse le strutture annidate.
-  \item \mintinline{rust}|flat_map(self, f)|: Concatena map e flatten, esegue la chiusura e rimuove le strutture annidate.
-  \item \mintinline{rust}|take(self, n)|: Ritorna un iteratore che contiene al più i primi \verb|n| elementi dell'iteratore su cui viene eseguito.
-  \item \mintinline{rust}|take_while(self, predicate)|: Conserva tutti gli elementi fino a quando la funzione ritorna \verb|true|; dal momento in cui diventa \verb|false|, scarta tutti i valori rimanenti.
-  \item \mintinline{rust}|skip(self, n)|: Ritorna un iteratore che esclude i primi \verb|n| elementi dell'iteratore originale.
-  \item \mintinline{rust}|skip_while(self, predicate)|: Esclude tutti gli elementi fino a quando la funzione ritorna \verb|false|, dal momento in cui diventa \verb|true| conserva tutti i valori rimanenti.
-  \item \mintinline{rust}|peekable(self)|: Permette di chiamare i metodi \mintinline{rust}|peek()| e \mintinline{rust}|peek_mut()| per accedere al valore successivo senza consumarlo.
-  \item \mintinline{rust}|fuse(self)|: Ritorna un iteratore che termina dopo il primo \verb|None|.
-  \item \mintinline{rust}|rev(self)|: Ritorna un iteratore con la direzione invertita.
-  \item \mintinline{rust}|inspect(self, f)|: Preleva un elemento dall'iteratore a monte e la passa sia alla funzione (che può ispezionarlo) che al consumatore a valle.
-  \item \mintinline{rust}|chain(self, other)|: Prende un iteratore e lo concatena all'originale.
-  \item \mintinline{rust}|enumerate(self)|: Ritorna un iteratore che restituisce una tupla formata dall'indice dell'iterazione e dal valore \verb|(i, val)|.
-  \item \mintinline{rust}|zip(self, other)|: Combina due iteratori per ritornare le coppie composte dai valori dei primi due iteratori.
-  \item \mintinline{rust}|by_ref(&mut self)|: Prende in prestito un iteratore senza consumarlo, lasciando intatto il possesso dell'originale.
-  \item \mintinline{rust}|copied(self)| e \mintinline{rust}|cloned(self)|: Ritornano un iteratore dove gli elementi originali vengono, rispettivamente, copiati o clonati.
-  \item \mintinline{rust}|cycle(self)|: Raggiunta la fine di un iteratore riparte dall'inizio, ciclando all'infinito.
+  \item \mintinline{rust}|map(self, f)|: Trasforma ogni elemento in ingresso con la chiusura f e produce un nuovo iteratore dei valori trasformati
+        \begin{itemize}
+          \item[] where \verb|F:FnMut(Self::Item) -> V|
+        \end{itemize}
+  \item \mintinline{rust}|enumerate(self) -> Enumerate<Self>|: Ritorna un iteratore che restituisce una tupla formata dall'indice dell'iterazione e dal valore \verb|(i, val)|.
+  \item \mintinline{rust}|copied<'s, T(self) -> Copied<Self>|: Ritorna un
+        nuovo iteratore, tutti gli elementi dell'iteratore originale verranno copiati
+        quando l'iteratore sarà consumato
+  \item \mintinline{rust}|cloned<'s, T(self) -> Cloned<Self>|: Ritorna un
+        nuovo iteratore, tutti gli elementi dell'iteratore originale verranno clonati
+        quando l'iteratore sarà consumato
+
+  \item \mintinline{rust}|inspect<F>(self, f: F) -> Inspect<Self, F>|: Ogni
+        volta che riceve una richiesta, preleva un elemento dall'iteratore a monte e
+        la passa sia alla funzione, che ha possibilità di ispezionarlo, che al
+        consumatore a valle
+        \begin{itemize}
+          \item[] where \verb|F: FnMut(&Self::Item)|
+        \end{itemize}
+
 \end{itemize}
 
 
-\section{Consumatori}
-I consumatori sono i metodi che "finalizzano" la catena dell'iteratore eseguendone l'elaborazione.
+\subsection{Adattatori: filtrare}
+
 \begin{itemize}
-  \item \mintinline{rust}|for_each(self, f)|: Esegue la chiusura ricevuta su tutti gli elementi dell'iteratore.
-  \item \mintinline{rust}|try_for_each(&mut self, f)|: Esegue una chiusura che può fallire su tutti gli elementi, fermandosi al primo fallimento.
-  \item \mintinline{rust}|collect(self)|: Trasforma un iteratore in una collezione.
-  \item \mintinline{rust}|nth(&mut self, n)|: Ritorna l'ennesimo elemento dell'iteratore.
-  \item \mintinline{rust}|all(&mut self, f)| e \mintinline{rust}|any(&mut self, f)|: Verificano se la chiusura restituisce \verb|true|, rispettivamente, per tutti o per almeno un elemento dell'iteratore.
-  \item \mintinline{rust}|find(&mut self, predicate)|: Cerca un elemento sulla base della chiusura ricevuta e lo ritorna.
-  \item \mintinline{rust}|count(self)|: Ritorna il numero di elementi dell'iteratore.
-  \item \mintinline{rust}|sum(self)| e \mintinline{rust}|product(self)|: Rispettivamente, somma o moltiplica tutti gli elementi di un iteratore e ritorna il valore ottenuto.
-  \item \mintinline{rust}|max(self)| e \mintinline{rust}|min(self)|: Ritornano il massimo o il minimo tra gli elementi; se l'iteratore è vuoto ritornano \verb|None|.
+  \item \mintinline{rust}|filter<P>(self, predicate: P) -> Filter<Self, P>|: Seleziona gli elementi per i quali l'esecuzione della chiusura predicate ritorna true.
+        \begin{itemize}
+          \item[] where \verb|P: FnMut(&Self::Item) -> bool|.
+        \end{itemize}
+  \item \mintinline{rust}|take(self, n: usize) -> Take<Self>|: Ritorna un iteratore che contiene al più i primi n elementi dell'iteratore su cui viene eseguito (meno, se l'iteratore originale non contiene abbastanza elementi).
+  \item \mintinline{rust}|take_while<P>(self, predicate: P) -> TakeWhile<Self, P>|: Esegue la funzione ricevuta su tutti gli elementi dell'iteratore originale, conserva tutti gli elementi fino a quando la funzione ritorna true; dal momento in cui diventa false, scarta tutti i valori rimanenti.
+        \begin{itemize}
+          \item[] where \verb|P: FnMut(&Self::Item) -> bool|.
+        \end{itemize}
+  \item \mintinline{rust}|skip(self, n: usize) -> Skip<Self>|: Ritorna un iteratore che esclude i primi n elementi dell'iteratore su cui viene eseguito, se si raggiunge la fine ritorna un iteratore vuoto.
+  \item \mintinline{rust}|skip_while<P>(self, predicate: P) -> SkipWhile<Self, P>|: Esegue la funzione su tutti gli elementi dell'iteratore originale, esclude tutti gli elementi fino a quando la funzione ritorna true, dal momento in cui diventa false conserva tutti i valori rimanenti.
+        \begin{itemize}
+          \item[] where \verb|P: FnMut(&Self::Item) -> bool|.
+        \end{itemize}
+\end{itemize}
+
+
+\subsection{Adattatori: combinare}
+
+\begin{itemize}
+  \item \mintinline{rust}|chain<U>(self, other: U) -> Chain<Self, <U as IntoIterator>::IntoIter>|: Prende come argomento un valore iterabile e ne concatena gli elementi all'originale, ritornando uno nuovo iteratore.
+  \item \mintinline{rust}|zip<U>(self, other: U) -> Zip<Self, <U as IntoIterator>::IntoIter>|: Combina due iteratori per ritornare un nuovo iteratore che ha come elementi le coppie composte dai valori dei primi due iteratori.
+  \item \mintinline{rust}|cycle(self) -> Cycle<Self>|: Raggiunta la fine di un iteratore riparte dall'inizio, ciclando all'infinito.
+  \item \mintinline{rust}|rev(self) -> Rev<Self>|: Ritorna un iteratore con la direzione invertita.
+\end{itemize}
+
+
+\subsection{Adattatori: funzionalità ulteriori}
+
+\begin{itemize}
+  \item \mintinline{rust}|flatten(self) -> Flatten<Self>|: Ritorna un iteratore dal quale sono state rimosse le strutture annidate.
+        \begin{itemize}
+          \item[] where \verb|Self::Item: IntoIterator|.
+        \end{itemize}
+  \item \mintinline{rust}|flat_map<U, F>(self, f: F) -> FlatMap<Self, U, F>|: Concatena in maniera concisa map e flatten, eseguendo la chiusura f e rimuovendo le strutture annidate.
+        \begin{itemize}
+          \item[] where \verb|F: FnMut(Self::Item) -> U, U: IntoIterator|.
+        \end{itemize}
+  \item \mintinline{rust}|filter_map<V, F>(self, f: F) -> FilterMap<Self, F>|: Concatena in maniera concisa filter e map, l'iteratore risultante conterrà solo elementi per i quali la chiusura ritorna Some(V).
+        \begin{itemize}
+          \item[] where \verb|F: FnMut(Self::Item) -> Option<V>|.
+        \end{itemize}
+  \item \mintinline{rust}|fuse(self) -> Fuse<Self>|: Termina dopo il primo None.
+  \item \mintinline{rust}|peekable(self)|: Permette di chiamare i metodi \mintinline{rust}|peek()| e \mintinline{rust}|peek_mut()| per accedere al valore successivo senza consumarlo.
+  \item \mintinline{rust}|by_ref(&mut self)|: Prende in prestito un iteratore senza consumarlo, lasciando intatto il possesso dell'originale.
+\end{itemize}
+
+
+\subsection{fold(...): riduzione esplicita di un iteratore}
+
+\mintinline{rust}|fold(init, f)| è un consumatore finale che attraversa l'iteratore mantenendo un accumulatore.
+        \begin{itemize}
+          \item L'accumulatore viene inizializzato con il valore \verb|init|.
+          \item Ad ogni passo applica \verb|f(acc, item)| e produce un nuovo accumulatore.
+          \item Al termine restituisce il valore finale dell'accumulatore.
+        \end{itemize}
+Molte aggregazioni possono essere espresse con \mintinline{rust}|fold(...)|, come somma, prodotto, conteggio, concatenazione, costruzione di strutture, ecc.
+
+
+\begin{minted}[breaklines]{rust}
+let v = vec![1, 2, 3, 4];
+
+let sum = v.iter().fold(0, |acc, x| acc + x);
+let count = v.iter().fold(0, |acc, _| acc + 1);
+let product = v.iter().fold(1, |acc, x| acc * x);
+\end{minted}
+
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.5\linewidth]{content/API_Programming/images/2026-04-11-18-03-39.png}
+\end{figure}
+
+
+
+
+\subsection{Consumatori: aggregare}
+
+\begin{itemize}
+  \item \mintinline{rust}|fold<B, F>(self, init: B, f: F) -> B|: Esegue la chiusura ricevuta accumulando i risultati sul primo argomento ricevuto.
+  \item \mintinline{rust}|try_fold<B, F, R>(&mut self, init: B, f: F) -> R|: Esegue la chiusura ricevuta fino a quando ritorna con successo, accumulando i risultati sul primo argomento ricevuto.
+  \item \mintinline{rust}|reduce<F>(self, f: F) -> Option<Self::Item>|: Riduce l'iteratore ad un singolo elemento eseguendo la funzione ricevuta.
+  \item \mintinline{rust}|sum<S>(self) -> S|: Somma tutti gli elementi di un iteratore e ritorna il valore ottenuto.
+  \item \mintinline{rust}|product<P>(self) -> P|: Moltiplica tutti gli elementi di un iteratore e ritorna il valore ottenuto.
+  \item \mintinline{rust}|count(self) -> usize|: Ritorna il numero di elementi dell'iteratore.
+  \item \mintinline{rust}|collect<B>(self) -> B|: Trasforma un iteratore in una collezione.
+        \begin{itemize}
+          \item[] where \verb|B: FromIterator<Self::Item>|.
+        \end{itemize}
+  \item \mintinline{rust}|partition<B, F>(self, f: F) -> (B, B)|: Consuma un iteratore e ritorna due collezioni sulla base del predicato ricevuto.
+  \item \mintinline{rust}|for_each<F>(self, f: F)|: Esegue la chiusura ricevuta su tutti gli elementi dell'iteratore.
+        \begin{itemize}
+          \item[] where \verb|F: FnMut(Item)|.
+        \end{itemize}
+  \item \mintinline{rust}|try_for_each<F, R>(&mut self, f: F) -> R|: Esegue una chiusura che può fallire su tutti gli elementi dell'iteratore, si ferma dopo il primo fallimento.
+        \begin{itemize}
+          \item[] where \verb|F: FnMut(Item) -> R, R: Try<Output=()>|.
+        \end{itemize}
+  \item \mintinline{rust}|max(self) -> Option<Self::Item>|: Ritorna il massimo tra gli elementi dell'iteratore, se trova due massimi equivalenti torna l'ultimo, se l'iteratore è vuoto viene ritornato None.
   \item \mintinline{rust}|max_by(self, compare)| / \mintinline{rust}|min_by(self, compare)|: Ritornano il massimo o il minimo sulla base della chiusura di confronto ricevuta in argomento.
   \item \mintinline{rust}|max_by_key(self, f)| / \mintinline{rust}|min_by_key(self, f)|: Eseguono la chiusura ricevuta e ritornano l'elemento che produce il risultato massimo o minimo.
-  \item \mintinline{rust}|position(&mut self, predicate)| e \mintinline{rust}|rposition(&mut self, predicate)|: Cercano un elemento sulla base della chiusura e ne ritornano la posizione (partendo rispettivamente da sinistra o da destra).
-  \item \mintinline{rust}|fold(self, init, f)|: Esegue la chiusura accumulando i risultati sul primo argomento ricevuto (\verb|init|).
-  \item \mintinline{rust}|try_fold(&mut self, init, f)|: Come \verb|fold|, ma si ferma al primo fallimento della chiusura.
-  \item \mintinline{rust}|last(self)|: Ritorna l'ultimo elemento dell'iteratore.
-  \item \mintinline{rust}|find_map(&mut self, f)|: Esegue la chiusura su tutti gli elementi e ritorna il primo risultato valido.
-  \item \mintinline{rust}|partition(self, f)|: Consuma un iteratore e ritorna due collezioni sulla base del predicato.
-  \item \mintinline{rust}|reduce(self, f)|: Riduce l'iteratore ad un singolo elemento eseguendo la funzione ricevuta.
-  \item Confronti tra iteratori: \mintinline{rust}|cmp(self, other)|, \mintinline{rust}|eq(self, other)|, \mintinline{rust}|ne(self, other)|, \mintinline{rust}|lt(self, other)|, \mintinline{rust}|le(self, other)|, \mintinline{rust}|gt(self, other)|, \mintinline{rust}|ge(self, other)|.
+  \item \mintinline{rust}|min(self) -> Option<Self::Item>|: Ritorna il minimo tra gli elementi dell'iteratore, se trova due minimi equivalenti torna l'ultimo, se l'iteratore è vuoto viene ritornato None.
 \end{itemize}
+
+
+\subsection{Consumatori: cercare e verificare}
+
+\begin{itemize}
+  \item \mintinline{rust}|find<P>(&mut self, predicate: P) -> Option<Self::Item>|: Cerca un elemento sulla base della chiusura ricevuta come argomento e lo ritorna.
+        \begin{itemize}
+          \item[] where \verb|P: FnMut(&Item) -> bool|.
+        \end{itemize}
+  \item \mintinline{rust}|find_map<B, F>(&mut self, f: F) -> Option<B>|: Esegue la chiusura ricevuta su tutti gli elementi e ritorna il primo risultato valido.
+  \item \mintinline{rust}|position<P>(&mut self, predicate: P) -> Option<usize>|: Cerca un elemento sulla base della chiusura ricevuta come argomento e ritorna la posizione.
+  \item \mintinline{rust}|rposition<P>(&mut self, predicate: P) -> Option<usize>|: Cerca un elemento sulla base della chiusura ricevuta come argomento, partendo da destra e ritornando la posizione.
+  \item \mintinline{rust}|last(self) -> Option<Self::Item>|: Ritorna l'ultimo elemento dell'iteratore.
+  \item \mintinline{rust}|nth(&mut self, n: usize) -> Option<Self::Item>|: Ritorna l'ennesimo elemento dell'iteratore, consumando i precedenti.
+  \item \mintinline{rust}|all<F>(&mut self, f: F) -> bool|: Verifica che la chiusura ricevuta restituisca true per tutti gli elementi restituiti dall'iteratore.
+        \begin{itemize}
+          \item[] where \verb|F: FnMut(Item) -> bool|.
+        \end{itemize}
+  \item \mintinline{rust}|any<F>(&mut self, f: F) -> bool|: Verifica che la chiusura ricevuta restituisca true per almeno un elemento restituito dall'iteratore.
+        \begin{itemize}
+          \item[] where \verb|F: FnMut(Item) -> bool|.
+        \end{itemize}
+\end{itemize}
+
+
+\subsection{Consumatori: confrontare}
+
+\begin{itemize}
+  \item \mintinline{rust}|cmp<I>(self, other: I) -> Ordering|: Confronta gli elementi di due iteratori.
+  \item \mintinline{rust}|eq<I>(self, other: I) -> bool|: Verifica se gli elementi di due iteratori sono uguali.
+  \item \mintinline{rust}|ne<I>(self, other: I) -> bool|: Verifica se gli elementi di due iteratori sono diversi.
+  \item \mintinline{rust}|lt<I>(self, other: I) -> bool|: Verifica se gli elementi di un iteratore sono minori rispetto a quelli di un secondo iteratore.
+  \item \mintinline{rust}|le<I>(self, other: I) -> bool|: Verifica se gli elementi di un iteratore sono minori o uguali rispetto a quelli di un secondo iteratore.
+  \item \mintinline{rust}|gt<I>(self, other: I) -> bool|: Verifica se gli elementi di un iteratore sono maggiori rispetto a quelli di un secondo iteratore.
+  \item \mintinline{rust}|ge<I>(self, other: I) -> bool|: Verifica se gli elementi di un iteratore sono maggiori o uguali rispetto a quelli di un secondo iteratore.
+\end{itemize}
+
+
+% I principali adattatori:
+% \begin{itemize}
+%   \item \mintinline{rust}|filter_map(self, f)|: Concatena in maniera concisa filter e map; l'iteratore risultante conterrà solo elementi per i quali la chiusura ritorna \verb|Some(B)|.
+%   \item \mintinline{rust}|flatten(self)|: Ritorna un iteratore dal quale sono state rimosse le strutture annidate.
+%   \item \mintinline{rust}|flat_map(self, f)|: Concatena map e flatten, esegue la chiusura e rimuove le strutture annidate.
+%   \item \mintinline{rust}|take(self, n)|: Ritorna un iteratore che contiene al più i primi \verb|n| elementi dell'iteratore su cui viene eseguito.
+%   \item \mintinline{rust}|take_while(self, predicate)|: Conserva tutti gli elementi fino a quando la funzione ritorna \verb|true|; dal momento in cui diventa \verb|false|, scarta tutti i valori rimanenti.
+%   \item \mintinline{rust}|skip(self, n)|: Ritorna un iteratore che esclude i primi \verb|n| elementi dell'iteratore originale.
+%   \item \mintinline{rust}|skip_while(self, predicate)|: Esclude tutti gli elementi fino a quando la funzione ritorna \verb|false|, dal momento in cui diventa \verb|true| conserva tutti i valori rimanenti.
+%   \item \mintinline{rust}|fuse(self)|: Ritorna un iteratore che termina dopo il primo \verb|None|.
+%   \item \mintinline{rust}|rev(self)|: Ritorna un iteratore con la direzione invertita.
+%   \item \mintinline{rust}|chain(self, other)|: Prende un iteratore e lo concatena all'originale.
+%   \item \mintinline{rust}|zip(self, other)|: Combina due iteratori per ritornare le coppie composte dai valori dei primi due iteratori.
+%   \item \mintinline{rust}|cycle(self)|: Raggiunta la fine di un iteratore riparte dall'inizio, ciclando all'infinito.
+% \end{itemize}
+
+
+% \section{Consumatori}
+% I consumatori sono i metodi che "finalizzano" la catena dell'iteratore eseguendone l'elaborazione.
+% \begin{itemize}
+%   \item \mintinline{rust}|for_each(self, f)|: Esegue la chiusura ricevuta su tutti gli elementi dell'iteratore.
+%   \item \mintinline{rust}|try_for_each(&mut self, f)|: Esegue una chiusura che può fallire su tutti gli elementi, fermandosi al primo fallimento.
+%   \item \mintinline{rust}|collect(self)|: Trasforma un iteratore in una collezione.
+%   \item \mintinline{rust}|nth(&mut self, n)|: Ritorna l'ennesimo elemento dell'iteratore.
+%   \item \mintinline{rust}|all(&mut self, f)| e \mintinline{rust}|any(&mut self, f)|: Verificano se la chiusura restituisce \verb|true|, rispettivamente, per tutti o per almeno un elemento dell'iteratore.
+%   \item \mintinline{rust}|find(&mut self, predicate)|: Cerca un elemento sulla base della chiusura ricevuta e lo ritorna.
+%   \item \mintinline{rust}|count(self)|: Ritorna il numero di elementi dell'iteratore.
+%   \item \mintinline{rust}|sum(self)| e \mintinline{rust}|product(self)|: Rispettivamente, somma o moltiplica tutti gli elementi di un iteratore e ritorna il valore ottenuto.
+%   \item \mintinline{rust}|max(self)| e \mintinline{rust}|min(self)|: Ritornano il massimo o il minimo tra gli elementi; se l'iteratore è vuoto ritornano \verb|None|.
+%   \item \mintinline{rust}|position(&mut self, predicate)| e \mintinline{rust}|rposition(&mut self, predicate)|: Cercano un elemento sulla base della chiusura e ne ritornano la posizione (partendo rispettivamente da sinistra o da destra).
+%   \item \mintinline{rust}|fold(self, init, f)|: Esegue la chiusura accumulando i risultati sul primo argomento ricevuto (\verb|init|).
+%   \item \mintinline{rust}|try_fold(&mut self, init, f)|: Come \verb|fold|, ma si ferma al primo fallimento della chiusura.
+%   \item \mintinline{rust}|last(self)|: Ritorna l'ultimo elemento dell'iteratore.
+%   \item \mintinline{rust}|find_map(&mut self, f)|: Esegue la chiusura su tutti gli elementi e ritorna il primo risultato valido.
+%   \item \mintinline{rust}|partition(self, f)|: Consuma un iteratore e ritorna due collezioni sulla base del predicato.
+%   \item \mintinline{rust}|reduce(self, f)|: Riduce l'iteratore ad un singolo elemento eseguendo la funzione ricevuta.
+%   \item Confronti tra iteratori: \mintinline{rust}|cmp(self, other)|, \mintinline{rust}|eq(self, other)|, \mintinline{rust}|ne(self, other)|, \mintinline{rust}|lt(self, other)|, \mintinline{rust}|le(self, other)|, \mintinline{rust}|gt(self, other)|, \mintinline{rust}|ge(self, other)|.
+% \end{itemize}
