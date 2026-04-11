@@ -402,5 +402,80 @@ fn load(path: &str) -> Result<Data> {
   \end{minipage}
 \end{center}
 
+\section{Gestione degli errori di I/O}
+
+Le operazioni di I/O restituiscono normalmente un valore di tipo \mintinline{rust}|io::Result<T>|, che
+è l'alias di \mintinline{rust}|Result<T, io::Error>|
+
+\verb|io::Error| contine:
+
+\begin{itemize}
+  \item Un valore \verb|ErrorKind|, utile per classificare l'errore 
+  \item Informazioni aggiuntive dipendenti dalla piattaforma
+\end{itemize}
+
+In molti casi, il comportamento corretto è propagare l'errore con \textbf{?}.
+In alternativa, occorre gestire esplicitamente i casi recuperabili.
+
+
+Un errore di I/O non implica sempre una condizione fatale:
+
+\begin{itemize}
+  \item Alcune operazioni possono essere semplicemente ritentate
+  \item Altre indicano fine input, permessi insufficienti o dati non validi
+\end{itemize}
+
+
+
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \subsection{ErrorKind: casi comuni e strategie}
+\begin{itemize}
+  \item \texttt{ErrorKind::Interrupted}: Operazione interrotta, generalmente ritentabile
+  \item \texttt{ErrorKind::NotFound}: File o percorso assente
+  \item \texttt{ErrorKind::PermissionDenied}: Accesso negato dal sistema operativo
+  \item \texttt{ErrorKind::UnexpectedEof}: Fine del flusso raggiunta prima del previsto, tipicamente restituito da \mintinline{rust}|read_exact()|
+  \item \texttt{ErrorKind::InvalidData}: Dati letti non validi per
+  l'interpretazione richiesta, ad esempio testo non in formato valido UTF-8
+  \item \texttt{ErrorKind::AlreadyExists}: Risorsa già esistente quando era
+  richiesta creazione esclusiva
+\end{itemize}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \begin{minted}[breaklines]{rust}
+use std::io::ErrorKind::Interrupted;
+
+match reader.read(&mut buf) {
+  Err(e)
+    if e.kind() == Interrupted => {
+    /* ritenta */
+    },
+  Err(e) => return Err(e),
+  Ok(n) => {
+  /* usa i primi n byte */
+  }
+}
+    \end{minted}
+  \end{minipage}
+\end{flushleft}
+
+
+\subsection{Buone pratiche}
+
+\begin{itemize}
+  \item Usare \mintinline{rust}|read_to_string()| solo per file testuali e non troppo grandi
+  \item Usare BufReader per letture piccole/frequenti
+  \item Ricordare che \mintinline{rust}|read()| e \mintinline{rust}|write()| possono essere parziali
+  \item Usare \mintinline{rust}|write_all()| quando si vuole trasferire tutto il buffer
+  \item Usare OpenOptions per semantiche di apertura esplicite
+  \item Non assumere che comportamento di cambio nome/rimozione sia identico su tutte le piattaforme
+\end{itemize}
+
+
+
+
+
 
 
