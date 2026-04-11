@@ -3,6 +3,15 @@ La programmazione in stile funzionale introduce il concetto di funzioni di ordin
 Si tratta di funzioni i cui parametri e/o il cui tipo di ritorno sono a loro volta una funzione.
 Questo richiede, ad un linguaggio, la possibilità di trattare una funzione come un tipo dati qualsiasi, consentendo di memorizzarla in una variabile.
 
+
+La differenza chiave non è sintattica, ma semantica I valori di tipo \verb|fn(...)| non catturano stato
+○ Le chiusure e i tipi derivati possono includere uno stato catturato
+
+
+La scelta del tipo di valore invocabile influenza vari aspetti: La
+rappresentazione del valore, prestiti e possesso, modalità di invocazione,
+possibilità di riuso
+
 In Rust è possibile assegnare ad una variabile il puntatore ad una funzione (che avrà come tipo \mintinline{rust}|fn(T1,...,Tn)->U|) o assegnare un valore che implementa un tratto funzionale: \verb|FnOnce|, \verb|FnMut|, \verb|Fn|.
 
 \subsection{Puntatori a funzione}
@@ -18,6 +27,27 @@ let ptr: fn(i32, f64) -> f64;
 ptr = f1; // assegno il puntatore 
 ptr(2, 3.14); // chiamo la funzione 
 \end{minted}
+
+\begin{minted}[breaklines]{rust}
+fn add(a: i32, b: i32) -> i32 { a + b }
+fn multiply(a: i32, b: i32) -> i32 { a * b }
+fn choose(c: bool) -> fn(i32, i32) -> i32 {
+  if c { add } else { multiply }
+}
+fn main() {
+  let f1 = choose(true);
+  let f2 = choose(false);
+  println!("f1 => {}", f1(2, 3)); // 5
+  println!("f2 => {}", f2(2, 3)); // 6
+}
+\end{minted}
+
+
+
+\begin{tcolorbox}
+  \textbf{Nota:} fn(...) rappresenta codice invocabile senza stato catturato 
+\end{tcolorbox}
+
 
 \section{Funzioni lambda}
 Una funzione lambda è una funzione anonima costituita da un blocco di codice espresso in forma letterale.
@@ -50,6 +80,12 @@ La funzione lambda così ottenuta viene detta \textbf{chiusura} , in quanto racc
 
 In Rust, il compilatore trasforma una chiusura in una tupla avente tanti campi quante sono le variabili libere.
 Tale tupla implementa uno dei tratti funzionali previsti dal linguaggio: \verb|FnOnce|, \verb|FnMut|, \verb|Fn|.
+
+
+\begin{tcolorbox}
+  \textbf{Note:} Una chiusura è simile ad una struct anonima con alcuni campi catturati
+e con un'operazione di chiamata definita dal compilatore 
+\end{tcolorbox}
 
 
 \subsection{Cattura delle variabili}
@@ -174,6 +210,11 @@ fn value_source<T>(v: T) -> impl Fn() -> T where T: Clone {
     return move || { v.clone() }; 
 } 
 \end{minted}
+
+\begin{tcolorbox}
+  \textbf{Note:} \textbf{move} serve spesso a rendere la chiusura restituita autosufficiente
+\end{tcolorbox}
+
 
 \subsection{Esempio di generatore}
 \begin{minted}[breaklines]{rust}

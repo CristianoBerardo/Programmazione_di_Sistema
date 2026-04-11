@@ -130,6 +130,41 @@ fn main() {
   \end{minipage}
 \end{center}
 
+\subsubsection{Mutare il contenuto di Rc<T>}
+
+Un valore di tipo \textbf{Rc<T>} non offre normalmente accesso mutabile diretto al
+contenuto.
+
+\begin{itemize}
+  \item 
+\end{itemize}
+
+\item Il metodo \mintinline{rust}|Rc::get_mut(&mut rc)-> Option<&mut T>| restituisce un riferimento mutabile se e solo se rc è l'unico riferimento forte al valore, altrimenti restituisce \verb|None|
+\item Il metodo \mintinline{rust}|Rc::make_mut(&mut rc) -> &mut T| restituisce sempre un riferimento mutabile: tuttavia, se esistono altri riferimenti forti, il valore verrà prima clonato, così da lasciare invariato quanto conosciuto dagli altri possessori
+
+
+Quando occorre mutabilità condivisa senza effettuare delle copie, si usa
+tipicamente \verb|Rc<RefCell<T>>|.
+
+
+\begin{minted}[breaklines]{rust}
+use std::rc::Rc;
+
+let mut a = Rc::new(String::from("abc"));
+
+if let Some(s) = Rc::get_mut(&mut a) {s.push('!');}
+
+assert_eq!(&*a, "abc!");
+
+let mut x = Rc::new(String::from("hello"));
+let y = x.clone();
+
+Rc::make_mut(&mut x).push('!');
+
+assert_eq!(&*x, "hello!");
+assert_eq!(&*y, "hello");
+\end{minted}
+
 
 \subsection{\texttt{std::rc::Weak<T>}}
 Se si costruisse una sequenza circolare con \verb|Rc<T>|, la memoria non potrebbe più essere rilasciata.
@@ -197,12 +232,66 @@ let c = RefCell::new(5);
     assert!(c.try_borrow().is_err());
     *m = 6;
 }
+assert_eq!(*c.borrow(), 6);
 \end{minted}
 
 \section{Altri Smart Pointer e Metodi}
 \subsection{\texttt{std::borrow::Cow<'a, B>}}
 Smart pointer che implementa il meccanismo \textit{clone on write} tramite \verb|enum| (\verb|Borrowed|, \verb|Owned|) .
 Se si modifica un dato condiviso, il dato viene clonato; se era già posseduto, si modifica direttamente l'originale.
+
+Implementato sotto forma di enumerazione
+
+\begin{minted}[breaklines]{rust}
+pub enum Cow<'a, B>
+where B: 'a + ToOwned + ?Sized,
+  {
+  Borrowed(&'a B),
+  Owned(<B as ToOwned>::Owned),
+  }
+\end{minted}
+
+Si istanzia attraverso il metodo \mintinline{rust}|Cow::from(...)|
+
+In base al dato da incapsulare, viene scelta la variante \textbf{Owned} o \textbf{Borrowed}.
+
+
+\begin{center}
+  \begin{minipage}{0.45\linewidth}
+\begin{minted}[breaklines]{rust}
+use std::borrow::Cow;
+// Riusa la slice se non occorre
+// effettuare modifiche
+// Altrimenti, alloca una nuova String
+fn normalize_whitespace(line: &str) -> Cow<'_, str> {
+  if line.contains('\t') {
+    Cow::Owned(line.replace('\t', " "))
+  } else {
+   Cow::Borrowed(line)
+  }
+}
+\end{minted}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+fn main() {
+  let a = "INFO user=alice op=login";
+  let b = "WARN\tuser=bob\top=logout";
+  let na = normalize_whitespace(a);
+  let nb = normalize_whitespace(b);
+  println!("a -> {}", na);
+  println!("b -> {}", nb);
+
+  assert!(
+  matches!(na,Cow::Borrowed(_)));
+
+  assert!(
+  matches!(nb, Cow::Owned(_)));
+}
+\end{minted}
+  \end{minipage}
+\end{center}
 
 \subsection{Smart pointer e metodi (\texttt{self})}
 L'argomento \verb|self| di un metodo può avere tipo \verb|Box<Self>|, \verb|Rc<Self>| ecc..
