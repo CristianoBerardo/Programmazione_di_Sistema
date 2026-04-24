@@ -1,18 +1,27 @@
 \section{Iteratori}
 Un iteratore è una struttura dati dotata di stato, in grado di generare una sequenza di valori.
-I valori possono essere estratti da un contenitore, di cui l'iteratore detiene un riferimento, o generati programmaticamente, come nel caso di un intervallo di valori.
+I valori possono essere estratti da un contenitore, di cui l'iteratore detiene un riferimento, o
+generati programmaticamente, come nel caso di un intervallo di valori.
 
-Un iteratore offre tipicamente un modo per verificare se sono presenti ulteriori valori da generare (\mintinline{rust}|hasNext() -> bool|) ed un altro per accedere al valore successivo (\mintinline{rust}|next() -> E|).
-Talora, come in Rust, le due operazioni sono combinate (\mintinline{rust}|next() -> Option<E>|).
-Inoltre, un iteratore può offrire ulteriori metodi che consentono di derivare un nuovo iteratore, che trasforma la sequenza di valori in un'altra sequenza (accorpando, eliminando, trasformando, ecc., i singoli elementi originali).
+Un iteratore offre tipicamente un modo per verificare se sono presenti ulteriori valori da generare,
+\mintinline{rust}|hasNext() -> bool|,
+ed un altro per accedere al valore successivo, \mintinline{rust}|next() -> E|.
 
-Pressoché tutti i linguaggi "moderni" offrono il concetto di iteratore come parte della propria libreria standard.
-Essi permettono di accedere ai valori contenuti all'interno di collezioni come liste, insiemi, mappe, scorrere i caratteri presenti all'interno di una stringa o leggere il contenuto di un file di testo estraendo una riga alla volta.
+
+Talora, come in Rust, le due operazioni sono combinate: \mintinline{rust}|next() -> Option<E>|.
+Inoltre, un iteratore può offrire ulteriori metodi che consentono di derivare un nuovo iteratore, che trasforma
+la sequenza di valori in un'altra sequenza, accorpando, eliminando, trasformando, ecc., i singoli elementi originali.
+
+Pressoché tutti i linguaggi moderni offrono il concetto di iteratore come parte della propria libreria standard.
+Infatti essi permettono di accedere ai valori contenuti all'interno di collezioni come liste, insiemi, mappe, scorrere
+i caratteri presenti all'interno di una stringa o leggere il contenuto di un file di testo estraendo una riga alla volta.
 
 \subsection{Uso degli iteratori}
 L'uso degli iteratori si sovrappone concettualmente a quello dei cicli \verb|for|/\verb|while|.
-Tuttavia, offre svariati vantaggi in termini di compattezza del codice, leggibilità, manutenibilità ed efficienza, nascondendo i dettagli necessari a generare o accedere ai singoli elementi.
-I vantaggi sono maggiormente evidenti se l'operazione svolta all'interno del ciclo è complessa e richiede, ad esempio, di scartare alcuni valori e di trasformarne altri.
+Tuttavia, offre svariati vantaggi in termini di compattezza del codice, leggibilità, manutenibilità
+ed efficienza, nascondendo i dettagli necessari a generare o accedere ai singoli elementi.
+I vantaggi sono maggiormente evidenti se l'operazione svolta all'interno del ciclo è complessa
+e richiede, ad esempio, di scartare alcuni valori e di trasformarne altri.
 
 \begin{center}
   \begin{minipage}{0.48\linewidth}
@@ -48,22 +57,33 @@ println!("{:?}", v2);
 
 \subsection{Caratteristiche degli iteratori}
 \begin{itemize}
-  \item Un iteratore offre un modo uniforme di accedere agli elementi, indipendentemente da come essi siano generati o da dove siano prelevati, permettendo al codice che utilizza tali valori di ignorare la fonte ed essere più generico.
-  \item Gli iteratori operano in \textbf{modalità pigra (lazy)}: solo a fronte della richiesta di un valore successivo, si occupano di generarlo / prelevarlo.
-  \item Possono abilitare l'elaborazione parallela dei dati ospitati in una collezione, permettendo di sfruttare la presenza di più core nell'elaboratore.
-  \item La possibilità di derivare un iteratore da un altro iteratore aumenta la flessibilità del codice. È facile inserire all'interno di una catena di elaborazione passi ulteriori senza dover intervenire sul codice che utilizza i valori generati.
+  \item Un iteratore offre un \textbf{modo uniforme} di accedere agli elementi, indipendentemente da come essi
+        siano generati o da dove siano prelevati, permettendo al codice che utilizza tali valori di ignorare la
+        fonte ed essere più generico.
+  \item Operano in \textbf{modalità pigra (lazy)}: solo a fronte della richiesta di un valore successivo, si
+        occupano di generarlo / prelevarlo.
+  \item Possono abilitare l'\textbf{elaborazione parallela} dei dati ospitati in una collezione, permettendo di
+        sfruttare la presenza di più core nell'elaboratore.
+  \item La possibilità di \textbf{derivare un iteratore} da un altro iteratore aumenta la flessibilità del codice.
+        È facile inserire all'interno di una catena di elaborazione passi ulteriori senza dover intervenire sul
+        codice che utilizza i valori generati.
 \end{itemize}
 
 \section{Iteratori in Rust}
 In Rust, un iteratore è una qualsiasi struttura dati che implementa il tratto \verb|std::iter::Iterator|.
-Un tipo può segnalare la capacità di essere esplorato tramite un iteratore, implementando il tratto \verb|std::iter::IntoIterator|.
 
 \begin{minted}[breaklines]{rust}
 trait Iterator { 
     type Item; 
-    fn next(&mut self) -> Option<Self::Item>;    // ... molti altri metodi con implementazione di default
+    fn next(&mut self) -> Option<Self::Item>;     // ... molti altri metodi con implementazione
+                                                  // di default
 } 
+\end{minted}
 
+Un tipo può segnalare la capacità di essere esplorato tramite un iteratore, implementando
+il tratto \verb|std::iter::IntoIterator|.
+
+\begin{minted}[breaklines]{rust}
 trait IntoIterator where Self::IntoIter: Iterator<Item=Self::Item> { 
     type Item; 
     type IntoIter: Iterator; 
@@ -173,7 +193,7 @@ impl<const FROM: isize, const TO: isize> Iterator for MyRangeIterator<FROM, TO> 
 
 
 \begin{flushleft}
-  \begin{minipage}{0.65\linewidth}
+  \begin{minipage}{0.47\linewidth}
     \raggedright
     Caratteristice:
 
@@ -186,7 +206,7 @@ impl<const FROM: isize, const TO: isize> Iterator for MyRangeIterator<FROM, TO> 
 
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.3\linewidth}
+  \begin{minipage}{0.47\linewidth}
     \begin{minted}[breaklines]{rust}
 fn main() {
   let line = "INFO 2025-05-10 user=alice action=login";
@@ -204,19 +224,29 @@ fn main() {
 \end{flushleft}
 
 
-
-
-
 \section{Iteratori e possesso}
-I contenitori presenti nella libreria standard mettono normalmente a disposizione tre metodi per ricavare un iteratore ai dati contenuti al loro interno:
+I contenitori presenti nella libreria standard mettono normalmente a disposizione tre metodi per ricavare 
+un iteratore ai dati contenuti al loro interno:
 
 \begin{itemize}
-  \item \mintinline{rust}|iter()|: restituisce oggetti di tipo \mintinline{rust}|&Item| e non consuma il contenuto del contenitore.
-  \item \mintinline{rust}|iter_mut()|: restituisce oggetti di tipo \mintinline{rust}|&mut Item| e permette di modificare gli elementi all'interno del contenitore.
-  \item \mintinline{rust}|into_iter()|: prende possesso del contenitore e restituisce oggetti di tipo \mintinline{rust}|Item| estraendoli dal contenitore.
+  \item \mintinline{rust}|iter()|: restituisce oggetti di tipo \mintinline{rust}|&Item| e non consuma il 
+  contenuto del contenitore.
+  \item \mintinline{rust}|iter_mut()|: restituisce oggetti di tipo \mintinline{rust}|&mut Item| e permette 
+  di modificare gli elementi all'interno del contenitore.
+  \item \mintinline{rust}|into_iter()|: prende possesso del contenitore e restituisce oggetti di tipo 
+  \mintinline{rust}|Item| estraendoli dal contenitore.
 \end{itemize}
 
-È comune, per tali contenitori, dichiarare tre implementazioni distinte del tratto \verb|IntoIterator|: una per il tipo \verb|Container| (\mintinline{rust}|into_iter()|), una per il tipo \verb|&Container| (\mintinline{rust}|iter()|), e una per il tipo \verb|&mut Container| (\mintinline{rust}|iter_mut()|).
+È comune, per tali contenitori, dichiarare tre implementazioni distinte del tratto \verb|IntoIterator|:
+
+\begin{itemize}
+  \item una per il tipo \verb|Container| (\mintinline{rust}|into_iter()|),
+  \item una per il tipo \verb|&Container| (\mintinline{rust}|iter()|),
+  \item una per il tipo \verb|&mut Container| (\mintinline{rust}|iter_mut()|).
+  \item In alcuni casi (come \verb|HashSet<T>|, \verb|HashMap<T>|) la terza implementazione non è 
+  fornita perché romperebbe le astrazioni.
+\end{itemize}
+% una per il tipo \verb|Container| (\mintinline{rust}|into_iter()|), una per il tipo \verb|&Container| (\mintinline{rust}|iter()|), e una per il tipo \verb|&mut Container| (\mintinline{rust}|iter_mut()|).
 % In alcuni casi (come \verb|HashSet<T>|, \verb|HashMap<T>|) la terza implementazione non è fornita perché romperebbe le astrazioni.
 Non tutte le collezioni espongono tutte le forme di iterazione mutabile nello stesso modo: in
 particolare, la possibilità di mutare gli elementi dipende dalle garanzie che la struttura deve
@@ -225,11 +255,13 @@ preservare
 \begin{minted}[breaklines]{rust}
 let mut v = vec![String::from("a"), String::from("b"), String::from("c")];
 
-for s in &v { println!("{}", s); } // s ha tipo &String 
+for s in &v { println!("{}", s); }    // s ha tipo &String 
 
-for s in &mut v { s.push_str("1"); } // s ha tipo &mut String. Modifico il contenuto del vettore 
+for s in &mut v { s.push_str("1"); }  // s ha tipo &mut String - Modifico il contenuto 
+                                      // del vettore 
 
-for s in v { println!("{}", s); } // s ha tipo String. invalido il contenuto del vettore che non è più utilizzabile dopo il ciclo
+for s in v { println!("{}", s); } // s ha tipo String - invalido il contenuto del vettore 
+                                  // che non è più utilizzabile dopo il ciclo
 \end{minted}
 
 \subsection{Derivare un iteratore}
@@ -249,9 +281,12 @@ for s in it { // it.into_iter() -> it
 
 
 \section{Adattatori}
-Il tratto \verb|Iterator| definisce un nutrito gruppo di metodi che consumano un iteratore e ne derivano uno differente, in grado di offrire funzionalità ulteriori.
-Possono essere combinati in catene più o meno lunghe al termine delle quali occorre porre un consumatore finale.
-Tutti gli adattatori sono infatti pigri (\textit{lazy}) di natura e non invocano il metodo \mintinline{rust}|next()| dell'oggetto a monte se non a seguito di una richiesta proveniente da un loro consumatore.
+Il tratto \verb|Iterator| definisce un molti metodi che consumano un iteratore 
+costruiscono un nuovo iteratore derivato, in grado di offrire funzionalità ulteriori.
+Possono essere combinati in catene più o meno lunghe al termine delle quali occorre porre un 
+consumatore finale.
+Tutti gli adattatori sono infatti pigri (\textit{lazy}) di natura e non invocano il metodo 
+\mintinline{rust}|next()| dell'oggetto a monte se non a seguito di una richiesta proveniente da un loro consumatore.
 
 \begin{center}
   \begin{minipage}{0.3\linewidth}
@@ -265,7 +300,7 @@ v.iter()
 \end{minted}
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.65\linewidth}
+  \begin{minipage}{0.5\linewidth}
     \includegraphics[width=1\linewidth]{content/API_Programming/images/2026-04-03-16-20-34.png}
   \end{minipage}
 \end{center}
@@ -351,11 +386,11 @@ v.iter()
 \subsection{fold(...): riduzione esplicita di un iteratore}
 
 \mintinline{rust}|fold(init, f)| è un consumatore finale che attraversa l'iteratore mantenendo un accumulatore.
-        \begin{itemize}
-          \item L'accumulatore viene inizializzato con il valore \verb|init|.
-          \item Ad ogni passo applica \verb|f(acc, item)| e produce un nuovo accumulatore.
-          \item Al termine restituisce il valore finale dell'accumulatore.
-        \end{itemize}
+\begin{itemize}
+  \item L'accumulatore viene inizializzato con il valore \verb|init|.
+  \item Ad ogni passo applica \verb|f(acc, item)| e produce un nuovo accumulatore.
+  \item Al termine restituisce il valore finale dell'accumulatore.
+\end{itemize}
 Molte aggregazioni possono essere espresse con \mintinline{rust}|fold(...)|, come somma, prodotto, conteggio, concatenazione, costruzione di strutture, ecc.
 
 
@@ -369,8 +404,8 @@ let product = v.iter().fold(1, |acc, x| acc * x);
 
 
 \begin{figure}[h!]
-	\centering
-	\includegraphics[width=0.5\linewidth]{content/API_Programming/images/2026-04-11-18-03-39.png}
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/API_Programming/images/2026-04-11-18-03-39.png}
 \end{figure}
 
 
