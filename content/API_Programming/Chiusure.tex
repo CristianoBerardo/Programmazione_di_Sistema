@@ -1,24 +1,47 @@
 \section{Funzioni e chiusure}
-La programmazione in stile funzionale introduce il concetto di funzioni di ordine superiore.
-Si tratta di funzioni i cui parametri e/o il cui tipo di ritorno sono a loro volta una funzione.
-Questo richiede, ad un linguaggio, la possibilità di trattare una funzione come un tipo dati qualsiasi, consentendo di memorizzarla in una variabile.
+La programmazione in stile funzionale introduce il concetto di \textbf{funzioni di
+  ordine superiore}. Si tratta di funzioni i cui parametri e/o il cui tipo di
+ritorno sono a loro volta una funzione. Questo richiede, ad un linguaggio, la
+possibilità di trattare una funzione come un tipo dati qualsiasi, consentendo di
+memorizzarla in una variabile.
 
+Rust offre vari modi di trattare il comportamento eseguibile come valore:
+\begin{itemize}
+  \item Puntatori a funzione di tipo \mintinline{rust}|fn(T1,...,Tn)->U|
+  \item Chiusure, introdotte dalla sintassi lambda \mintinline{rust}|p1: T1, …, pn:Tn| -> R {…}|
+  \item Parametri generici vincolati da tratti funzionali \verb|FnOnce|,
+        \verb|FnMut|, \verb|Fn|.
+\end{itemize}
 
-La differenza chiave non è sintattica, ma semantica I valori di tipo \verb|fn(...)| non catturano stato
-○ Le chiusure e i tipi derivati possono includere uno stato catturato
-
+La differenza chiave non è sintattica, ma semantica. I valori di tipo
+\verb|fn(...)| non catturano stato. Le chiusure e i tipi derivati possono
+includere uno stato catturato
 
 La scelta del tipo di valore invocabile influenza vari aspetti: La
 rappresentazione del valore, prestiti e possesso, modalità di invocazione,
-possibilità di riuso
+possibilità di riuso.
 
-In Rust è possibile assegnare ad una variabile il puntatore ad una funzione (che avrà come tipo \mintinline{rust}|fn(T1,...,Tn)->U|) o assegnare un valore che implementa un tratto funzionale: \verb|FnOnce|, \verb|FnMut|, \verb|Fn|.
+\subsection{Puntatori a funzione - fn(T1, ..., Tn) -> U}
+% Qualunque sia la natura del dato assegnato, si utilizza la variabile che contiene il puntatore come se fosse essa stessa una funzione.
+% Sia il tipo di ritorno che tutti i tipi degli argomenti devono corrispondere a quanto dichiarato nella definizione della variabile (e della funzione).
 
-\subsection{Puntatori a funzione}
-Qualunque sia la natura del dato assegnato, si utilizza la variabile che contiene il puntatore come se fosse essa stessa una funzione.
-Sia il tipo di ritorno che tutti i tipi degli argomenti devono corrispondere a quanto dichiarato nella definizione della variabile (e della funzione).
 
-\begin{minted}[breaklines]{rust}
+Un valore di tipo \verb|fn(A, B) -> R| è un
+puntatore a funzione con firma
+compatibile. Può essere invocato come funzione
+normale: \verb|f(x, y)|.
+
+
+È adatto quando:
+
+\begin{itemize}
+  \item Il comportamento da eseguire è già definito
+  \item Non serve catturare stato
+\end{itemize}
+
+\begin{center}
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
 fn f1(i: i32, d: f64) -> f64 { 
     return i as f64 * d; 
 }
@@ -27,8 +50,10 @@ let ptr: fn(i32, f64) -> f64;
 ptr = f1; // assegno il puntatore 
 ptr(2, 3.14); // chiamo la funzione 
 \end{minted}
-
-\begin{minted}[breaklines]{rust}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.5\linewidth}
+    \begin{minted}[breaklines]{rust}
 fn add(a: i32, b: i32) -> i32 { a + b }
 fn multiply(a: i32, b: i32) -> i32 { a * b }
 fn choose(c: bool) -> fn(i32, i32) -> i32 {
@@ -41,65 +66,200 @@ fn main() {
   println!("f2 => {}", f2(2, 3)); // 6
 }
 \end{minted}
-
+  \end{minipage}
+\end{center}
 
 
 \begin{tcolorbox}
-  \textbf{Nota:} fn(...) rappresenta codice invocabile senza stato catturato 
+  \textbf{Nota:} \verb|fn(...)| rappresenta codice invocabile senza stato catturato
 \end{tcolorbox}
 
+\section{Chiusure: codice + ambiente catturato}
+Un puntatore a funzione invoca solo codice; non incorpora un ambiente lessicale.
+Una chiusura è un valore invocabile che può catturare variabili visibili nel
+punto in cui è definita.
+Le variabili catturate diventano parte dello stato della chiusura.
+Ogni chiusura ha un tipo proprio, unico e anonimo generato dal compilatore.
 
-\section{Funzioni lambda}
-Una funzione lambda è una funzione anonima costituita da un blocco di codice espresso in forma letterale.
-Tale forma dipende dal linguaggio di programmazione ed è oggetto delle forme più disparate:
-
-\begin{itemize}
-  \item \textbf{Javascript}, si utilizza la notazione freccia: \mintinline{js}|const f = (v) => v + 1|.
-  \item \textbf{Kotlin}, si racchiude l'espressione tra parentesi graffe: \mintinline{kotlin}|val F = {v: Int -> v + 1}|.
-  \item \textbf{C++}, si usa una notazione ancora più complessa: \mintinline{cpp}|auto f = [](int v) -> int { return v + 1; }|.
-  \item \textbf{Rust}, si racchiudono i parametri formali tra \verb||||: \mintinline{rust}{let f = |v| {v + 1}}.
-\end{itemize}
-
-Una volta definita ed assegnata ad una variabile, una funzione lambda può essere invocata trattando la variabile come se fosse una funzione.
-Ovvero facendo seguire al nome della variabile la lista degli argomenti racchiusi in parentesi tonde: ad esempio, \mintinline{rust}|f(5);|.
-
-È possibile passare una funzione lambda come argomento di una funzione da invocare o utilizzare una funzione lambda come valore di ritorno di una funzione. La sintassi con cui si indica il tipo ritornato (una funzione che accetta certi tipi come parametri e restituisce un certo tipo di valore), a seconda dei linguaggi, può essere più o meno leggibile.
-
-\begin{minted}[breaklines]{rust}
-fn ret_fun() -> fn(i32) -> i32 { 
-    return |x| {x + 1}; 
-} 
-\end{minted}
-
-
-\section{Chiusure}
-Il corpo di una funzione lambda può fare riferimento alle variabili che sono visibili nel contesto in cui è definita, acquisendone un riferimento, una copia o il possesso completo, in base al linguaggio e alla sintassi usata.
-Tali variabili, che compaiono nel corpo della funzione lambda, sono dette \textit{variabili libere}.
-
-La funzione lambda così ottenuta viene detta \textbf{chiusura} , in quanto racchiude, al proprio interno, (una copia de) i valori catturati (quelli contenuti nelle variabili libere), rendendoli disponibili quando sarà successivamente invocata.
-
-In Rust, il compilatore trasforma una chiusura in una tupla avente tanti campi quante sono le variabili libere.
-Tale tupla implementa uno dei tratti funzionali previsti dal linguaggio: \verb|FnOnce|, \verb|FnMut|, \verb|Fn|.
+Tale tipo implementa almeno il tratto \verb|FnOnce|, ed eventualmente anche
+i tratti \verb|FnMut| e \verb|Fn|.
 
 
 \begin{tcolorbox}
   \textbf{Note:} Una chiusura è simile ad una struct anonima con alcuni campi catturati
-e con un'operazione di chiamata definita dal compilatore 
+  e con un'operazione di chiamata definita dal compilatore
 \end{tcolorbox}
 
+\subsection{Differenza essenziale: una chiusura cattura l'ambiente}
 
-\subsection{Cattura delle variabili}
-Per default in Rust, tutte le variabili libere che compaiono nel corpo di una funzione lambda sono catturate per riferimento.
-Il compilatore, automaticamente, crea un prestito in lettura (\mintinline{rust}|&|).
-Se occorre modificare il contenuto delle variabili catturate, occorre dichiarare la funzione lambda come mutabile (\mintinline{rust}|let mut f = |...| {....};|): in questo caso verrà creato un prestito esclusivo (\mintinline{rust}|&mut|).
+\begin{flushleft}
+  \begin{minipage}{0.45\linewidth}
+    \raggedright
+    \begin{itemize}
+      \item \textbf{f\_ptr} non dispone di ambiente catturato, il suo
+            risultato dipende solo dagli argomenti e da ciò che la funzione può già
+            raggiungere senza cattura
+      \item \textbf{closure(...)} usa anche \textbf{offset}, che appartiene al contesto lessicale esterno
+      \item \textbf{offset} è una variabile libera nel corpo della chiusura
+      \item Il compilatore decide come catturarla: per riferimento, come riferimento mutabile o per valore
+    \end{itemize}
 
-Il borrow checker, come al solito, verifica che tali riferimenti siano coerenti tra loro e con il tempo di vita dei valori cui si riferiscono.
-Se occorre, è possibile indicare che la funzione lambda intende acquisire il possesso dei valori contenuti nelle variabili libere.
-Lo si fa anteponendo alla definizione della funzione lambda la parola chiave \mintinline{rust}|move|:
+    \begin{tcolorbox}
+      \textbf{Nota:} Una chiusura è una funzione accompagnata dal proprio ambiente
+    \end{tcolorbox}
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+fn add_one(x: i32) -> i32 {
+  x + 1
+}
+fn main() {
+  let offset = 10;
+  let f_ptr: fn(i32)->i32 = add_one;
+  let closure = |x| { x + offset };
+  println!("{}", f_ptr(5)); // 6
+  println!("{}", closure(5)); // 15
+}
+\end{minted}
+  \end{minipage}
+\end{flushleft}
+
+
+\subsection{Chiusure che non catturano}
+Una chiusura viene invocata come una funzione: \textbf{f(5)}.
+Se \textbf{non cattura variabili}, può essere convertita a puntatore a funzione.
+Se invece cattura un ambiente, la si descrive tramite:
+
+\begin{itemize}
+  \item \mintinline{rust}|impl Fn|
+  \item \mintinline{rust}|impl FnMut|
+  \item \mintinline{rust}|impl FnOnce|
+\end{itemize}
+
+Come oggetto tratto, \mintinline{rust}|Box<dyn Fn(...)>| quando occorre implementare
+il dispatch dinamico.
 
 \begin{center}
-  \mintinline{rust}{let f = move |...| {...};}
+  \begin{minipage}{0.37\linewidth}
+    \begin{minted}[breaklines]{rust}
+fn ret_fun() -> fn(i32) -> i32 {
+  |x|{ x + 1 }      //Funziona perché la funzione ritornata non cattura valori
+}
+\end{minted}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.57\linewidth}
+    \begin{minted}[breaklines]{rust}
+fn ret_closure(i: i32) -> impl Fn(i32) -> i32 {
+  move |x|{ x + i }   //viene catturata la variabile i
+}
+\end{minted}
+  \end{minipage}
 \end{center}
+
+
+\subsection{Modalità di cattura in Rust}
+Una chiusura cattura ogni variabile libera nel modo meno restrittivo compatibile
+con il suo utilizzo nel corpo:
+
+\begin{itemize}
+  \item Se la variabile è solo letta, la cattura avviene tramite riferimento condiviso \verb|&|
+  \item Se nel corpo richiede modifica dello stato catturato, la chiusura
+        richiede accesso mutabile al proprio, \mintinline{rust}|let mut f = |...| {...};|
+        e implementa tipicamente il tratto \verb|FnMut|
+  \item Se il corpo consuma un valore catturato, la chiusura implementa il tratto \verb|FnOnce|
+  \item Il borrow checker verifica la coerenza tra catture, prestiti e il
+        tempo di vita
+\end{itemize}
+
+La parola chiave \verb|move| forza la cattura per valore: \mintinline{rust}{let f = move |...| {...};}.
+\verb|move| non implica necessariamente \verb|FnOnce|.
+Il tratto implementato dalla chiusura dipende da come il valore viene usato.
+
+\subsection{Modello mentale: le chiusure come struct anonime}
+
+\begin{flushleft}
+  \begin{minipage}{0.5\linewidth}
+    \raggedright
+    Il compilatore materializza l'ambiente catturato come campi di un tipo
+    anonimo
+
+    \begin{itemize}
+      \item Senza \verb|move|, la cattura può avvenire per riferimento
+      \item Con \verb|move|, i campi dell'ambiente vengono catturati per
+            valore
+      \item l corpo della chiusura opera su questi campi
+    \end{itemize}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+let y: Y = ...;
+let z: Z = ...;
+let f = |x| x + y.m() + z;  
+//is equivalent to
+struct __Closure<'a> {
+  y: &'a Y,  // o Y o &mut Y in base all'uso nel corpo
+  z: &'a Z, 
+}
+// impl Fn / FnMut / FnOnce for __Closure
+   \end{minted}
+  \end{minipage}
+\end{flushleft}
+
+
+
+
+% \section{Funzioni lambda}
+% Una funzione lambda è una funzione anonima costituita da un blocco di codice espresso in forma letterale.
+% Tale forma dipende dal linguaggio di programmazione ed è oggetto delle forme più disparate:
+
+% \begin{itemize}
+%   \item \textbf{Javascript}, si utilizza la notazione freccia: \mintinline{js}|const f = (v) => v + 1|.
+%   \item \textbf{Kotlin}, si racchiude l'espressione tra parentesi graffe: \mintinline{kotlin}|val F = {v: Int -> v + 1}|.
+%   \item \textbf{C++}, si usa una notazione ancora più complessa: \mintinline{cpp}|auto f = [](int v) -> int { return v + 1; }|.
+%   \item \textbf{Rust}, si racchiudono i parametri formali tra \verb||||: \mintinline{rust}{let f = |v| {v + 1}}.
+% \end{itemize}
+
+% Una volta definita ed assegnata ad una variabile, una funzione lambda può essere invocata trattando la variabile come se fosse una funzione.
+% Ovvero facendo seguire al nome della variabile la lista degli argomenti racchiusi in parentesi tonde: ad esempio, \mintinline{rust}|f(5);|.
+
+% È possibile passare una funzione lambda come argomento di una funzione da invocare o utilizzare una funzione lambda come valore di ritorno di una funzione. La sintassi con cui si indica il tipo ritornato (una funzione che accetta certi tipi come parametri e restituisce un certo tipo di valore), a seconda dei linguaggi, può essere più o meno leggibile.
+
+% \begin{minted}[breaklines]{rust}
+% fn ret_fun() -> fn(i32) -> i32 { 
+%     return |x| {x + 1}; 
+% } 
+% \end{minted}
+
+
+% \section{Chiusure}
+% Il corpo di una funzione lambda può fare riferimento alle variabili che sono visibili nel contesto in cui è definita, acquisendone un riferimento, una copia o il possesso completo, in base al linguaggio e alla sintassi usata.
+% Tali variabili, che compaiono nel corpo della funzione lambda, sono dette \textit{variabili libere}.
+
+% La funzione lambda così ottenuta viene detta \textbf{chiusura} , in quanto racchiude, al proprio interno, (una copia de) i valori catturati (quelli contenuti nelle variabili libere), rendendoli disponibili quando sarà successivamente invocata.
+
+% In Rust, il compilatore trasforma una chiusura in una tupla avente tanti campi quante sono le variabili libere.
+% Tale tupla implementa uno dei tratti funzionali previsti dal linguaggio: \verb|FnOnce|, \verb|FnMut|, \verb|Fn|.
+
+
+
+
+
+\subsection{Cattura delle variabili in Rust}
+% Per default in Rust, tutte le variabili libere che compaiono nel corpo di una funzione lambda sono catturate per riferimento.
+% Il compilatore, automaticamente, crea un prestito in lettura (\mintinline{rust}|&|).
+% Se occorre modificare il contenuto delle variabili catturate, occorre dichiarare la funzione lambda come mutabile (\mintinline{rust}|let mut f = |...| {....};|): in questo caso verrà creato un prestito esclusivo (\mintinline{rust}|&mut|).
+
+% Il borrow checker, come al solito, verifica che tali riferimenti siano coerenti tra loro e con il tempo di vita dei valori cui si riferiscono.
+% Se occorre, è possibile indicare che la funzione lambda intende acquisire il possesso dei valori contenuti nelle variabili libere.
+% Lo si fa anteponendo alla definizione della funzione lambda la parola chiave \mintinline{rust}|move|:
+
+% \begin{center}
+%   \mintinline{rust}{let f = move |...| {...};}
+% \end{center}
 
 \begin{figure}[h!]
   \centering
@@ -108,7 +268,7 @@ Lo si fa anteponendo alla definizione della funzione lambda la parola chiave \mi
 
 
 \begin{center}
-  \begin{minipage}{0.75\linewidth}
+  \begin{minipage}{0.8\linewidth}
     \begin{minipage}{0.48\linewidth}
       \begin{minted}[breaklines]{rust}
 // Stack referenzia la memoria
@@ -125,85 +285,194 @@ let f2 = move |x| { x + y.f() + z };
   \end{minipage}
 \end{center}
 
+\begin{tcolorbox}
+  \textbf{Nota:} Il diagramma è qualitativo: in assenza di \verb|move|, la modalità di cattura dipende dall’uso;
+  move forza invece la cattura per valore
+\end{tcolorbox}
 
-\section{I tratti funzionali}
-Rust definisce tre tratti funzionali che possono essere implementati solo tramite chiusure.
-Quale tratto venga implementato, dipende da cosa e come viene catturato.
 
-\begin{minted}[breaklines]{rust}
-trait FnOnce<Args> { 
-    type Output; 
-    fn call_once(self, args: Args) -> Self::Output; 
-}
-
-trait FnMut<Args>: FnOnce<Args> { 
-    fn call_mut(&mut self, args: Args) -> Self::Output; 
-}
-
-trait Fn<Args>: FnMut<Args> { 
-    fn call(&self, args: Args) -> Self::Output; 
-}
-\end{minted}
-
-\subsection{Comportamento dei tratti funzionali}
-
-\begin{itemize}
-  \item \textbf{\texttt{FnOnce<Args>|}}: Una chiusura implementa questo tratto se consuma uno o più valori come parte della propria esecuzione. Pertanto, potrà essere invocata una sola volta.
-  \item \textbf{\texttt{FnMut<Args>|}}: Una chiusura implementa questo tratto se può essere invocata più volte, ma ha catturato una o più variabili in modo esclusivo (\mintinline{rust}|&mut|). Questo tipo di chiusura produce effetti collaterali ed ha pertanto uno stato. Esecuzioni successive con gli stessi parametri in ingresso possono dare risultati differenti.
-  \item \textbf{\texttt{Fn<Args>|}}: Una chiusura implementa questo tratto se si limita ad accedere in sola lettura alle variabili libere (\mintinline{rust}|&|). Finché la funzione esiste, le variabili libere sono in prestito condiviso e non possono essere cambiate. Pertanto, la chiusura può essere invocata un numero qualsiasi di volte e produce, a parità di argomenti, sempre lo stesso risultato.
-\end{itemize}
-
+\subsection{Gerarchia dei tratti funzionali}
 
 \begin{center}
-  \begin{minipage}{0.48\linewidth}
-    \begin{tcolorbox}[title=Esempio FnOnce]
-      \begin{minted}[breaklines]{rust}
-let range = 1..10; 
-let f = || range.count(); 
-let n1 = f(); // 10 
-let n2 = f(); // Errore di compilazione: l'intervallo è stato consumato 
-        \end{minted}
-    \end{tcolorbox}
+  \begin{equation*}
+    \texttt{Fn} \subset \texttt{FnMut} \subset \texttt{FnOnce}
+  \end{equation*}
+\end{center}
+
+\begin{table}[h!]
+  \renewcommand{\arraystretch}{1.6}
+  \centering
+  \begin{tabularx}{\textwidth}{X X X X}
+    \toprule
+    \textbf{Tratto} & \textbf{Ricevitore concettuale} & \textbf{Ambiente catturato} & \textbf{Invocazioni} \\
+    \midrule
+    \texttt{FnOnce} & \texttt{self}                   & Può essere consumato        & al più una           \\
+    \texttt{FnMut}  & \texttt{\&mut self}             & Può essere modificato       & zero o più           \\
+    \texttt{Fn}     & \texttt{\&self}                 & È in sola lettura           & zero o più           \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+
+
+
+
+
+% \section{I tratti funzionali}
+% Rust definisce tre tratti funzionali che possono essere implementati solo tramite chiusure.
+% Quale tratto venga implementato, dipende da cosa e come viene catturato.
+
+% \begin{minted}[breaklines]{rust}
+% trait FnOnce<Args> { 
+%     type Output; 
+%     fn call_once(self, args: Args) -> Self::Output; 
+% }
+
+% trait FnMut<Args>: FnOnce<Args> { 
+%     fn call_mut(&mut self, args: Args) -> Self::Output; 
+% }
+
+% trait Fn<Args>: FnMut<Args> { 
+%     fn call(&self, args: Args) -> Self::Output; 
+% }
+% \end{minted}
+
+% \subsection{Comportamento dei tratti funzionali}
+
+% \begin{itemize}
+%   \item \textbf{\texttt{FnOnce<Args>|}}: Una chiusura implementa questo tratto se consuma uno o più valori come parte della propria esecuzione. Pertanto, potrà essere invocata una sola volta.
+%   \item \textbf{\texttt{FnMut<Args>|}}: Una chiusura implementa questo tratto se può essere invocata più volte, ma ha catturato una o più variabili in modo esclusivo (\mintinline{rust}|&mut|). Questo tipo di chiusura produce effetti collaterali ed ha pertanto uno stato. Esecuzioni successive con gli stessi parametri in ingresso possono dare risultati differenti.
+%   \item \textbf{\texttt{Fn<Args>|}}: Una chiusura implementa questo tratto se si limita ad accedere in sola lettura alle variabili libere (\mintinline{rust}|&|). Finché la funzione esiste, le variabili libere sono in prestito condiviso e non possono essere cambiate. Pertanto, la chiusura può essere invocata un numero qualsiasi di volte e produce, a parità di argomenti, sempre lo stesso risultato.
+% \end{itemize}
+
+
+\section{FnOnce vs FnMut}
+
+\begin{center}
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+let range = 1..10;
+let f = || range.count();
+let n1 = f();
+// let n2 = f();
+// errore: range è stato consumato
+\end{minted}
+
+    \verb|range.count()| consuma range, il valore catturato viene tolto dall'ambiente quindi
+    la chiusura può essere chiamata una sola volta. $\to$ \verb|f: FnOnce() -> usize|
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.48\linewidth}
-    \begin{tcolorbox}[title=Esempio FnMut]
-      \begin{minted}[breaklines]{rust}
-let mut sum = 0; 
-let mut f = |x| sum += x; 
-f(5); // ok, sum: 5 
-f(7); // ok, sum: 12 
-        \end{minted}
-    \end{tcolorbox}
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+let mut sum = 0;
+let mut f = |x| sum += x;
+f(5);
+f(7);
+// sum vale 12
+\end{minted}
+
+    La chiusura modifica il proprio ambiente. Occorre invocarla tramite accesso mutabile
+    $\to$ \verb|f: FnMut(i32) -> ()|
   \end{minipage}
 \end{center}
 
-\begin{tcolorbox}[title=Esempio Fn]
-  \begin{minted}[breaklines]{rust}
+% \begin{center}
+%   \begin{minipage}{0.48\linewidth}
+%     \begin{tcolorbox}[title=Esempio FnOnce]
+%       \begin{minted}[breaklines]{rust}
+% let range = 1..10; 
+% let f = || range.count(); 
+% let n1 = f(); // 10 
+% let n2 = f(); // Errore di compilazione: l'intervallo è stato consumato 
+%         \end{minted}
+%     \end{tcolorbox}
+%   \end{minipage}%
+%   \hfill
+%   \begin{minipage}{0.48\linewidth}
+%     \begin{tcolorbox}[title=Esempio FnMut]
+%       \begin{minted}[breaklines]{rust}
+% let mut sum = 0; 
+% let mut f = |x| sum += x; 
+% f(5); // ok, sum: 5 
+% f(7); // ok, sum: 12 
+%         \end{minted}
+%     \end{tcolorbox}
+%   \end{minipage}
+% \end{center}
+
+
+\section{Fn}
+
+\begin{center}
+  \begin{minipage}{0.6\linewidth}
+    Una chiusura di tipo \verb|Fn| accede all'ambiente catturato senza consumarlo né
+    mutarlo, dunque può essere invocata più volte e produrrà sempre il medesimo risultato.
+
+    Tipicamente, la cattura avviene tramite accesso in sola lettura al dato esterno.
+    Questo è il caso più restrittivo ma anche quello più riusabile.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.35\linewidth}
+    \begin{minted}[breaklines]{rust}
 let s = "hello"; 
 let f = |v| v < s; 
 f("world"); // false 
 f("bye"); // true 
-    \end{minted}
-\end{tcolorbox}
+\end{minted}
+  \end{minipage}
+\end{center}
 
 
-\section{Funzioni di ordine superiore}
-È possibile implementare una funzione che accetta come parametro una funzione lambda ricorrendo alla programmazione generica.
-Ogni funzione lambda forma infatti un tipo a sé, la cui unica istanza è la funzione lambda stessa. Tuttavia, esse implementano tutte almeno uno dei tratti funzionali: è quindi possibile definire una funzione generica che accetta come parametro di ingresso un'istanza del tipo F, soggetta al vincolo che tale tipo deve implementare uno dei tratti funzionali.
 
-Quale specifico tratto richiedere dipende dalla natura del codice che si intende scrivere:
+
+
+\section{Chiusure come argomenti}
+Ogni chiusura ha un tipo anonimo distinto. Per accettare una chiusura come
+parametro si usa spesso un \textbf{tipo generico}.
+
+Il vincolo posto su tale tipo dipende dall'uso
+previsto:
+
 \begin{itemize}
-  \item \verb|FnOnce(Args)| accetterà qualsiasi chiusura, ma questa potrà essere invocata una sola volta.
-  \item \verb|FnMut(Args)| e \verb|Fn(Args)| sono via via più restrittivi sulle operazioni che è lecito eseguire all'interno della funzione e più ampi nell'uso della funzione di ordine superiore.
+  \item \verb|FnOnce|  se basta una chiamata
+  \item \verb|FnMut| se si vuole modificare l'ambiente
+  \item \verb|Fn| se vengono effettuate solo letture
 \end{itemize}
 
-\subsection{Restituire chiusure}
-Analogamente, è possibile scrivere una funzione che restituisce una chiusura.
-Se la chiusura ritornata cattura qualche variabile, occorre fare attenzione al fatto che, normalmente, ciò implica memorizzare un riferimento all'interno della chiusura stessa. Questo fatto potrebbe imporre restrizioni sul tempo di vita del dato catturato non facilmente compatibili con il fatto che la chiusura ritornata deve sopravvivere alla funzione stessa (e quindi a tutte le sue variabili locali e ai suoi argomenti).
+La presenza del parametro generico dà origine
+a \textbf{monomorfizzazione}. Se serve eterogeneità in fase di esecuzione, si
+può usare \mintinline{rust}|Box<dyn Fn(...) -> R>|
 
-In questa situazione, si usa comunemente il modificatore \mintinline{rust}|move| per trasferire il possesso di tali dati alla chiusura stessa.
-Può, inoltre, essere necessario richiedere che il dato catturato sia clonabile, se l'esecuzione della chiusura ritornata tendesse a consumare il dato e non si volesse ridurla ad \verb|FnOnce<Args>|.
+
+
+% \section{Funzioni di ordine superiore}
+% È possibile implementare una funzione che accetta come parametro una funzione lambda ricorrendo alla programmazione generica.
+% Ogni funzione lambda forma infatti un tipo a sé, la cui unica istanza è la funzione lambda stessa. Tuttavia, esse implementano tutte almeno uno dei tratti funzionali: è quindi possibile definire una funzione generica che accetta come parametro di ingresso un'istanza del tipo F, soggetta al vincolo che tale tipo deve implementare uno dei tratti funzionali.
+
+% Quale specifico tratto richiedere dipende dalla natura del codice che si intende scrivere:
+% \begin{itemize}
+%   \item \verb|FnOnce(Args)| accetterà qualsiasi chiusura, ma questa potrà essere invocata una sola volta.
+%   \item \verb|FnMut(Args)| e \verb|Fn(Args)| sono via via più restrittivi sulle operazioni che è lecito eseguire all'interno della funzione e più ampi nell'uso della funzione di ordine superiore.
+% \end{itemize}
+
+\subsection{Restituire una chiusura in sicurezza}
+% Analogamente, è possibile scrivere una funzione che restituisce una chiusura.
+% Se la chiusura ritornata cattura qualche variabile, occorre fare attenzione al fatto che, normalmente, ciò implica memorizzare un riferimento all'interno della chiusura stessa. Questo fatto potrebbe imporre restrizioni sul tempo di vita del dato catturato non facilmente compatibili con il fatto che la chiusura ritornata deve sopravvivere alla funzione stessa (e quindi a tutte le sue variabili locali e ai suoi argomenti).
+
+% In questa situazione, si usa comunemente il modificatore \mintinline{rust}|move| per trasferire il possesso di tali dati alla chiusura stessa.
+% Può, inoltre, essere necessario richiedere che il dato catturato sia clonabile, se l'esecuzione della chiusura ritornata tendesse a consumare il dato e non si volesse ridurla ad \verb|FnOnce<Args>|.
+
+Se una funzione restituisce una chiusura, il valore restituito deve essere
+slegato dallo stack frame locale.
+
+\begin{itemize}
+  \item \mintinline{rust}|move| trasferisce il possesso dei valori alla chiusura
+  \item \mintinline{rust}|impl Fn() -> T| nasconde il tipo anonimo concreto
+        della chiusura
+  \item L'invocazione del metodo \verb|clone| permette di restituire ogni volta
+        un nuovo valore senza consumare quello catturato
+\end{itemize}
+
 
 \begin{minted}[breaklines]{rust}
 fn value_source<T>(v: T) -> impl Fn() -> T where T: Clone { 
@@ -217,6 +486,16 @@ fn value_source<T>(v: T) -> impl Fn() -> T where T: Clone {
 
 
 \subsection{Esempio di generatore}
+
+Questa chiusura cattura \verb|b| per valore, e \verb|i|  per valore, mantenendolo
+come stato interno mutabile.
+
+Ad ogni invocazione lo stato si aggiorna e produce un risultato diverso.
+
+Il tratto associato è \verb|FnMut|, perché l'ambiente viene modificato.
+Questo pattern è utile quando si vuole incapsulare uno stato senza definire esplicitamente
+una struct dedicata.
+
 \begin{minted}[breaklines]{rust}
 fn generator(prefix: &str) -> impl FnMut() -> String { 
     let mut i = 0; 
