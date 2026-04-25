@@ -12,9 +12,10 @@ Se esistono strategie diverse di implementazione, spesso sono presenti versioni
 alternative con diverse caratteristiche in termini di prestazioni.
 
 
-È responsabilità del programmatore conoscere le proprietà di complessità delle
-diverse strutture dati e riconoscere in quale occasione sia opportuno utilizzare
-l'una piuttosto che l'altra.
+È responsabilità del programmatore conoscere proprietà semantiche e costi
+computazionali delle diverse strutture dati, per scegliere quella adatta al caso
+d'uso. La scelta del contenitore deve tener conto anche di vincoli legati al
+possesso, località della memoria e pattern di accesso
 
 \section{Complessità nel tempo}
 \begin{table}[h!]
@@ -22,19 +23,21 @@ l'una piuttosto che l'altra.
   \centering
   \begin{tabular}{l c c c c}
     \toprule
-    \textbf{Descrizione}        & \textbf{Accesso} & \textbf{Ricerca} & \textbf{Inserimento} & \textbf{Cancellazione} \\
+    \textbf{Descrizione} & \textbf{Accesso} & \textbf{Ricerca} & \textbf{Inserimento}              & \textbf{Cancellazione}            \\
     \midrule
-    Array dinamico              & $O(1)$           & $O(n)$           & $O(n)$               & $O(n)$                 \\
-    Coda a doppia entrata       & $O(n)$           & $O(n)$           & $O(1)$               & $O(1)$                 \\
-    Lista doppiamente collegata & $O(n)$           & $O(n)$           & $O(1)$               & $O(1)$                 \\
-    Coda a priorità             & $O(1)$           & -                & $O(\log(n))$         & $O(\log(n))$           \\
-    Tabella hash                & $O(1)$           & $O(1)$           & $O(1)$               & $O(1)$                 \\
-    Mappa ordinata              & $O(\log(n))$     & $O(\log(n))$     & $O(\log(n))$         & $O(\log(n))$           \\
-    Insieme Hash                & -                & $O(1)$           & $O(1)$               & $O(1)$                 \\
-    Insieme ordinato            & -                & $O(\log(n))$     & $O(\log(n))$         & $O(\log(n))$           \\
+    std::Vec<T>          & $O(1)$           & $O(n)$           & Fine: $O(1)$, posizionale: $O(n)$ & Fine: $O(1)$, posizionale: $O(n)$ \\
+    std::VecDeque<T>     & $O(n)$           & $O(n)$           & Estremi: $O(1)$, interno: $O(n)$  & Estremi: $O(1)$, interno: $O(n)$  \\
+    std::LinkedList<T>   & $O(n)$           & $O(n)$           & dato il nodo/estremi: $O(1)$      & dato il nodo/estremi: $O(1)$      \\
+    std::BinaryHeap<T>   & max/min: $O(1)$  & $O(1)$           & $O(\log(n))$                      & Pop: $O(\log(n))$                 \\
+    std::HashMap<T>      & -                & medio: $O(1)$    & medio: $O(1)$                     & Medio:$O(1)$                      \\
+    std::BTreeMap<T>     & -                & $O(\log(n))$     & $O(\log(n))$                      & $O(\log(n))$                      \\
+    std::HashSet<T>      & -                & medio: $O(1)$    & medio: $O(1)$                     & Medio: $O(1)$                     \\
+    std::BTreeSet<T>     & -                & $O(\log(n))$     & $O(\log(n))$                      & $O(\log(n))$                      \\
     \bottomrule
   \end{tabular}
 \end{table}
+
+
 
 \clearpage
 
@@ -71,17 +74,18 @@ l'una piuttosto che l'altra.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.3\linewidth]{content/API_Programming/images/2026-04-02-16-51-13.png}
+  \includegraphics[width=0.4\linewidth]{content/API_Programming/images/2026-04-13-11-42-19.png}
 \end{figure}
 
 
 
 \section{Metodi comuni a tutte le collezioni}
-Tutte le collezioni, messe a disposizione della standard library di Rust,
-offrono una serie di metodi comuni tra cui:
+Molte collezioni della standard library di Rust espongono un insieme di metodi e
+tratti comuni:
 
 \begin{itemize}
   \item \texttt{new()}: alloca una nuova collezione
+  \item \texttt{with\_capacity(capacity: usize)}: alloca una nuova collezione con capacità iniziale fissata
   \item \texttt{len()}: permette di conoscere l'attuale dimensione della
         collezione
   \item \texttt{clear()}: rimuove tutti gli elementi della
@@ -91,28 +95,28 @@ offrono una serie di metodi comuni tra cui:
 
 \end{itemize}
 
-Oltre a questi metodi di base, tutte le collezioni implementano i tratti
+Inoltre, molte collezioni implementano i tratti
 \texttt{IntoIterator} e \texttt{FromIterator}:
 
 \begin{itemize}
-  \item \texttt{into\_iter()}: permette di convertire qualsiasi collezione in un iteratore
-  \item \texttt{collect()}:permette di ottenere una collezione partendo da un iteratore
+  \item \texttt{IntoIterator::into\_iter()}: permette di convertire qualsiasi collezione in un iteratore
+  \item \texttt{FromIterator::collect()}:permette di ottenere una collezione partendo da un iteratore
 \end{itemize}
 
 \section{Vec<T>}
-Il tipo \texttt{Vec<T>} rappresenta una sequenza ridimensionabile di elementi di tipo \texttt{T},
-allocati sullo heap. Questa collezione offre una serie di metodi per accedere al
-suo contenuto e per inserire/togliere valori al suo interno.
+Il tipo \texttt{Vec<T>} rappresenta una sequenza ridimensionabile di elementi di
+tipo \texttt{T}, allocati sullo heap. Questa collezione offre una serie di
+metodi per accedere al suo contenuto e per inserire/togliere valori al suo
+interno.
 
-Una variabile di tipo \texttt{Vec<T>} è una tupla formata da tre valori privati:
+Un valore di tipo \texttt{Vec<T>} è rappresentato internamente da tre campi logici:
+
 
 \begin{itemize}
-  \item \texttt{ptr}: Un puntatore ad un buffer allocato sullo
+  \item \textbf{Un puntatore} ad un buffer allocato sullo
         heap nel quale sono memorizzati gli elementi
-  \item \texttt{len}: Un intero privo
-        di segno che indica la dimensione complessiva del buffer
-  \item \texttt{cap}: Un
-        intero privo di segno che indica quanti elementi sono valorizzati nel buffer
+  \item \textbf{Un intero} privo di segno che indica la dimensione complessiva del buffer
+  \item \textbf{Un intero} privo di segno che indica quanti elementi sono valorizzati nel buffer
 \end{itemize}
 
 
@@ -124,7 +128,7 @@ presenti.
 Nel caso in cui il buffer fosse già completo, verrà allocato un nuovo buffer di
 dimensioni maggiori. Il contenuto del buffer precedente sarà riversato in
 quello nuovo, dove verrà poi anche inserito il nuovo elemento. Dopodiché il
-buffer precedente sarà deallocato.
+buffer precedente sarà de-allocato.
 
 \subsection{Metodi di Vec<T>}
 Offre una vasta serie di metodi per accedere al suo contenuto e per
@@ -132,73 +136,162 @@ inserire/togliere valori al suo interno, tra cui:
 
 
 \begin{itemize}
-  \item \texttt{Vec::with\_capacity(n)} alloca un vettore con capacità n
-  \item \texttt{capacity()} ritorna la lunghezza del vettore
-  \item \texttt{push(value)} aggiunge un elemento alla fine del vettore
+  \item \texttt{Vec::with\_capacity(n)} alloca un vettore con capacità \textbf{n}
+  \item \texttt{capacity()} ritorna la capacità attualmente allocata
+  \item \texttt{len()} ritorna il numero di elementi effettivamente presenti
+        nel vettore
+  \item \texttt{push(value)} aggiunge un elemento in coda
   \item \texttt{pop()} rimuove e ritorna un \texttt{std::Option} contenente l'ultimo
         elemento del vettore, se esistente
-  \item \texttt{insert(index, value)} aggiunge un elemento alla posizione ricevuta in argomento
-  \item \texttt{remove(index)} rimuove e ritorna l'elemento alla posizione ricevuta in argomento
-  \item ...
+  \item \texttt{insert(index, value)} aggiunge un elemento alla posizione ricevuta in argomento spostando gli elementi
+  \item \texttt{remove(index)} rimuove, compatta e ritorna l'elemento alla posizione ricevuta in argomento
+  \item ... molti altri
 \end{itemize}
 
 I dati contenuti in un vettore devono essere omogenei.  Se occorre memorizzare
-dati di tipo differente, è possibile utilizzare un tipo enumerativo come busta
-per tali elementi
+dati di tipo differente, è possibile utilizzare un tipo enumerativo somma disgiunta
+dei casi ammessi
 
 \begin{center}
   \begin{minipage}{0.55\linewidth}
     \begin{minted}[breaklines]{rust}
-  let row = vec![
-    SpreadsheetCell::Int(3),
-    SpreadsheetCell::Text(String::from("blue")),
-    SpreadsheetCell::Float(10.12),
-    ];
+enum SpreadsheetCell {
+  Int(i32),
+  Float(f64),
+  Text(String),
+}
 \end{minted}
   \end{minipage}%
   \hfill
   \begin{minipage}{0.4\linewidth}
     \begin{minted}[breaklines]{rust}
-  enum SpreadsheetCell {
-  Int(i32),
-  Float(f64),
-  Text(String),
-  }
+let row = vec![
+      SpreadsheetCell::Int(3),
+      SpreadsheetCell::Text(String::from("blue")),
+      SpreadsheetCell::Float(10.12),
+  ];
   \end{minted}
   \end{minipage}
 \end{center}
 
+\subsection{Quando utilizzarlo}
+
+\begin{itemize}
+  \item Serve tenere i dati in una sequenza ordinata con accesso casuale
+        veloce
+  \item Serve prevalentemente inserire/rimuovere in coda
+  \item Serve ordinare, deduplicare, suddividere in blocchi contigui i dati
+  \item Occorre un buffer elastico per gestire volumi di dati variabili
+\end{itemize}
+
+
+\subsection{Punti di forza}
+Eccellente località dei dati che favorisce l'uso della cache infatti accedere ad
+un elemento ha costo unitario, inserire al fondo ha costo unitario ammortizzato
+
+\subsection{Punti di debolezza}
+
+Inserire/rimuovere all'inizio o al centro richiede lo spostamento di tutti gli
+elementi successivi.
+
 
 \section{VecDeque<T>}
-Il tipo \texttt{VecDeque<T>} modella una coda a doppia entrata: esso alloca sullo heap una
-serie di elementi di tipo \texttt{T}.
+Il tipo \texttt{VecDeque<T>} modella una coda a doppia entrata: esso alloca
+sullo heap una serie di elementi di tipo \texttt{T}.
 
 A differenza di \texttt{Vec<T>}, permette l'inserimento e la rimozione, con
 costo unitario, sia all'inizio che alla fine del vettore tramite i metodi
-\texttt{push\_front()}, \texttt{push\_back()}, \texttt{pop\_front()} e \texttt{pop\_back()}.
+\texttt{push\_front()}, \texttt{push\_back()}, \texttt{pop\_front()} e
+\texttt{pop\_back()}.
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/API_Programming/images/2026-04-13-11-55-28.png}
+\end{figure}
 
 
 Viene implementato come un buffer circolare e non garantisce che gli elementi
-siano contigui in memoria, per rendere gli elementi contigui in
-memoria utilizzando il metodo
+siano contigui in memoria, per rendere gli elementi contigui in memoria
+utilizzando il metodo \verb|make_contiguous()| e ora si possono applicare gli
+algoritmi di sorting.
 
 \begin{tcolorbox}
-  \textbf{Nota:} \texttt{VecDeque<T>} risulta più veloce di \texttt{Vec<T>} se se
-  si eseguono molte \texttt{pop\_front()}. In tutti gli altri casi è preferibile
-  utilizzare \texttt{Vec<T>}.
+  \textbf{Nota:} \texttt{VecDeque<T>} risulta più efficiente di
+  \texttt{Vec<T>} se se si eseguono molte inserimenti o rimozioni ad entrambi
+  gli estremi. In tutti gli altri casi è preferibile utilizzare \texttt{Vec<T>}.
 \end{tcolorbox}
+
+\subsection{Quando usarlo}
+
+\begin{itemize}
+  \item Occorre una coda con comportamento FIFO
+  \item Serve frequentemente inserire in coda e estrarre dalla testa
+  \item Occorre implementare una finestra scorrevole, sliding window, o
+        mantenere la lista di N elementi recenti
+  \item Serve estrarre/inserire sia in testa che in coda
+\end{itemize}
+
+\subsection{Punti di forza}
+
+Le operazioni in testa e in coda sono efficienti e gli elementi sono memorizzati
+in un array, con accessi efficienti all'i-esimo elemento
+
+
+\subsection{Punti di debolezza}
+
+Non tutti gli elementi sono contigui, talora occorre renderli tali invocando
+\verb|make_contiguous()|. Inserire nel mezzo ha un costo proporzionale al numero
+di elementi da spostare.
 
 
 \section{LinkedList<T>}
 
 Il tipo \texttt{LinkedList<T>} permette di rappresentare in memoria una lista
-doppiamente collegata, il tempo di accesso è costante.
+doppiamente concatenata.
+L'accesso per posizione ha complessità $O(n)$, mentre inserimento e rimozione agli
+estremi o dato il nodo corretto ha complessità $O(1)$.
+
+Il tempo di join è costante, utile per applicazioni real-time .
 
 Come per \texttt{VecDeque<T>}, permette di inserire e rimuovere elementi da
 entrambe le estremità della lista.
 
 È possibile inizializzare una \texttt{LinkedList<T>} a partire da un array
+
+
 \mintinline{rust}|let ll = LinkedList::from([1, 2, 3]);|
+
+I metodi attualmente offerti da \texttt{LinkedList<T>} sono un ristretto
+sottoinsieme dei metodi offerti da \texttt{VecDeque<T>}.
+
+Tuttavia, è quasi sempre preferibile utilizzare \texttt{Vec<T>}  o \texttt{VecDeque<T>}
+poiché superiori in termini di prestazioni ed uso della memoria.
+
+\subsection{Quando usarla}
+
+\begin{itemize}
+  \item Occorre suddividere una sequenza o concatenare due sequenze in tempo
+        costante
+  \item Non è tollerabile il comportamento di riallocazione/movimento di
+        elementi a fronte di inserimenti/rimozioni in quanto potrebbe introdurre
+        ritardi variabili (VecDeque<T>)
+\end{itemize}
+
+\subsection{Punti di forza}
+
+Concatenazione e suddivisione molto efficienti. Le operazioni in testa e coda
+hanno tempo costante
+
+
+\subsection{Punti di debolezza}
+
+Località della cache molto limitata rispetto a \verb|Vec<T>| o
+\verb|VecDeque<T>|. L'accesso casuale ha costo lineare. Nella maggior parte dei
+casi reali ha comportamento più lento rispetto a \verb|Vec<T>| o
+\verb|VecDeque<T>|
+
+
 
 \subsection{Metodi}
 
@@ -212,45 +305,103 @@ poiché superiori in termini di prestazioni ed uso della memoria.
 
 \subsection{HashMap<K,V>}
 
-Una \texttt{HashMap<K,V>} è una collezione di coppie composte da una chiave di tipo
-\texttt{K} e un valore di tipo \texttt{V}: i valori sono salvati nello
-heap come una sinfola hash table.
+Una \texttt{HashMap<K,V>} è una collezione di coppie composte da una
+\textbf{chiave} di tipo \texttt{K: Eq+Hash} e un \textbf{valore} di tipo
+\texttt{V}: i valori sono salvati nello heap usando una struttura dati hash.
+
+È indicata quando non serve un ordinamento totale delle chiavi e si vogliono
+operazioni in tempo medio costante. Massimizza la rapidità media di accesso.
+
+
+Il tempo di accesso ad un elemento è in media $O(1)$, ma può diventare $O(n)$
+nel caso peggiore, quando tutte le chiavi collidono allo stesso valore.
+Per questo caso la funzione hash deve essere ben progettata.
+
 
 È preferibile utilizzare una \texttt{HashMap<K,V>} quando le chiavi \textbf{NON} hanno
 un ordine. L'inserimento di una nuova entry nella \texttt{HashMap<K,V>} può causare
 la riallocazione ed il movimento dei dati.
 
 
-La chiave deve essere univoca ed il tipo \texttt{K} deve implementare i tratti \texttt{Eq} e \texttt{Hash}.
+% La chiave deve essere univoca ed il tipo \texttt{K} deve implementare i tratti \texttt{Eq} e \texttt{Hash}.
+
+
+\subsubsection{Quando usarla}
+
+\begin{itemize}
+  \item Occorre gestire conteggi, indici, cache, raggruppamenti di elementi,
+        unioni basate su chiave
+  \item Serve accumulare dati etichettati per poterli elaborare
+        successivamente
+  \item Serve una ricerca con complessità attesa $O(1)$ e non serve garantire
+        un ordine di iterazione
+\end{itemize}
+
+
+\subsubsection{Punti di forza}
+
+Accesso e modifica con complessità attesa $O(1)$. L'API offerta da Rust è
+eccellente per la gestione di conteggi e inizializzazione condizionale.
+
+
+\subsubsection{Punti di debolezza}
+L'ordine di iterazione non è stabile né segue un criterio prevedibile.
+Le chiavi devono implementare i tratti \textbf{Eq} e \textbf{Hash}: se le due implementazioni non sono coerenti o
+ottimizzate possono nascere errori logici.
 
 
 \subsection{BTreeMap<K,V>}
 
 Una \texttt{BTreeMap<K,V>} è una collezione di coppie composte da una chiave di tipo
-\texttt{K} e un valore di tipo \texttt{V}: i valori sono salvati nello
-heap come un singolo albero dove ogni entry rappresenta un nodo.
+\texttt{K: Ord} e un valore di tipo \texttt{V}: i valori sono salvati nello
+heap mantenendo le chiavi ordinate tramite una struttura di tipo B-tree.
 
-È preferibile utilizzare una \texttt{BTreeMap<K,V>} quando le chiavi hanno un ordine, per
-migliorare l'efficienza di accesso ai nodi.
+È indicata quando servono ordinamento delle chiavi, interrogazioni su intervalli
+e costi prevedibili. Garantisce scansioni ordinate per chiave.
 
-Anche in questo caso l'inserimento di una nuova entry nella \texttt{BTreeMap<K,V>} può causare la riallocazione ed il movimento dei dati.ù
+Anche in questo caso l'inserimento di una nuova entry nella \texttt{BTreeMap<K,
+  V>} può causare la riallocazione ed il movimento dei dati.
 
-La chiave deve essere univoca ed il tipo \texttt{K} deve implementare il tratto \texttt{Ord}.
+La chiave deve essere univoca ed il tipo \texttt{K} deve implementare il tratto
+\texttt{Ord}.
 
+Anche nel caso di \texttt{BTreeMap<K,V>}, l'inserimento di una nuova coppia può
+causare la riallocazione ed il movimento dei dati.
+
+
+\subsubsection{Quando usarla}
+
+
+\begin{itemize}
+  \item Serve iterare sugli elementi in modo ordinato deterministicamente
+  \item Occorre reperire tutti gli elementi presenti in un \textbf{intervallo di chiavi}
+  \item Occorre un ordinamento stabile per la creazione di report, API, test
+\end{itemize}
+
+\subsubsection{Punti di forza}
+
+Iterazione ordinata naturalmente. Interrogazioni su intervalli di chiavi
+
+\subsection{Punti di debolezza}
+
+Il costo di accesso ad un elemento è più costoso, $O(log(n))$. Le chiavi devono
+implementare il tratto \textbf{Ord} e devono garantire immutabilità di confronto
+(stabili): un eventuale cambio di ordinamento mentre una chiave è parte di una
+mappa è un errore logico.
 
 \subsection{Mappe e possesso}
-Poiché una mappa nella maggior parte dei casi possiede sia le chiavi che i valori
-presenti al suo interno, le operazioni relative all'inserimento, cancellazione, accesso
-ai singoli elementi richiedono il rispetto di tale possesso.
+Poiché una mappa nella maggior parte dei casi possiede sia le chiavi che i
+valori presenti al suo interno, le operazioni relative all'inserimento,
+cancellazione, accesso ai singoli elementi richiedono il rispetto di tale
+possesso.
 
 Inoltre, Rust cerca di ottimizzare l'accesso ai dati contenuti evitando di dover
 navigare più volte la struttura interna alla ricerca del valore associato ad un
 chiave.
 
-
-
-La conseguenza di ciò è che l'interfaccia applicativa offerta è alquanto differente da
-quella tipicamente offerta da altri linguaggi, pur avendo lo stesso potere espressivo.
+La conseguenza di ciò è che l'interfaccia applicativa offerta è alquanto
+differente da quella tipicamente offerta da altri linguaggi, pur avendo lo
+stesso potere espressivo.
 
 In particolare:
 
@@ -259,43 +410,56 @@ In particolare:
   \item \textbf{Accesso}: i metodi di accesso, \mintinline{rust}|get(...)|, \mintinline{rust}|get_key_value(...)|,
         \mintinline{rust}|keys(...)|, etc., usano chiavi di tipo referenziato, \texttt{\&K},
         e ritornano valori di tipo referenziato, \texttt{\&V}.
-  \item \textbf{Modifica}: i metodi che modificano la mappa tendono ad usare riferimenti a chiavi e valori, \mintinline{rust}|remove(...)|, \mintinline{rust}|retain(...)|.
+  \item \textbf{Modifica}: i metodi che modificano la mappa tendono ad usare riferimenti a chiavi e valori, \mintinline{rust}|remove(...)|, \mintinline{rust}|retain(...)|. Passando una funzione si decide se rimuovere o mantenere un elemento nella mappa.
   \item \textbf{Inserimento}: i metodi di inserimento richiedono invece il movimento di valori posseduti
-  \item \textbf{Sostituzione}: La sostituzione di un valore avviene presente nella mappa ha un approccio particolare, attraverso il
-        concetto di \texttt{Entry}
+  \item \textbf{Modifica o inserimento condizionale}: L'aggiornamento o
+        l'inserimento condizionale di un valore associato a una chiave usa spesso la
+        enum \texttt{Entry}, che evita ricerche duplicate.
 \end{itemize}
 
 
 \section{Entry<'a,K,V>}
-Rust offre la possibilità di ottimizzare l'utilizzo delle mappe: in particolare attraverso
-il metodo \texttt{entry} che permette di cercare una chiave all'interno di una mappa e
-ritorna un enum in base al risultato della ricerca
+Rust offre la possibilità di ottimizzare l'utilizzo delle mappe: in particolare
+attraverso il metodo \texttt{entry} che permette di cercare una chiave
+all'interno di una mappa e ritorna un enum in base al risultato della ricerca.
 
 \begin{center}
   \mintinline{rust}|entry(&mut self, key: K) -> Entry<'a, K, V>|
 \end{center}
 
-L'enum \texttt{Entry} mette a disposizione diversi metodi per la gestione del
-risultato, permettendo di ridurre il numero di spostamenti in memoria:
+L'enum \texttt{Entry<'a, K, V>} permette di effettuare una sola ricerca della
+chiave e poi decidere se modificare il valore esistente oppure inserire un
+valore di default:
 
 \begin{itemize}
   \item \mintinline{rust}|and_modify<F>(self, f: F)| in caso di successo
-        permette di eseguire delle azioni aggiuntive sul risultato ottenuto
-  \item \mintinline{rust}|or_insert(self, default: V)| in caso di fallimento è
-        possibile inserire una nuova entry senza costi aggiuntivi poiché il puntatore
+        consente di modificare il valore se la chiave è presente
+  \item \mintinline{rust}|or_insert(self, default: V)| in caso di fallimento
+        inserisce un valore di default se la chiave è assente senza costi aggiuntivi poiché il puntatore
         sarà già indirizzato verso una zona di memoria libera
 \end{itemize}
 
 
 \begin{minted}[breaklines]{rust}
 let mut animals: HashMap<&str, u32> = HashMap::new();
- animals.entry("dog")
-        .and_modify(|e| { *e += 1 })
-        .or_insert(1);
+
+animals.entry("dog")                  //hai la chiave "dog"?
+        .and_modify(|e| { *e += 1 })  // se si, la modifichi
+        .or_insert(1);                // altrimenti la aggiungi e inserisci 1
+
+//nota il tempo di vita implicito in questo caso è 'static, si potrebbe esplicitare
 \end{minted}
+
+\begin{tcolorbox}
+  \textbf{Nota:} Questo permette di abbassare la complessità ciclomatica permettendo di
+  non inserire blocchi \verb|if| o \verb|for| espliciti
+\end{tcolorbox}
+
 
 
 \subsection{Operare con le mappe}
+
+Nelle mappe non vi è la macro per l'inizializzazione rapida.
 
 \begin{minted}[breaklines]{rust}
 use std::collections::HashMap;
@@ -303,13 +467,13 @@ use std::collections::HashMap;
 fn main() {
   // inizializzo una mappa a partire da un insieme di valori
   let mut scores = HashMap::from([("Alice",80), ("Bob", 90), ("Carol",70)]);
-  // modifico il valore associato ad una chiave
+  // modifico il valore associato ad una chiave, se esiste
   scores.entry("Carol").and_modify(|v| *v = 75 );
   // trasferisco il contenuto della mappa in un Vec<(K,V)>
   let mut v: Vec<(&'static str, i32)> = scores
-  .into_iter()
-  .collect();
-  // ordino per valore
+                                          .into_iter() //smonta la mappa e prendo il possesso
+                                          .collect(); //colleziono i valori in un vettore
+  // ordino per il valore
   v.sort_by_key(|(_, val)| *val);
   println!("{:?}",v);
 }
@@ -321,12 +485,33 @@ fn main() {
 \subsection{HashSet<T>}
 
 Un \texttt{HashSet<T>} è un insieme di elementi univoci di tipo \texttt{T} i cui
-valori sono salvati nello heap come singole hash table.
+valori sono salvati nello heap come singole hash table. Sono delle mappe con
+solo la chiave, senza un valore associato.
 
 \begin{itemize}
   \item L'inserimento di una nuova entry nell'\texttt{HashSet<T>} può causare la riallocazione e il movimento dei dati.
-  \item Un \texttt{HashSet<T>} è implementato come un wrapper attorno ad una \texttt{HashMap<T, ()>}
+  \item Un \texttt{HashSet<T>} può essere visto come una struttura analoga a \texttt{HashMap<T, ()>},
+  dove conta solo la presenza dell'elemento
 \end{itemize}
+
+\subsubsection{Quando usarlo}
+
+\begin{itemize}
+  \item Serve tenere traccia della presenza di un elemento
+  \item Serve implementare meccanismi di deduplicazione, controllo di appartenenza, unicità
+  \item Serve un'implementazione efficiente dell'algebra insiemistica, somma, differenza o intersezioni, senza esigenze di ordinamento
+\end{itemize}
+
+\subsubsection{Punti di forza}
+Verifica di appartenenza e inserimento hanno costo atteso $O(1)$. Offre
+operazioni espressive quali unione, intersezione e differenza
+
+
+\subsubsection{Punti di debolezza}
+
+Nessuna garanzia di ordinamento nell'iterazione.
+I valori devono implementare i tratti \textbf{Eq} e \textbf{Hash}: se le due implementazioni non sono coerenti o
+ottimizzate possono nascere errori logici.
 
 
 \subsection{BTreeSet<T>}
@@ -336,21 +521,68 @@ valori sono salvati nello heap come un singolo albero dove ogni entry rappresent
 
 \begin{itemize}
   \item L'inserimento di una nuova entry nell'\texttt{BTreeSet<T>} può causare la riallocazione e il movimento dei dati.
-  \item Un \texttt{BTreeSet<T>} è implementato come un wrapper attorno ad una \texttt{BTreeMap<T, ()>}
+  \item Un \texttt{BTreeSet<T>} può essere visto come una struttura analoga a \texttt{BTreeMap<T, ()>}
+\end{itemize}
+
+
+\subsubsection{Quando usarlo}
+
+\begin{itemize}
+  \item Serve iterare su valori \textbf{ordinati} e \textbf{privi di duplicati}
+  \item Serve creare report ordinati, esplorare contenuti sulla base del prefisso o effettuare asserzioni stabili per i test
+  \item Occorre estrarre gli elementi contenuti in un intervallo
 \end{itemize}
 
 
 
+\subsubsection{Punti di forza}
+Le iterazioni ordinate e la ricerca per intervallo non richiedono operazioni ulteriori.
+Comportamento eccellente per indici privi di duplicati e ordinati
+
+
+\subsubsection{Punti di debolezza}
+Verificare l'appartenenza di un elemento ha costo logaritmico.
+Gli elementi devono avere un ordinamento totale stabile
+
+
 \section{BinaryHeap<T>}
 
-Un \texttt{BinaryHeap<T>} è una collezione di elementi di tipo \texttt{T} i cui valori sono salvati nello heap
-e l'elemento più grande si trova sempre nella prima posizione.
+Un \texttt{BinaryHeap<T>} è una collezione di elementi di tipo \texttt{T} i cui
+valori sono salvati nello heap mantenendo il massimo elemento accessibile in
+cima alla struttura
 
 Il tipo \texttt{T} deve implementare il tratto \texttt{Ord} per poter essere ordinato.
+La struttura non è ordinata globalmente: garantisce solo la proprietà di heap.
 
-Il metodo \texttt{peek()} permette di ritornare l'elemento più grande con
-complessità $O(1)$. Nel caso peggiore, se si modifica l'elemento attraverso il metodo
-\texttt{peek\_mut()}, la complessità diventa $O(n)$.
+Il metodo \texttt{peek()} restituisce un riferimento all'elemento più grande con
+complessità $O(1)$.
+L'inserimento e la modifica di un elemento tramite il metodo \texttt{peek\_mut()} hanno complessità $O(\log(n))$.
+
+
+\subsubsection{Quando usarlo}
+
+\begin{itemize}
+  \item Serve implementare uno \textbf{scheduler}, una coda a priorità o mantenere l'elenco dei migliori \textbf{N} elmenti
+  \item Occorre elaborare prima di tutto gli elementi a costo minore o a priorità maggiore
+  \item Si vuole evitare di dover ordinare l'intero insieme di valori dopo ciascun inserimento
+\end{itemize}
+
+
+\subsubsection{Punti di forza}
+Osservare l'elemento maggiore ha costo $O(1)$, push/pop hanno costo logaritmico.
+Ideale per algoritmi di tipo \textit{top-N}.
+
+\subsubsection{Punti di debolezza}
+
+L'iterazione non è ordinata. Gli elementi devono implementare il tratto \textbf{Ord}: talora occorre un'implementazione custom o
+racchiudere gli elementi all'interno di \verb|std::cmp::Reverse<T>|.
+
+\begin{tcolorbox}
+  \textbf{Nota:} Permette di non ordinare l'intero insieme di valori rispetto ad
+  utilizzare un \texttt{Vec<T>} ed ordinare prima di prendere i primi N elementi.
+\end{tcolorbox}
+
+%  $N \cdot \log(n) < \log(n)$
 
 
 
