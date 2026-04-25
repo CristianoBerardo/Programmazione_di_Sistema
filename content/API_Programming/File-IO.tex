@@ -1,14 +1,14 @@
 \section{File e file system}
-Un file consiste in un'astrazione offerta dal sistema operativo che lega un
-blocco di byte di dimensione arbitraria ad un nome.
-I nomi sono organizzati in una struttura gerarchica fatta di cartelle o
-directory che permette di identificare uno specifico file attraverso una
-concatenazione dei nomi di cartelle e del nome del file che ne esprime il cammino
-(path) a partire da una radice nota.
+Un file è un'astrazione del sistema operativo per accedere in modo persistente a
+una sequenza di byte, identificata tramite una voce nel file system. I nomi sono
+organizzati in una struttura gerarchica fatta di cartelle o directory che
+permette di identificare uno specifico file attraverso una concatenazione dei
+nomi di cartelle e nome del file che ne esprime il cammino (path) a partire da
+una radice nota
 
-Ad ogni file sono associati vincoli di sicurezza infatti il sistema operativo
-garantisce che solo chi dispone delle necessarie autorizzazioni possa leggere,
-scrivere o eseguire il file.
+Ad ogni file sono associati metadati e permessi di accesso infatti il sistema
+operativo media le operazioni di lettura, scrittura ed esecuzione secondo le
+proprie regole di sicurezza
 
 Le librerie dei linguaggi di programmazione offrono meccanismi indipendenti dal
 sistema operativo per accedere al contenuto di un file.
@@ -30,7 +30,7 @@ e ricavare indicazioni sul file eventualmente referenziato.
 
 
 \begin{itemize}
-  \item \textbf{Path}, analogamente a \texttt{str}, è \verb|unsized| e accessibile in sola lettura
+  \item \textbf{Path} è un tipo \textbf{borrowed}, analoga a \verb|str|: rappresenta una vista immutabile su un percorso
   \item \textbf{PathBuf}, analogamente a \texttt{String}, possiede il proprio contenuto e può
         essere modificato
 \end{itemize}
@@ -38,6 +38,12 @@ e ricavare indicazioni sul file eventualmente referenziato.
 Attraverso i metodi offerti da questi tipi, è possibile ricavare informazioni sulla
 esistenza del file, sulla sua natura come file semplici, directory, collegamenti simbolici, ecc.,
 sui metadati associati come dimensioni, data di creazione e di ultima modifica e permessi, ecc.
+
+
+\begin{tcolorbox}
+  \textbf{ATTENZIONE:} le verifiche sul file system non sono atomiche rispetto a operazioni successive: fra controllo e
+  uso, lo stato può cambiare!
+\end{tcolorbox}
 
 
 \section{Navigare il file system}
@@ -54,28 +60,30 @@ esiste già o se la cartella genitrice del cammino indicato non esiste.
 
 
 La funzione \mintinline{rust}|std::fs::remove_dir(dir: &Path) -> Result<()>| rimuove una cartella,
-a condizione che esista, si disponga dei necessari permessi e che sia vuota.
+a condizione che \textbf{esista}, si disponga dei necessari \textbf{permessi} e che sia \textbf{vuota}.
 
 \section{Manipolare i file nel file system}
 La funzione \mintinline{rust}|std::fs::copy(from: &Path, to: &Path) -> Result<i64>|
 copia il contenuto di un file in un secondo file. Restituisce in caso di
 successo il numero di byte copiati.
 
-La funzione \mintinline{rust}|std::fs::rename(from: &Path, to: &Path) -> Result<()>| rinomina, sposta,
-un file in un secondo file, sostituendo il contenuto del file destinazione con quello sorgente.
-Il comportamento di questa funzione dipende dal sistema operativo.
+La funzione \mintinline{rust}|std::fs::rename(from: &Path, to: &Path) -> Result<()>|
+rinomina (o sposta) una voce del file system. Il comportamento in presenza di
+destinazione esistente o di file system differenti dipende dal sistema operativo
+soggiacente
 
 
-La funzione \mintinline{rust}|std::fs::remove_file(path: &Path) -> Result<()>| elimina un file.
-Se il file è in uso, la sua eliminazione può essere rimandata dal sistema operativo.
+La funzione \mintinline{rust}|std::fs::remove_file(path: &Path) -> Result<()>|
+elimina un file, a patto che non sia una directory. L'effettiva rimozione di un
+file aperto dipende dalla semantica del sistema operativo.
 
 
 \section{Operazioni con i file}
-L'accesso al blocco di byte legato ad un file è totalmente mediato dal sistema operativo.
-Infatti per poter leggere o scrivere tale blocco occorre aprire il file.
-Il sistema operativo offre apposite funzioni che restituiscono un riferimento
-opaco al file sotto forma di handle o file descriptor, di fatto un numero
-intero.
+L'accesso al blocco di byte legato ad un file è totalmente mediato dal sistema
+operativo. Infatti per poter leggere o scrivere tale blocco occorre aprire il
+file. Il sistema operativo offre apposite funzioni che restituiscono un
+riferimento opaco al file sotto forma di \textit{handle} o \textit{file
+  descriptor}, di fatto un numero intero.
 
 La struct \texttt{std::fs::File} di Rust offre due metodi di base per aprire un file:
 
@@ -89,45 +97,54 @@ La struct \texttt{std::fs::File} di Rust offre due metodi di base per aprire un 
 
 
 Maggiori opportunità sono offerte dalla struct \texttt{std::fs::OpenOptions}.
-Essa permette di impostare come un file debba essere aperto e quali operazioni
-sono consentite su di esso.
+Essa permette di combinare in modo esplicito flag come \verb|read|, \verb|write|,
+\verb|append|, \verb|truncate|, \verb|create_new|.
 
 
 \section{Leggere e scrivere file}
-Le funzioni \mintinline{rust}|std::fs::read_to_string(path: &Path)| e
-\mintinline{rust}|std::fs::write(path: &Path, contents: &[u8])|
-offrono un meccanismo compatto per leggere e scrivere il contenuto di un file di
-moderate dimensioni.
+La funzione \mintinline{rust}|std::fs::read_to_string(path: &Path)|
+legge l'intero file in memoria e lo interpreta come testo UTF-8. Questa funzione
+non deve essere usata per la lettura di file binari né per file troppo grossi.
+
+La funzione \mintinline{rust}|std::fs::write(path: &Path, contents: &[u8])|
+scrive l'intero buffer sul file, creandolo se non esiste o sovrascrivendolo.
 
 Poiché un file può avere dimensioni molto maggiori del massimo blocco di
 memoria allocabile, occorre utilizzare tali funzioni quando si è certi che il
 contenuto può essere ospitato nella memoria del processo.
 
-
+\begin{tcolorbox}
+  \textbf{Nota:} Queste funzioni sono adatte per file di dimensioni moderate.
+  Per gestire contenuti di dimensioni arbitrariamente grandi, occorre utilizzare
+  le API di streaming
+\end{tcolorbox}
 
 \begin{minted}[breaklines]{rust}
 use std::fs;
-let contents = fs::read_to_string(filename)
-                  .expect("Something went wrong reading the file");
-println!("Text is:\n{}", contents);
+let contents = fs::read_to_string("file.txt")?;
+fs::write("Text is;", contents)?;
 \end{minted}
 
-\section{Aprire un file}
+
+\subsection{Aprire un file}
 
 \begin{minted}[breaklines]{rust}
 use std::fs::File;
-use std::io::{Write, BufReader, BufRead};
+use std::io::{Write, BufReader, BufRead, Error};
+fn main() -> io::Result<()> {
+  let path = "lines.txt";
 
-let path = "lines.txt";
+  let mut output = File::create(path)?;
+  write!(output, "Rust\n <3 \nFun")?;
 
-let mut output = File::create(path)?;
-write!(output, "Rust\n<3\nFun")?;
+  let input = File::open(path)?;
+  let buffered = BufReader::new(input);
 
-let input = File::open(path)?;
-let buffered = BufReader::new(input);
+  for line in buffered.lines() {
+    println!("{}", line?);
+  }
 
-for line in buffered.lines() {
-  println!("{}", line?);
+  Ok(())
 }
 \end{minted}
 
@@ -141,15 +158,15 @@ for line in buffered.lines() {
     scrittura. L'utilizzo di tratti favorisce la scrittura di codice generico,
     indipendente dal tipo specifico su cui viene eseguito.
 
-    I tratti principali offerti da Rust sono: \verb|Read|, \verb|BufRead|, \verb|Write| e \verb|Seek|.
-    Tutti e quattro i tratti possono essere importati in maniera concisa attraverso il costrutto
-    \texttt{use std::io::prelude::*}.
+    I tratti principali offerti da Rust sono: \verb|Read|, \verb|BufRead|,
+    \verb|Write| e \verb|Seek|. Tutti e quattro i tratti possono essere
+    importati in maniera concisa attraverso il costrutto \texttt{use std::io::
+      prelude::*}.
 
 
-    In caso di errore durante le operazioni di I/O viene restituita una delle varianti
-    disponibili nell'enum \texttt{std::io::ErrorKind}. La variante \texttt{std::io::ErrorKind::Interrupted}
-    indica un errore non fatale, che generalmente può essere gestito
-    riprovando l'operazione.
+    Molte operazioni offerte da questi tratti restituiscono valori di tipo
+    \texttt{io::Result<T>}, che è l'alias di \texttt{Result<T, io::Error>},
+    occorre pertanto gestire opportunamente i risultati.
 
   \end{minipage}%
   \hfill
@@ -160,21 +177,22 @@ for line in buffered.lines() {
 \end{center}
 
 \subsection{std::io::Read}
-Tratto che indica la capacità di leggere un flusso di byte.
+Tratto che indica la capacità di \textbf{leggere un flusso di byte}.
 \verb|File|, \verb|Stdin| e \verb|TcpStream| sono alcuni dei tipi che implementano questo tratto.
 
 
 Per implementare il tratto \verb|Read| è sufficiente fornire l'implementazione
 del metodo \\ \mintinline{rust}|read(buf: &mut [u8]) -> Result<usize>|.
+Questo metodo tenta di leggere fino a \texttt{buf.len()} byte, ma può generarne di meno
+senza generare errori.
 
 Rust genererà tutti gli altri metodi sulla base dell'implementazione di \texttt{read(buf: \&mut [u8])}
 fornita dal programmatore.
 
-In caso di successo, il metodo \texttt{read(buf: \&mut [u8])} deve ritornare \texttt{Ok(n)}.
-
 
 \begin{itemize}
-  \item L'implementazione deve garantire che \textit{n} sia compreso tra 0 e \texttt{buf.len()}
+  \item In caso di successo, il metodo \texttt{read(buf: \&mut [u8])} deve ritornare \texttt{Ok(n)}.
+        Dove \textit{n} è compreso tra 0 e \texttt{buf.len()}
   \item Il valore \textit{Ok(0)} può indicare che il flusso è terminato oppure
         che il buffer passato ha lunghezza 0.
 \end{itemize}
@@ -218,14 +236,14 @@ le operazioni più comuni di I/O
         fino all'EOF: si limita a richiamare il metodo \texttt{read()} fino a
         quando quest'ultimo non ritorna un valore \texttt{Ok(0)} o un errore fatale.
   \item \mintinline{rust}|read_to_string(buf: &mut String) -> Result<usize>| - continua a
-        leggere fino all'EOF e riceve come parametro una \mintinline{rust}|&mut String|.
-  \item \mintinline{rust}|read_exact(buf: &mut [u8]) -> Result<()>| - prova a leggere l'esatto
-        numero di byte necessario a riempire completamente \textit{buf}; se non
-        riesce ritorna \verb|ErrorKind::UnexpectedEof|.
+        leggere fino all'EOF e riceve come parametro una \mintinline{rust}|&mut String|. Assume che il contenuto sia UTF-8
+  \item \mintinline{rust}|read_exact(buf: &mut [u8]) -> Result<()>| - prova a
+        leggere l'esatto numero di byte contenuti nel buffer; adatto per record a
+        dimesione fissa.
   \item \mintinline{rust}|bytes() -> Bytes<Self>| - ritorna un iteratore sui byte, gli
         elementi dell'iteratore sono dei \texttt{Result<u8, io::Error>}
   \item \mintinline{rust}|chain<R: Read>(next: R) -> Chain<Self, R>| - permette di concatenare due reader
-  \item \mintinline{rust}|take(limit: u64) -> Take<Self>|  - limita il numero di byte che possono essere letti da un reader
+  \item \mintinline{rust}|take(limit: u64) -> Take<Self>|  - limita il numero massimo di byte che sarà possibile leggere
 \end{description}
 
 
@@ -235,16 +253,15 @@ Il tratto \verb|BufRead|  offre una serie di metodi che permettono di migliorare
 prestazioni dell'I/O appoggiandosi ad un buffer in memoria.
 
 \begin{itemize}
-  \item Ogni chiamata a \texttt{read()} può dare origine ad una system call,
-        l'utilizzo di un buffer permette di effettuare meno chiamate
-  \item Risulta particolarmente efficace se si eseguono molte letture di piccole dimensioni
+  \item Il buffering riduce il numero di accessi al livello sottostante ed è particolarmente utile per letture
+        frequenti e di piccola dimensione
   \item  Non è utile quando si legge da elementi già presenti in memoria
 \end{itemize}
 
 L'implementazione del tratto richiede i metodi \texttt{fill\_buf()}  e \texttt{consume(amt: usize)}.
-I due metodi devono sempre essere utilizzati insieme: \texttt{fill\_buf()} si
-limita a ritornare il contenuto del buffer in memoria, successivamente è
-necessario chiamare il metodo \texttt{consume(\dots)} per garantire che i byte non siano ritornati nuovamente.
+I due metodi devono sempre essere utilizzati insieme: \texttt{fill\_buf()}
+espone il contenuto disponibile nel buffer senza avanzare la posizione logica;
+dopo averne usato una parte, occorre chiamare \texttt{consume(\dots)}.
 
 
 Offre i metodi \texttt{read\_line(\&mut self, buf: \&mut String)} e \texttt{lines(self)}
@@ -257,7 +274,7 @@ use std::io::prelude::*;
 let stdin = io::stdin(); // stdin non implementa il tratto BufRead
 let mut handle = stdin.lock(); // lock permette di ottenere uno StdinLock che implementa BufRead
 
-let buffer = handle.fill_buf().unwrap();
+let buffer = handle.fill_buf()?;
 println!("{:?}", buffer);
 
 let length = buffer.len();
@@ -273,11 +290,14 @@ Il tratto \verb|Write| richiede l'implementazione dei metodi \textit{write} e \t
 
 \begin{itemize}
   \item[] \mintinline{rust}|write(buf: &[u8]) -> Result<usize>| - prova a
-        scrivere l'intero contenuto del buffer ricevuto come argomento e ritorna il
-        numero di byte scritti
-  \item[] \mintinline{rust}|flush() -> Result<()>| - finalizza l'output
+        scrivere una parte del buffer ricevuto come argomento e ritorna il numero di
+        byte effettivamente scritti
+  \item[] \mintinline{rust}|flush() -> Result<()>| - inalizza l'output
         garantendo che tutti gli eventuali buffer transitori siano correttamente
         svuotati
+  \item [] \mintinline{rust}|write_all(buf: &[u8]) -> Result<()>| - ripete le
+        scritture fino a che tutti i dati sono stati trasferiti o si è verificato un
+        errore
 \end{itemize}
 
 
@@ -298,8 +318,13 @@ Il tratto offre i seguenti metodi:
         posizione corrente del cursore rispetto all'inizio del flusso
 \end{itemize}
 
+\textbf{Seek} è disponibile solo per sorgenti/destinazioni che supportano il
+riposizionamento, come i file.
+Non è generalmente appropriato per stream sequenziali come socket o pipe.
+
 
 \paragraph{Esempio: lettura di un file contenente dati binari}
+
 \begin{minted}[breaklines]{rust}
 use std::fs::File;
 use std::io::Read;
@@ -307,7 +332,7 @@ fn main() -> std::io::Result<()> {
   // "/dev/urandom": sorgente di byte casuali provenienti da una sorgente sicura
   let mut f = File::open("/dev/urandom")?;
 
-  loop {
+  for _ in 0..10  {
     let mut buff = [0;4];                               // buffer in cui depositare i byte
     let r = f.read_exact(&mut buff);                    // lettura del file
     if r.is_err() { return r; }
@@ -315,8 +340,89 @@ fn main() -> std::io::Result<()> {
     let i = i32::from_be_bytes(buff);                   // conversione del buffer in i32
     println!("{:x}",i);                                 // uso il valore letto
   }
+
+  for _ in 0..10 {
+    let mut buff = [0;4];                               // buffer in cui depositare i byte
+    f.read_exact(&mut buff)?;                           // lettura del file
+    let i = i32::from_be_bytes(buff);                   // conversione del buffer in i32
+    println!("0x{:08x}",i);                             // uso il valore letto
+  }
+  Ok(())
 }
 \end{minted}
+
+
+\section{Gestione degli errori di I/O}
+
+Le operazioni di I/O restituiscono normalmente un valore di tipo \mintinline{rust}|io::Result<T>|, che
+è l'alias di \\
+\mintinline{rust}|Result<T, io::Error>|
+
+\verb|io::Error| contine:
+
+\begin{itemize}
+  \item Un valore \verb|ErrorKind|, utile per classificare l'errore
+  \item Informazioni aggiuntive dipendenti dalla piattaforma
+\end{itemize}
+
+In molti casi, il comportamento corretto è propagare l'errore con \textbf{?}.
+In alternativa, occorre gestire esplicitamente i casi recuperabili.
+
+
+Un errore di I/O non implica sempre una condizione fatale:
+
+\begin{itemize}
+  \item Alcune operazioni possono essere semplicemente \textbf{ritentate}
+  \item Altre indicano fine input, \textbf{permessi insufficienti o dati non validi}
+\end{itemize}
+
+
+
+\begin{flushleft}
+  \begin{minipage}{0.63\linewidth}
+    \raggedright
+    \subsection{ErrorKind: casi comuni e strategie}
+    \begin{itemize}
+      \item \texttt{ErrorKind::Interrupted}: Operazione interrotta, generalmente ritentabile
+      \item \texttt{ErrorKind::NotFound}: File o percorso assente
+      \item \texttt{ErrorKind::PermissionDenied}: Accesso negato dal sistema operativo
+      \item \texttt{ErrorKind::UnexpectedEof}: Fine del flusso raggiunta prima del previsto, tipicamente restituito da \mintinline{rust}|read_exact()|
+      \item \texttt{ErrorKind::InvalidData}: Dati letti non validi per
+            l'interpretazione richiesta, ad esempio testo non in formato valido UTF-8
+      \item \texttt{ErrorKind::AlreadyExists}: Risorsa già esistente quando era
+            richiesta creazione esclusiva
+    \end{itemize}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.4\linewidth}
+    \begin{minted}[breaklines]{rust}
+use std::io::ErrorKind::Interrupted;
+
+match reader.read(&mut buf) {
+  Err(e)
+    if e.kind() == Interrupted => {
+    /* ritenta */
+    },
+  Err(e) => return Err(e),
+  Ok(n) => {
+  /* usa i primi n byte */
+  }
+}
+    \end{minted}
+  \end{minipage}
+\end{flushleft}
+
+
+\subsection{Buone pratiche}
+
+\begin{itemize}
+  \item Usare \mintinline{rust}|read_to_string()| solo per file testuali e non troppo grandi
+  \item Usare \mintinline{rust}|BufReader| per letture piccole/frequenti
+  \item Ricordare che \mintinline{rust}|read()| e \mintinline{rust}|write()| possono essere parziali
+  \item Usare \mintinline{rust}|write_all()| quando si vuole trasferire tutto il buffer
+  \item Usare \mintinline{rust}|OpenOptions| per semantiche di apertura esplicite
+  \item Non assumere che comportamento di cambio nome/rimozione sia identico su tutte le piattaforme
+\end{itemize}
 
 
 \section{Lettura e scrittura di contenuti strutturati}
@@ -324,7 +430,7 @@ Sebbene sia possibile operare a livello di singoli byte/caratteri e ricostruire
 un dato strutturato a partire dai suoi componenti elementari, spesso è poco
 conveniente farlo.
 
-Rust mette a disposizione il framework \texttt{Serde} il cui scopo è generare
+Rust mette a disposizione il framework \texttt{Serde}, Serialization-Deserialization, il cui scopo è generare
 implementazioni efficienti di funzioni di serializzazione e deserializzazione di
 strutture dati arbitrarie verso formati standard quali \verb|JSON|, \verb|YAML|, \verb|CSV|,
 \verb|BSON|, \verb|Avro|, \verb|XML|  e tanti altri.
@@ -402,76 +508,6 @@ fn load(path: &str) -> Result<Data> {
   \end{minipage}
 \end{center}
 
-\section{Gestione degli errori di I/O}
-
-Le operazioni di I/O restituiscono normalmente un valore di tipo \mintinline{rust}|io::Result<T>|, che
-è l'alias di \mintinline{rust}|Result<T, io::Error>|
-
-\verb|io::Error| contine:
-
-\begin{itemize}
-  \item Un valore \verb|ErrorKind|, utile per classificare l'errore 
-  \item Informazioni aggiuntive dipendenti dalla piattaforma
-\end{itemize}
-
-In molti casi, il comportamento corretto è propagare l'errore con \textbf{?}.
-In alternativa, occorre gestire esplicitamente i casi recuperabili.
-
-
-Un errore di I/O non implica sempre una condizione fatale:
-
-\begin{itemize}
-  \item Alcune operazioni possono essere semplicemente ritentate
-  \item Altre indicano fine input, permessi insufficienti o dati non validi
-\end{itemize}
-
-
-
-\begin{flushleft}
-  \begin{minipage}{0.65\linewidth}
-    \raggedright
-    \subsection{ErrorKind: casi comuni e strategie}
-\begin{itemize}
-  \item \texttt{ErrorKind::Interrupted}: Operazione interrotta, generalmente ritentabile
-  \item \texttt{ErrorKind::NotFound}: File o percorso assente
-  \item \texttt{ErrorKind::PermissionDenied}: Accesso negato dal sistema operativo
-  \item \texttt{ErrorKind::UnexpectedEof}: Fine del flusso raggiunta prima del previsto, tipicamente restituito da \mintinline{rust}|read_exact()|
-  \item \texttt{ErrorKind::InvalidData}: Dati letti non validi per
-  l'interpretazione richiesta, ad esempio testo non in formato valido UTF-8
-  \item \texttt{ErrorKind::AlreadyExists}: Risorsa già esistente quando era
-  richiesta creazione esclusiva
-\end{itemize}
-  \end{minipage}%
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-    \begin{minted}[breaklines]{rust}
-use std::io::ErrorKind::Interrupted;
-
-match reader.read(&mut buf) {
-  Err(e)
-    if e.kind() == Interrupted => {
-    /* ritenta */
-    },
-  Err(e) => return Err(e),
-  Ok(n) => {
-  /* usa i primi n byte */
-  }
-}
-    \end{minted}
-  \end{minipage}
-\end{flushleft}
-
-
-\subsection{Buone pratiche}
-
-\begin{itemize}
-  \item Usare \mintinline{rust}|read_to_string()| solo per file testuali e non troppo grandi
-  \item Usare BufReader per letture piccole/frequenti
-  \item Ricordare che \mintinline{rust}|read()| e \mintinline{rust}|write()| possono essere parziali
-  \item Usare \mintinline{rust}|write_all()| quando si vuole trasferire tutto il buffer
-  \item Usare OpenOptions per semantiche di apertura esplicite
-  \item Non assumere che comportamento di cambio nome/rimozione sia identico su tutte le piattaforme
-\end{itemize}
 
 
 
