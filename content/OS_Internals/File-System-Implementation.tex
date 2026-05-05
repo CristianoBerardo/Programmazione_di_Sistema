@@ -1,29 +1,33 @@
 
 \section{Struttura del File System}
 
-\textbf{Struttura del file}: unità di archiviazione logica e raccolta di informazioni correlate.
+\begin{flushleft}
+  \begin{minipage}{0.75\linewidth}
+    \raggedright
 
-\textbf{Il file system fornisce: }
+    \textbf{Struttura del file}: unità di archiviazione logica e raccolta di informazioni correlate.
 
-\begin{itemize}
-  \item interfaccia utente allo storage, mappando logico su fisico
-  \item accesso efficiente e comodo al disco, permettendo di memorizzare, localizzare e recuperare facilmente i dati
-  \item Interfaccia all'HW: il disco fornisce riscrittura in-place e accesso casuale - i trasferimenti I/O avvengono in blocchi o settori (solitamente 512 byte)
-\end{itemize}
+    \textbf{Il file system fornisce: }
 
-\textbf{File control block} (\textbf{FCB}) - struttura di archiviazione contenente informazioni su un file.
+    \begin{itemize}
+      \item interfaccia utente allo storage, mappando logico su fisico
+      \item accesso efficiente e comodo al disco, permettendo di memorizzare, localizzare e recuperare facilmente i dati
+      \item Interfaccia all'HW: il disco fornisce riscrittura in-place e accesso casuale - i trasferimenti I/O avvengono in blocchi o settori (solitamente 512 byte)
+    \end{itemize}
 
-\textbf{Driver del dispositivo} controlla il dispositivo fisico - molte attività: un File System può essere organizzato a livelli.
+    \textbf{File control block} (\textbf{FCB}) - struttura di archiviazione contenente informazioni su un file.
+
+    \textbf{Driver del dispositivo} controlla il dispositivo fisico - molte attività: un File System può essere organizzato a livelli.
 
 
-\section{File System a Livelli}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.2\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/sdfrbn.png}
+  \end{minipage}
+\end{flushleft}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.2\linewidth]{content/OS_Internals/img/sdfrbn.png}
-\end{figure}
-
-\newpage
 \subsection{Driver dei Dispositivi}
 
 \textbf{I driver dei dispositivi} gestiscono i dispositivi I/O al livello di controllo I/O.
@@ -95,7 +99,6 @@ Molti file system, a volte più di uno nello stesso sistema operativo, ciascuno 
 
 Ne continuano ad arrivare di nuovi - ZFS, GoogleFS, Oracle ASM, FUSE
 
-\newpage
 
 \section{Dall'API all'Implementazione}
 
@@ -116,13 +119,16 @@ L'OS mantiene un FCB per ogni file, che contiene molti dettagli sul file: tipica
 
 
 \begin{figure}[h!]
-  \begin{minipage}[h!]{0.5\textwidth}
+  \begin{minipage}{0.75\textwidth}
     \centering
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/mfhg.png}
-  \end{minipage}
-  \begin{minipage}[h!]{0.5\textwidth}
-    \centering
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfngb.png}
+    \begin{minipage}[h!]{0.3\textwidth}
+      \centering
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/mfhg.png}
+    \end{minipage}
+    \begin{minipage}[h!]{0.3\textwidth}
+      \centering
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfngb.png}
+    \end{minipage}
   \end{minipage}
 \end{figure}
 
@@ -146,12 +152,12 @@ In generale, i metadati contenuti in un inode sono:
 
 
 \begin{figure}[h!]
-  \begin{minipage}[h!]{0.5\textwidth}
+  \begin{minipage}[h!]{0.4\textwidth}
     \centering
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfnsb.png}
     \caption{Il Linux iNode}
   \end{minipage}
-  \begin{minipage}[h!]{0.5\textwidth}
+  \begin{minipage}[h!]{0.4\textwidth}
     \centering
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/smgth.png}
     \caption{UNIX UFS - 4 KB per blocco, indirizzi a 32 bit}
@@ -161,58 +167,85 @@ In generale, i metadati contenuti in un inode sono:
 
 \subsection{Strutture del File System in Memoria}
 
-\textbf{Tabella di montaggio} - memorizza i mount dei file system, i punti di montaggio e i tipi di file system.
 
-\textbf{Tabella globale dei file aperti} - contiene una copia del FCB di ogni file e altre informazioni.
 
-\textbf{Tabella dei file aperti per processo} - contiene puntatori alle voci appropriate nella tabella globale e altre informazioni.
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
 
-\paragraph{}
 
-Gli elementi della tabella sono chiamati:
+    \textbf{Tabella di montaggio} - memorizza i mount dei file system, i punti di montaggio e i tipi di file system.
 
-\begin{itemize}
-  \item fd descrittori di file in UNIX/Linux
-  \item fh file handler in Windows
-  \item stessa denominazione delle funzioni C
-\end{itemize}
+    \textbf{Tabella globale dei file aperti} - contiene una copia del FCB di ogni file e altre informazioni.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/mxfhg.png}
-\end{figure}
+    \textbf{Tabella dei file aperti per processo} - contiene puntatori alle voci appropriate nella tabella globale e altre informazioni.
 
-\newpage
+    \paragraph{}
+
+    Gli elementi della tabella sono chiamati:
+
+    \begin{itemize}
+      \item fd descrittori di file in UNIX/Linux
+      \item fh file handler in Windows
+      \item stessa denominazione delle funzioni C
+    \end{itemize}
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/mxfhg.png}
+  \end{minipage}
+\end{flushleft}
+
+
 \section{Implementazione delle Directory}
 
-\subsection{Lista Lineare}
-
-Lista lineare di nomi di file con puntatori ai blocchi dati.
-
-\begin{itemize}
-  \item Semplice da programmare
-  \item Lenta da eseguire: tempo di ricerca lineare; si potrebbe mantenere ordinata alfabeticamente tramite lista collegata o usare un B+ tree
-\end{itemize}
 
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dndsgvg.png}
-\end{figure}
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \subsection{Lista Lineare}
 
-\subsection{Tabella Hash}
-Tabella Hash - lista lineare con struttura dati hash:
-\begin{itemize}
-  \item Riduce il tempo di ricerca nella directory
-  \item Collisioni - situazioni in cui due nomi di file hanno lo stesso valore hash
-  \item Efficiente solo se le voci hanno dimensione fissa, oppure si usa il metodo a catena di overflow
-\end{itemize}
+    Lista lineare di nomi di file con puntatori ai blocchi dati.
+
+    \begin{itemize}
+      \item Semplice da programmare
+      \item Lenta da eseguire: tempo di ricerca lineare; si potrebbe mantenere ordinata alfabeticamente tramite lista collegata o usare un B+ tree
+    \end{itemize}
 
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dghgf.png}
-\end{figure}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/dndsgvg.png}
+  \end{minipage}
+\end{flushleft}
+
+
+
+
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \subsection{Tabella Hash}
+    Tabella Hash - lista lineare con struttura dati hash:
+    \begin{itemize}
+      \item Riduce il tempo di ricerca nella directory
+      \item Collisioni - situazioni in cui due nomi di file hanno lo stesso valore hash
+      \item Efficiente solo se le voci hanno dimensione fissa, oppure si usa il metodo a catena di overflow
+    \end{itemize}
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/dghgf.png}
+  \end{minipage}
+\end{flushleft}
+
 
 \section{Metodo di Allocazione}
 
@@ -224,71 +257,114 @@ Un metodo di allocazione definisce come i blocchi del disco vengono assegnati ai
   \item Tabella di Allocazione dei File (FAT)
 \end{itemize}
 
-\newpage
-\subsection{Metodo di Allocazione Contigua}
 
-Ogni file occupa un insieme di blocchi contigui.
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
 
-\begin{itemize}
-  \item Migliori prestazioni nella maggior parte dei casi
-  \item Semplice: sono necassari solo la posizione iniziale (numero di blocco) e la lunghezza (numero di blocchi)
-  \item I problemi includono:
-        \begin{itemize}
-          \item Trovare spazio sul disco per un file,
-          \item Conoscere la dimensione del file,
-          \item Frammentazione esterna nell'HD; necessita di compattazione offline (downtime) o online, detta anche defrag.
-        \end{itemize}
-\end{itemize}
+    \subsection{Metodo di Allocazione Contigua}
 
-Mappatura da logico a fisico (dimensione blocco = 512 byte).
+    Ogni file occupa un insieme di blocchi contigui.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/srymkh.png}
-\end{figure}
+    \begin{itemize}
+      \item Migliori prestazioni nella maggior parte dei casi
+      \item Semplice: sono necassari solo la posizione iniziale (numero di blocco) e la lunghezza (numero di blocchi)
+      \item I problemi includono:
+            \begin{itemize}
+              \item Trovare spazio sul disco per un file,
+              \item Conoscere la dimensione del file,
+              \item Frammentazione esterna nell'HD; necessita di compattazione offline (downtime) o online, detta anche defrag.
+            \end{itemize}
+    \end{itemize}
+
+    Mappatura da logico a fisico (dimensione blocco = 512 byte).
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/srymkh.png}
+  \end{minipage}
+\end{flushleft}
 
 
-\subsection{Allocazione Collegata}
 
-\begin{itemize}
-  \item[] Ogni file è una lista collegata di blocchi
-  \item[] Il file termina con un puntatore null
-  \item[] Nessuna frammentazione esterna
-  \item[] Ogni blocco contiene un puntatore al blocco successivo
-  \item[] Nessuna compattazione, nessuna frammentazione esterna
-  \item[] Il sistema di gestione dello spazio libero viene chiamato quando è necessario un nuovo blocco
-  \item[] Si migliora l'efficienza raggruppando i blocchi in cluster, ma aumenta la frammentazione interna
-\end{itemize}
-\textbf{Grande problema}: localizzare un blocco richiede molti I/O e seek del disco.
 
-\newpage
-Ogni file è una lista collegata di blocchi su disco: i blocchi possono essere sparsi ovunque sul disco
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/srfymjkgm.png}
-\end{figure}
+
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \subsection{Allocazione Collegata}
+
+    \begin{itemize}
+      \item[] Ogni file è una lista collegata di blocchi
+      \item[] Il file termina con un puntatore null
+      \item[] Nessuna frammentazione esterna
+      \item[] Ogni blocco contiene un puntatore al blocco successivo
+      \item[] Nessuna compattazione, nessuna frammentazione esterna
+      \item[] Il sistema di gestione dello spazio libero viene chiamato quando è necessario un nuovo blocco
+      \item[] Si migliora l'efficienza raggruppando i blocchi in cluster, ma aumenta la frammentazione interna
+    \end{itemize}
+    \textbf{Grande problema}: localizzare un blocco richiede molti I/O e seek del disco.
+
+    Ogni file è una lista collegata di blocchi su disco: i blocchi possono essere sparsi ovunque sul disco
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/srfymjkgm.png}
+  \end{minipage}
+\end{flushleft}
+
 
 Il blocco da accedere è il $Q^{esimo}$ blocco nella catena collegata di blocchi che rappresenta il file. Spostamento nel blocco = R + 1.
 
+% \subsection{Metodo di Allocazione FAT}
+
+% L'inizio del volume ha una tabella, indicizzata per numero di blocco. Simile a una lista collegata, ma più veloce su disco e memorizzabile in cache. L'allocazione di nuovi blocchi è semplice.
+
+% \begin{figure}[h!]
+%   \centering
+%   \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/nddgndg.png}
+% \end{figure}
+
+
+% \subsection{Metodo di Allocazione Indicizzata}
+
+% Ogni file ha il proprio/i propri blocco/i indice con puntatori ai propri blocchi dati.
+
+% \begin{figure}[h!]
+%   \centering
+%   \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fbfbf.png}
+% \end{figure}
+
 \subsection{Metodo di Allocazione FAT}
 
-L'inizio del volume ha una tabella, indicizzata per numero di blocco. Simile a una lista collegata, ma più veloce su disco e memorizzabile in cache. L'allocazione di nuovi blocchi è semplice.
+\begin{minipage}{0.75\textwidth}
+  L'inizio del volume ha una tabella, indicizzata per numero di blocco. Simile a una lista collegata, ma più veloce su disco e memorizzabile in cache. L'allocazione di nuovi blocchi è semplice.
+\end{minipage}
+\hfill\
+\begin{minipage}{0.2\textwidth}
+  \begin{center}
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/nddgndg.png}
+  \end{center}
+\end{minipage}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/nddgndg.png}
-\end{figure}
+\vspace{1.5em} % Aggiunge un po' di respiro tra le due sottosezioni
 
-\newpage
 \subsection{Metodo di Allocazione Indicizzata}
 
-Ogni file ha il proprio/i propri blocco/i indice con puntatori ai propri blocchi dati.
-
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fbfbf.png}
-\end{figure}
+\begin{minipage}{0.75\textwidth}
+  Ogni file ha il proprio/i propri blocco/i indice con puntatori ai propri blocchi dati.
+\end{minipage}
+\hfill
+\begin{minipage}{0.2\textwidth}
+  \begin{center}
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/fbfbf.png}
+  \end{center}
+\end{minipage}
 
 
 \subsection{Prestazioni}
@@ -417,3 +493,5 @@ Molte di queste funzionalità sono state già discusse, ma ci sono alcuni nuovi 
 Il \textbf{calcolo rapido della dimensione delle directory} fornisce un aggiornamento rapido dello spazio usato. L'\textbf{atomic safe-save} è una primitiva (disponibile tramite API, non tramite comandi del file system) che esegue ridenominazioni di file, bundle di file e directory come operazioni atomiche singole. L'I/O coalescing è un'ottimizzazione per i dispositivi NVM in cui più piccole scritture vengono raggruppate in una grande scrittura per ottimizzare le prestazioni di scrittura.
 \paragraph{}
 Apple ha scelto di non implementare RAID come parte del nuovo APFS, dipendendo invece dal meccanismo Apple RAID volume per il RAID software. APFS è anche compatibile con HFS+, consentendo una facile conversione delle installazioni esistenti.
+
+

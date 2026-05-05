@@ -681,6 +681,11 @@ Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco
       \item Tutto gestito dall'OS
       \item Un motore simile, MyISAM, è un modo per indicizzare i DB MySQL
     \end{itemize}
+
+    \begin{tcolorbox}
+      \textbf{Nota:} Questa è una struttura data ad alto livello, più avanti ne vedremo una di più basso livello.
+    \end{tcolorbox}
+
   \end{minipage}%
   \hfill
   \begin{minipage}{0.3\linewidth}
@@ -750,7 +755,8 @@ Anche Linux ha più file system.
 
 
 \section{Struttura delle Directory}
-Una raccolta di nodi contenenti informazioni su tutti i file
+Una collezione di nodi contenenti informazioni su tutti i file, ed alcuni
+sui attributi come data di creazione, dimensioni, etc.
 
 
 \begin{figure}[h!]
@@ -759,6 +765,7 @@ Una raccolta di nodi contenenti informazioni su tutti i file
 \end{figure}
 
 Sia la struttura delle directory che i file risiedono sul disco. Le informazioni delle directory si trovano di solito in cima a una partizione.
+I direttori fanno parte dei metadati.
 
 \begin{figure}[h!]
   \centering
@@ -774,7 +781,7 @@ In particolare:
 
 \begin{itemize}
   \item Efficienza - individuare rapidamente un file
-  \item Denominazione - comoda per gli utenti: due utenti possono avere lo stesso nome per file diversi; lo stesso file può avere più nomi diversi
+  \item Denominazione - comoda per gli utenti: due utenti possono avere lo stesso nome per file diversi; lo stesso file può avere più nomi diversi per essere compatibili con programmi diversi
   \item Raggruppamento - raggruppamento logico dei file per proprietà (es. tutti i programmi Java, tutti i giochi...)
 \end{itemize}
 
@@ -816,11 +823,11 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
     % Rimosso \begin{table}, usiamo direttamente tabular
     \begin{tabular}{c c}
       \toprule
-      \textbf{Pro}      & \textbf{Contro}                       \\
+      \textbf{Pro}                  & \textbf{Contro}                       \\
       \midrule
-      Generale          & Inefficiente                          \\
-      Scalabile         & Nessuna condivisione di file          \\
-      Facile da cercare & Duplicazione di file in più directory \\
+      Concetto di current directory & Inefficiente                          \\
+      Raggruppamento                & Nessuna condivisione di file          \\
+      Facile da cercare             & Duplicazione di file in più directory \\
       \bottomrule
     \end{tabular}
   \end{minipage}
@@ -828,26 +835,19 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
 
 
 
-
-
-Absolute or relative path name.
-Creating a new file is done in current directory.
-Delete a file
+Traduci in italiano:
+Nome del percorso assoluto o relativo.
+Creare un nuovo file viene fatto nella directory corrente.
+Eliminare un file
 \verb|rm <file-name>|.
-Creating a new subdirectory is done in current directory
+Creare una nuova sottodirectory viene fatto nella directory corrente
 \verb|mkdir <dir-name>|
-Example: if in current directory /mail
+Esempio: se nella directory corrente /mail
 \verb|mkdir count|
 
 
 
 \subsection{Directory a Grafo Aciclico}
-
-
-\begin{figure}[h!]
-  \centering
-\end{figure}
-
 
 
 \begin{flushleft}
@@ -862,9 +862,9 @@ Example: if in current directory /mail
     Soluzioni:
 
     \begin{itemize}
-      \item Backpointer, in modo da poter eliminare tutti i puntatori alla cartella eliminata; records di dimensione variabile sono un problema
-      \item Backpointer usando un'organizzazione a catena (daisy chain)
-      \item Soluzione con contatore di riferimenti (entry-hold-count)
+      \item \textbf{Backpointer - elimina tutto}, in modo da poter eliminare tutti i puntatori alla cartella eliminata; (records di dimensione variabile sono un problema.) Così lo cancelli da una parte e lui di conseguenza sale e cancella i direttori.
+      \item \textbf{Backpointer} usando un'organizzazione a catena (daisy chain)
+      \item \textbf{entry-hold-count - elimina il puntatore} Soluzione con contatore di riferimenti, elimino solo il puntatore al file e mantengo un contatore ai file. Il file viene cancellato solo se il contatore raggiunge zero.
     \end{itemize}
 
     Nuovi tipi di voci nelle directory:
@@ -893,8 +893,8 @@ Come garantiamo l'assenza di cicli? Consentiamo solo link a file, non a sottodir
 
 
 \section{File System Mounting}
-A file system must be mounted before it can be accessed. A unmounted file system is mounted at a
-mount point
+
+Un file system deve essere montato prima di poter essere accessibile. Un file system non mont
 
 \begin{figure}[h!]
   \centering
@@ -903,70 +903,126 @@ mount point
 
 \section{File Sharing}
 
-Sharing of files on multi-user systems is desirable.
-Sharing may be done through a protection scheme.
-On distributed systems, files may be shared across a network.
-Network File System (NFS) is a common distributed file-sharing
-method.
-If multi-user system:
+La condivisione di file su sistemi multi-utente è desiderabile.
+La condivisione può essere effettuata attraverso uno schema di protezione.
+Su sistemi distribuiti, i file possono essere condivisi attraverso una rete.
+Il Network File System (NFS) è un metodo comune di condivisione di file distribuita.
+
+Se il sistema è multi-utente:
 
 \begin{itemize}
-  \item \textbf{User IDs} identify users, allowing permissions and protections to be per-user
-  \item \textbf{Group IDs} allow users to be in groups, permitting group
-        access rights
-  \item Owner of a file / directory
-  \item Group of a file / directory
+  \item \textbf{User IDs}: Gli ID utente identificano gli utenti, consentendo che i permessi e le protezioni siano per utente.
+  \item \textbf{Group IDs}: Gli ID gruppo consentono agli utenti di essere in gruppi, permettendo diritti di accesso per gruppo.
+  \item \textbf{Owner of a file / directory}: Il proprietario di un file o directory.
+  \item \textbf{Group of a file / directory}: Il gruppo a cui appartiene un file o directory.
 \end{itemize}
 
-\subsection{File Sharing - Remote File Systems }
+\subsection{ Condivisione di File - Sistemi Remoti}
 
-Uses networking to allow file system access between systems
+%  Uses networking to allow file system access between systems.
+ Utilizzare la rete per consentire l'accesso al file system tra sistemi.
+
+% \begin{itemize}
+%   \item Manually via programs like FTP
+%   \item Automatically, seamlessly using distributed file systems
+%   \item Semi automatically via the world wide web
+% \end{itemize}
+
+% Client-server model allows clients to mount remote file systems from
+% servers:
+
+% \begin{itemize}
+%   \item Server can serve multiple clients
+%   \item Client and user-on-client identification is insecure or complicated
+%   \item NFS is standard UNIX client-server file sharing protocol
+%   \item CIFS is standard Windows protocol
+%   \item Standard operating system file calls are translated into remote calls
+% \end{itemize}
+
+% Distributed Information Systems (distributed naming services) such
+% as LDAP, DNS, NIS, Active Directory implement unified access to
+% information needed for remote computing
+
+
+% \subsection{File Sharing - Failure Modes}
+
+% All file systems have failure modes, for example corruption of directory structures or other nonuser data, called metadata.
+% Remote file systems add new failure modes, due to network
+% failure, server failure.
+% Recovery from failure can involve state information about
+% status of each remote request.
+
+% Stateless protocols such as NFS v3 include all information in
+% each request, allowing easy recovery but less security.
+
+
+% \subsection{File Sharing - Consistency Semantics}
+
+% Specify how multiple users are to access a shared file
+% simultaneously.
+% Tend to be less complex
+% due to disk I/O and network latency (for remote file systems). Andrew File
+% System (AFS) implemented complex remote file sharing semantics. Unix file
+% system (UFS) implements: ! Writes to an open file visible immediately to other
+% users of the same open file ! Sharing file pointer to allow multiple users to
+% read and write concurrently. AFS has session semantics ! Writes only visible to
+% sessions starting after the file is closed
+
+
+% \section{Protezione}
+
+% Il problema:
+% non si desidera che altri modifichino, leggano o spostino i propri dati/programmi.
+
+% \paragraph{}
+
+% Il proprietario/creatore del file deve poter controllare: cosa può essere fatto/visto, da chi.
+% Tipi di accesso: - Lettura - Scrittura - Esecuzione - Aggiunta - Eliminazione - Elenco.
+
+% \paragraph{}
+% Tutti i sistemi operativi forniscono questa opzione di base.
+
+% \subsection{Access Lists and Groups}
+% Mode of access: read, write, execute. Three classes of users on Unix / Linux:
+
+% \begin{itemize}
+%   \item Owner access 7 $\to$ RWX (111)
+%   \item Group access 6 $\to$ RW- (110)
+%   \item Public access 1 $\to$ --X (001)
+% \end{itemize}
 
 \begin{itemize}
-  \item Manually via programs like FTP
-  \item Automatically, seamlessly using distributed file systems
-  \item Semi automatically via the world wide web
+  \item Manualmente tramite programmi come FTP
+  \item Automaticamente, in modo trasparente utilizzando file system distribuiti
+  \item Semi-automaticamente tramite il World Wide Web
 \end{itemize}
 
-Client-server model allows clients to mount remote file systems from
-servers:
+Il modello client-server consente ai client di montare file system remoti dai server:
 
 \begin{itemize}
-  \item Server can serve multiple clients
-  \item Client and user-on-client identification is insecure or complicated
-  \item NFS is standard UNIX client-server file sharing protocol
-  \item CIFS is standard Windows protocol
-  \item Standard operating system file calls are translated into remote calls
+  \item Il server può servire più client
+  \item L'identificazione del client e dell'utente sul client è insicura o complicata
+  \item NFS è il protocollo standard UNIX per la condivisione di file in modalità client-server
+  \item CIFS è il protocollo standard di Windows
+  \item Le chiamate standard ai file del sistema operativo vengono tradotte in chiamate remote
 \end{itemize}
 
-Distributed Information Systems (distributed naming services) such
-as LDAP, DNS, NIS, Active Directory implement unified access to
-information needed for remote computing
+I Sistemi Informativi Distribuiti (servizi di naming distribuiti) come LDAP, DNS, NIS, Active Directory implementano un accesso unificato alle informazioni necessarie per l'elaborazione remota
 
 
-\subsection{File Sharing - Failure Modes}
+\subsection{Condivisione di File - Modalità di Guasto}
 
-All file systems have failure modes, for example corruption of directory structures or other nonuser data, called metadata.
-Remote file systems add new failure modes, due to network
-failure, server failure.
-Recovery from failure can involve state information about
-status of each remote request.
+Tutti i file system presentano modalità di guasto, ad esempio la corruzione delle strutture delle directory o di altri dati non utente, chiamati metadati.
+I file system remoti aggiungono nuove modalità di guasto, dovute a malfunzionamenti della rete o del server.
+Il ripristino dai guasti può coinvolgere informazioni di stato relative allo status di ciascuna richiesta remota.
 
-Stateless protocols such as NFS v3 include all information in
-each request, allowing easy recovery but less security.
+I protocolli stateless (senza stato) come NFS v3 includono tutte le informazioni in ogni singola richiesta, consentendo un ripristino semplice ma una minore sicurezza.
 
 
-\subsection{File Sharing - Consistency Semantics}
+% \subsection{Condivisione di File - Semantica di Coerenza ()}
 
-Specify how multiple users are to access a shared file
-simultaneously.
-Tend to be less complex
-due to disk I/O and network latency (for remote file systems). Andrew File
-System (AFS) implemented complex remote file sharing semantics. Unix file
-system (UFS) implements: ! Writes to an open file visible immediately to other
-users of the same open file ! Sharing file pointer to allow multiple users to
-read and write concurrently. AFS has session semantics ! Writes only visible to
-sessions starting after the file is closed
+% Specifica come più utenti debbano accedere contemporaneamente a un file condiviso.
+% Tendono a essere meno complesse a causa dell'I/O su disco e della latenza di rete (per i file system remoti). L'Andrew File System (AFS) ha implementato una complessa semantica per la condivisione remota dei file. Il file system Unix (UFS) implementa: ! Le scritture su un file aperto sono immediatamente visibili agli altri utenti dello stesso file aperto ! Condivisione del puntatore del file per consentire a più utenti di leggere e scrivere contemporaneamente. AFS ha una semantica di sessione ! Le scritture sono visibili solo alle sessioni che iniziano dopo la chiusura del file
 
 
 \section{Protezione}
@@ -982,13 +1038,13 @@ Tipi di accesso: - Lettura - Scrittura - Esecuzione - Aggiunta - Eliminazione - 
 \paragraph{}
 Tutti i sistemi operativi forniscono questa opzione di base.
 
-\subsection{Access Lists and Groups}
-Mode of access: read, write, execute. Three classes of users on Unix / Linux:
+\subsection{Liste di Accesso e Gruppi}
+Modalità di accesso: lettura (read), scrittura (write), esecuzione (execute). Tre classi di utenti su Unix / Linux:
 
 \begin{itemize}
-  \item Owner access 7 $\to$ RWX (111)
-  \item Group access 6 $\to$ RW- (110)
-  \item Public access 1 $\to$ --X (001)
+  \item Accesso del proprietario (Owner) 7 $\to$ RWX (111)
+  \item Accesso del gruppo (Group) 6 $\to$ RW- (110)
+  \item Accesso pubblico (Public) 1 $\to$ --X (001)
 \end{itemize}
 
 

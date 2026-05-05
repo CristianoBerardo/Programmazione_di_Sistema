@@ -39,6 +39,7 @@ possesso, località della memoria e pattern di accesso
 
 
 
+
 \clearpage
 
 \begin{sidewaystable}
@@ -153,7 +154,7 @@ dati di tipo differente, è possibile utilizzare un tipo enumerativo somma disgi
 dei casi ammessi
 
 \begin{center}
-  \begin{minipage}{0.55\linewidth}
+  \begin{minipage}{0.3\linewidth}
     \begin{minted}[breaklines]{rust}
 enum SpreadsheetCell {
   Int(i32),
@@ -163,7 +164,7 @@ enum SpreadsheetCell {
 \end{minted}
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.4\linewidth}
+  \begin{minipage}{0.65\linewidth}
     \begin{minted}[breaklines]{rust}
 let row = vec![
       SpreadsheetCell::Int(3),
@@ -491,7 +492,7 @@ solo la chiave, senza un valore associato.
 \begin{itemize}
   \item L'inserimento di una nuova entry nell'\texttt{HashSet<T>} può causare la riallocazione e il movimento dei dati.
   \item Un \texttt{HashSet<T>} può essere visto come una struttura analoga a \texttt{HashMap<T, ()>},
-  dove conta solo la presenza dell'elemento
+        dove conta solo la presenza dell'elemento
 \end{itemize}
 
 \subsubsection{Quando usarlo}
