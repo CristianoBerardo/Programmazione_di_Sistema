@@ -117,8 +117,8 @@ La struttura delle directory organizza i file: nomi e numeri di inode, master fi
 
 L'OS mantiene un FCB per ogni file, che contiene molti dettagli sul file: tipicamente, numero di inode (se Linux), permessi, dimensione, date.
 
-
-\begin{figure}[h!]
+\begin{center}
+  % \begin{figure}[h!]
   \begin{minipage}{0.75\textwidth}
     \centering
     \begin{minipage}[h!]{0.3\textwidth}
@@ -130,7 +130,8 @@ L'OS mantiene un FCB per ogni file, che contiene molti dettagli sul file: tipica
       \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfngb.png}
     \end{minipage}
   \end{minipage}
-\end{figure}
+  % \end{figure}
+\end{center}
 
 \subsection{Il Linux iNode}
 
@@ -151,19 +152,24 @@ In generale, i metadati contenuti in un inode sono:
 \end{itemize}
 
 
-\begin{figure}[h!]
-  \begin{minipage}[h!]{0.4\textwidth}
-    \centering
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfnsb.png}
-    \caption{Il Linux iNode}
-  \end{minipage}
-  \begin{minipage}[h!]{0.4\textwidth}
-    \centering
-    \includegraphics[width=1\linewidth]{content/OS_Internals/img/smgth.png}
-    \caption{UNIX UFS - 4 KB per blocco, indirizzi a 32 bit}
-  \end{minipage}
-\end{figure}
+% \begin{figure}[h!]
+\begin{center}
 
+
+  \begin{minipage}{0.75\textwidth}
+    \begin{minipage}[h!]{0.47\textwidth}
+      \centering
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfnsb.png}
+      \captionof{figure}{Il Linux iNode}
+    \end{minipage}
+    \begin{minipage}[h!]{0.47\textwidth}
+      \centering
+      \includegraphics[width=1\linewidth]{content/OS_Internals/img/smgth.png}
+      \captionof{figure}{UNIX UFS - 4 KB per blocco, indirizzi a 32 bit}
+    \end{minipage}
+  \end{minipage}
+  % \end{figure}
+\end{center}
 
 \subsection{Strutture del File System in Memoria}
 
@@ -293,18 +299,18 @@ Un metodo di allocazione definisce come i blocchi del disco vengono assegnati ai
 
 
 \begin{flushleft}
-  \begin{minipage}{0.65\linewidth}
+  \begin{minipage}{0.7\linewidth}
     \raggedright
     \subsection{Allocazione Collegata}
 
     \begin{itemize}
-      \item[] Ogni file è una lista collegata di blocchi
-      \item[] Il file termina con un puntatore null
-      \item[] Nessuna frammentazione esterna
-      \item[] Ogni blocco contiene un puntatore al blocco successivo
-      \item[] Nessuna compattazione, nessuna frammentazione esterna
-      \item[] Il sistema di gestione dello spazio libero viene chiamato quando è necessario un nuovo blocco
-      \item[] Si migliora l'efficienza raggruppando i blocchi in cluster, ma aumenta la frammentazione interna
+      \item Ogni file è una lista collegata di blocchi
+      \item Il file termina con un puntatore null
+      \item Nessuna frammentazione esterna
+      \item Ogni blocco contiene un puntatore al blocco successivo
+      \item Nessuna compattazione, nessuna frammentazione esterna
+      \item Il sistema di gestione dello spazio libero viene chiamato quando è necessario un nuovo blocco
+      \item Si migliora l'efficienza raggruppando i blocchi in cluster, ma aumenta la frammentazione interna
     \end{itemize}
     \textbf{Grande problema}: localizzare un blocco richiede molti I/O e seek del disco.
 
@@ -312,7 +318,7 @@ Un metodo di allocazione definisce come i blocchi del disco vengono assegnati ai
 
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.3\linewidth}
+  \begin{minipage}{0.25\linewidth}
     \centering
     \includegraphics[width=\linewidth]{content/OS_Internals/img/srfymjkgm.png}
   \end{minipage}
@@ -389,10 +395,10 @@ Il file system mantiene la \textbf{lista dello spazio libero} per tracciare i bl
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.45\linewidth]{content/OS_Internals/img/mngaz.png}
+  \includegraphics[width=0.25\linewidth]{content/OS_Internals/img/mngaz.png}
 \end{figure}
 
-Calcolo del numero di blocco:
+Calcolo del numero di blocco:\newline
 
 \begin{equation*}
   \text{(numero di bit per parola) * (numero di parole con valore 0) + offset del primo bit a 1}
@@ -412,24 +418,29 @@ Semplice, ma la bit map richiede spazio extra.
 
 Vantaggio: è facile ottenere spazio per file contigui verificando se ci sono abbastanza blocchi adiacenti liberi
 
-\subsection{Lista Collegata dello Spazio Libero su Disco}
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \subsection{Lista Collegata dello Spazio Libero su Disco}
 
-Lista collegata (free list):
+    Lista collegata (free list):
 
-\begin{itemize}
-  \item \textbf{SVANTAGGIO}: non è facile ottenere spazio contiguo
-  \item \textbf{VANTAGGIO}: nessuno spreco. Lista collegata dello spazio libero su disco
-\end{itemize}
+    \begin{itemize}
+      \item \textbf{SVANTAGGIO}: non è facile ottenere spazio contiguo
+      \item \textbf{VANTAGGIO}: nessuno spreco. Lista collegata dello spazio libero su disco
+    \end{itemize}
 
-
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.2\linewidth]{content/OS_Internals/img/andjfgt.png}
-\end{figure}
-
+    Non è necessario attraversare l'intera lista (se il numero di blocchi liberi è registrato)
 
 
-Non è necessario attraversare l'intera lista (se il numero di blocchi liberi è registrato)
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/andjfgt.png}
+  \end{minipage}
+\end{flushleft}
+
 
 \subsection{Lista Collegata dello Spazio Libero}
 
