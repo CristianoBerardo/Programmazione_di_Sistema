@@ -85,24 +85,13 @@ stile TypeScript:
   vedere con Giocatore con i medesimi campi.
 \end{tcolorbox}
 
-\newpage
 \subsubsection{Operatore di spreading}
 
 Esiste la notazione di \textit{spreading}, parziale o totale, anche in Rust.\newline
 
-Se è parziale la si può utilizzare solo alla fine:
+Se è parziale la si può utilizzare solo alla fine: \mintinline[breaklines]{rust}{let s1 = Player {name: “Paolo”.to_string(), ..s}}
 
-\begin{center}
-  \centering
-  \mintinline[breaklines]{rust}{let s1 = Player {name: “Paolo”.to_string(), ..s}}
-\end{center}
-
-Se è totale:\newline
-
-\begin{center}
-  \centering
-  \mintinline[breaklines]{rust}{let s1 = Player {..s}}
-\end{center}
+Se è totale: \mintinline[breaklines]{rust}{let s1 = Player {..s}}
 
 \noindent
 \begin{tcolorbox}
@@ -716,7 +705,7 @@ enum Shape {
     \begin{minipage}{\linewidth}
       \begin{minipage}{0.35\linewidth}
 
-        \includegraphics[width=1\linewidth]{images/API_Programming/Tipi-Composti/TC-esempio2.png}
+        \includegraphics[width=0.75\linewidth]{images/API_Programming/Tipi-Composti/TC-esempio2.png}
 
       \end{minipage}
     \end{minipage}
@@ -773,7 +762,7 @@ fn compute_area(shape: Shape) -> f64 {
 \section{Destrutturazione}
 
 L'utilizzo del pattern matching e la possibilità di destrutturare un valore complesso
-non sono limitate al costrutto \textit{match}. È possibile usare la stessa tecnica 
+non sono limitate al costrutto \textit{match}. È possibile usare la stessa tecnica
 anche all'interno di costrutti di controllo del flusso come:
 
 \begin{center}
@@ -898,9 +887,9 @@ println!("The original point was: ({},{})", x, y);
 % Se il dato ha tratto copy manntengo accessibile l'originale, altrimenti
 % il valore viene trasferito assieme al possesso dell'owner oriniale.
 
-Il processo di destrutturazione utilizza la semantica delle assegnazioni. Se il valore 
+Il processo di destrutturazione utilizza la semantica delle assegnazioni. Se il valore
 implementa il tratto copy, le variabili introdotte nel pattern conterranno una copia
-dell'elemento corrispondente. In caso contrario, verrà eseguito un movimento, 
+dell'elemento corrispondente. In caso contrario, verrà eseguito un movimento,
 invalidando il valore originale.
 
 \begin{minted}[breaklines]{rust}
