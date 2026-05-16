@@ -14,7 +14,7 @@
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
     \begin{minipage}{0.25\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/memory.png}
+      \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/memory.png}
     \end{minipage}
   \end{minipage}
 \end{center}
@@ -63,7 +63,7 @@ Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un somm
 \begin{center}
   \begin{minipage}{1\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.55\linewidth}
+    \begin{minipage}{0.65\linewidth}
       Quando un programma è diventato un processo, tutti o gran parte dei suoi dati sono memorizzati nella memoria principale. Abbiamo bisogno di un modo per:
 
       \begin{itemize}
@@ -75,10 +75,10 @@ Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un somm
 
     \end{minipage}%
     \hfill
-    \begin{minipage}{0.35\linewidth}
+    \begin{minipage}{0.3\linewidth}
       \centering
 
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/adsfcv.png}
+      \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/adsfcv.png}
 
     \end{minipage}
   \end{minipage}
@@ -91,7 +91,7 @@ Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un somm
   \centering
   \begin{minipage}{\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.50\linewidth}
+    \begin{minipage}{0.65\linewidth}
       La CPU/OS deve verificare ogni accesso alla memoria generato in modalità utente per
       assicurarsi che sia compreso tra base e limite per quell'utente.
 
@@ -99,8 +99,8 @@ Utilizzando l'hardware, base e limit, prima di arrivare al bus inseriamo un somm
       Le istruzioni per caricare i registri base e limite sono privilegiate.
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.4\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/ikadsuhc.png}
+    \begin{minipage}{0.3\linewidth}
+      \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/ikadsuhc.png}
 
     \end{minipage}
   \end{minipage}
@@ -156,8 +156,7 @@ Il binding degli indirizzi di istruzioni e dati agli indirizzi di memoria può a
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
     \begin{minipage}{0.2\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/rwefbg.png}
-      \captionof{figure}{Elaborazione in più fasi di un programma utente}
+      \includegraphics[width=0.6\linewidth]{content/OS_Internals/img/rwefbg.png}
     \end{minipage}
   \end{minipage}
 \end{center}
@@ -185,15 +184,15 @@ Gli indirizzi logici e fisici coincidono negli schemi di binding al tempo di com
   \centering
   \begin{minipage}{\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.6\linewidth}
+    \begin{minipage}{0.7\linewidth}
 
       Dispositivo hardware, all'interno della CPU, che al runtime mappa gli indirizzi virtuali, che troviamo nel codice assembler, in indirizzi fisici.
       Vi sono diverse tipologie di MMU, anche in base a quanto vogliamo far pagare il chip.
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.35\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/hnter.png}
+    \begin{minipage}{0.25\linewidth}
+      \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/hnter.png}
     \end{minipage}
   \end{minipage}
 \end{center}
@@ -202,7 +201,7 @@ Gli indirizzi logici e fisici coincidono negli schemi di binding al tempo di com
   \centering
   \begin{minipage}{\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.6\linewidth}
+    \begin{minipage}{0.7\linewidth}
 
       Il registro base ora si chiama registro di rilocazione. Il valore nel registro di rilocazione viene aggiunto a ogni indirizzo
       generato da un processo utente nel momento in cui viene inviato alla memoria.
@@ -211,8 +210,8 @@ Gli indirizzi logici e fisici coincidono negli schemi di binding al tempo di com
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.35\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/mmuu.png}
+    \begin{minipage}{0.25\linewidth}
+      \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/mmuu.png}
     \end{minipage}
   \end{minipage}
 \end{center}
@@ -282,7 +281,7 @@ Il SO può aiutare fornendo librerie per implementare il caricamento dinamico.
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
     \begin{minipage}{0.35\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/ddl.png}
+      \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/ddl.png}
       \captionof{figure}{File .dll}
     \end{minipage}
   \end{minipage}
@@ -383,7 +382,7 @@ La memoria principale è solitamente suddivisa in due partizioni:
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
     \begin{minipage}{0.35\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/fbs.png}
+      \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/fbs.png}
     \end{minipage}
   \end{minipage}
 \end{center}
@@ -410,23 +409,21 @@ Il SO può decidere l'allocazione a partizioni multiple. Il grado di multiprogra
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.6\linewidth}
 
-      Quando un processo arriva, gli viene allocata memoria da un buco sufficientemente grande da contenerlo; quando un processo termina e libera la sua partizione, le partizioni libere adiacenti vengono unite. Tutto ciò è gestito dal sistema operativo che mantiene informazioni su:
+      Quando un processo arriva, gli viene allocata memoria da un buco sufficientemente
+      grande da contenerlo; quando un processo termina e libera la sua partizione,
+      le partizioni libere adiacenti vengono unite. Tutto ciò è gestito dal sistema
+      operativo che mantiene informazioni su: partizioni allocate e partizioni libere (buchi)
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
     \begin{minipage}{0.35\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/jyrt.png}
+      \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/jyrt.png}
     \end{minipage}
   \end{minipage}
 \end{center}
 
-\begin{itemize}
-  \item partizioni allocate
-  \item partizioni libere (buchi)
-\end{itemize}
 
 
-\newpage
 \subsection{Problema dell'allocazione dinamica della memoria}
 Come soddisfare una richiesta di dimensione n da una lista di buchi liberi?
 
@@ -467,13 +464,13 @@ Per decidere tra Best e Worst fit andrebbero fatti test sul campo.
   \centering
   \begin{minipage}{\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.6\linewidth}
+    \begin{minipage}{0.7\linewidth}
 
       \paragraph{Frammentazione esterna} - esiste sufficiente spazio di memoria totale per soddisfare una richiesta, ma non è contiguo. Sia la strategia first-fit che best-fit causano frammentazione esterna.
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.35\linewidth}
+    \begin{minipage}{0.25\linewidth}
       \includegraphics[width=1\linewidth]{content/OS_Internals/img/mkjhg.png}
     \end{minipage}
   \end{minipage}
@@ -486,13 +483,13 @@ Per decidere tra Best e Worst fit andrebbero fatti test sul campo.
   \centering
   \begin{minipage}{\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.6\linewidth}
+    \begin{minipage}{0.7\linewidth}
 
       \paragraph{Frammentazione interna} - la memoria allocata può essere leggermente più grande di quella richiesta; la dimensione minima è definita dal SO e la differenza tra la dimensione del programma C e questa dimensione minima è detta frammentazione interna. L'uso della partizione dinamica per assegnare spazio al processo può risolvere questo problema.
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.35\linewidth}
+    \begin{minipage}{0.25\linewidth}
       \includegraphics[width=1\linewidth]{content/OS_Internals/img/mht.png}
     \end{minipage}
   \end{minipage}
@@ -589,22 +586,26 @@ ora possono prendere la stessa dimensione della pagina, e non importa se sono co
 
 
 \begin{center}
-  \centering
-  \begin{minipage}{\linewidth}
-    % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.48\linewidth}
-      \includegraphics[width=0.95\linewidth]{content/OS_Internals/img/nfg.png}
+  \begin{minipage}{0.7\linewidth}
 
-    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-    \hfill
-    \begin{minipage}{0.48\linewidth}
-      \includegraphics[width=0.95\linewidth]{content/OS_Internals/img/dsf.png}
-      \captionof{figure}{Modello di paginazione della memoria logica e fisica}
+    \centering
+    \begin{minipage}{\linewidth}
+      % Primo blocco: 50% dello spazio per il codice
+      \begin{minipage}{0.48\linewidth}
+        \includegraphics[width=0.95\linewidth]{content/OS_Internals/img/nfg.png}
+
+      \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+      \hfill
+      \begin{minipage}{0.48\linewidth}
+        \includegraphics[width=0.95\linewidth]{content/OS_Internals/img/dsf.png}
+        \captionof{figure}{Modello di paginazione della memoria logica e fisica}
+      \end{minipage}
     \end{minipage}
   \end{minipage}
 \end{center}
 
 
+\newpage
 \subsubsection{Esempio di paginazione}
 
 Indirizzo logico: n = 2 (bit di offset), n-m = 3 (bit di pagina). Con una dimensione di pagina di 4 byte e una memoria fisica di 32 bit ($2^m$ = 8 pagine).
@@ -634,7 +635,7 @@ Le dimensioni delle pagine sono cresciute nel tempo:
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.5\linewidth]{images/OS_internals/Main-memory/MM-esempio4.png}
+  \includegraphics[width=0.4\linewidth]{images/OS_internals/Main-memory/MM-esempio4.png}
 \end{figure}
 
 Sappiamo, dato l'architettura e il funzionamento della memoria e dei processori, che
@@ -714,7 +715,7 @@ quello di svuotare la TLB ad ogni context switch, ma questo è inefficiente.
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
     \begin{minipage}{0.37\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/ythmu.png}
+      \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/ythmu.png}
     \end{minipage}
   \end{minipage}
 \end{center}
@@ -819,7 +820,7 @@ int main(){
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
     \begin{minipage}{0.37\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/frsb.png}
+      \includegraphics[width=0.8\linewidth]{content/OS_Internals/img/frsb.png}
       \captionof{figure}{Page fault}
 
     \end{minipage}
@@ -891,7 +892,7 @@ La virtual memory può essere implementata tramite: demand paging o demand segme
   \centering
   \begin{minipage}{\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.6\linewidth}
+    \begin{minipage}{0.7\linewidth}
       Posso caricare un processo interamente in memoria al momento del caricamento, oppure posso caricare una pagina solo quando è necessaria. Il demand paging richiede meno I/O, non esegue I/O non necessario, richiede meno memoria, offre una risposta più rapida e consente più utenti. È simile a un sistema di paging con swapping.\newline
 
       Il demand paging consiste nel caricare la prima pagina del processo e di comportarsi
@@ -910,7 +911,7 @@ La virtual memory può essere implementata tramite: demand paging o demand segme
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.37\linewidth}
+    \begin{minipage}{0.25\linewidth}
       \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio8.png}
     \end{minipage}
   \end{minipage}
@@ -949,7 +950,7 @@ Possiamo usare un bit, \textbf{valid-invalid}, per tracciare se l'indirizzo è n
 
 \begin{center}
   \centering
-  \begin{minipage}{0.85\linewidth}
+  \begin{minipage}{0.8\linewidth}
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.48\linewidth}
       \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/rfynhmg.png}
@@ -1240,7 +1241,7 @@ In questa immagine si può vedere che più frame slot sono associati a ogni proc
 dove
 
 \begin{flushleft}
-  \begin{minipage}{0.65\linewidth}
+  \begin{minipage}{0.7\linewidth}
     \raggedright
     \begin{itemize}
       \setlength{\itemsep}{6pt}
@@ -1253,7 +1254,7 @@ dove
     \end{itemize}
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.3\linewidth}
+  \begin{minipage}{0.25\linewidth}
     \centering
     \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-30-11-58-12.png}
   \end{minipage}
@@ -1493,7 +1494,7 @@ dobbiamo trovare un modo per azzerarlo.
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/OS_Internals/img/jnyfg.png}
+    \includegraphics[width=0.8\linewidth]{content/OS_Internals/img/jnyfg.png}
   \end{minipage}
 \end{flushleft}
 
@@ -1852,7 +1853,7 @@ In rosso le vittime. In Verde la pagina referenziata con residence set a 1.
   \hfill
   \begin{minipage}{0.45\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-31-13-35-34.png}
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/images/2026-03-31-13-35-34.png}
   \end{minipage}
 \end{center}
 
@@ -2124,7 +2125,7 @@ un alto grado di page fault.
   \centering
   \begin{minipage}{1\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.65\linewidth}
+    \begin{minipage}{0.7\linewidth}
       \textbf{I/O Interlock} - Le pagine devono talvolta essere bloccate in memoria.
       Consideriamo l'I/O - Le pagine che vengono utilizzate per copiare
       un file da un dispositivo devono essere bloccate ed evitare di essere selezionate per l'espulsione da un algoritmo
@@ -2134,8 +2135,8 @@ un alto grado di page fault.
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.3\linewidth}
-      \includegraphics[width=0.6\textwidth]{images/OS_internals/Main-memory/MM-esempio16.png}
+    \begin{minipage}{0.25\linewidth}
+      \includegraphics[width=0.5\textwidth]{images/OS_internals/Main-memory/MM-esempio16.png}
     \end{minipage}
   \end{minipage}
 \end{center}
@@ -2159,7 +2160,7 @@ pagine in eccesso rispetto al loro working set minimo
   \centering
   \begin{minipage}{1\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.65\linewidth}
+    \begin{minipage}{0.7\linewidth}
       Mantiene una lista di pagine libere da assegnare ai processi che generano fault.
       Lotsfree - parametro di soglia (quantità di memoria libera) per iniziare il paging.
       Desfree - parametro di soglia per aumentare il paging. Minfree - parametro di
@@ -2171,7 +2172,7 @@ pagine in eccesso rispetto al loro working set minimo
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.3\linewidth}
+    \begin{minipage}{0.25\linewidth}
       \includegraphics[width=\textwidth]{images/OS_internals/Main-memory/MM-esempio17.png}
     \end{minipage}
   \end{minipage}
