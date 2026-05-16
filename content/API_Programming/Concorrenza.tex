@@ -64,7 +64,7 @@ terminare.
 \begin{table}[h!]
   \renewcommand{\arraystretch}{1.5}
   \centering
-  \begin{tabularx}{0.7\textwidth}{X X X}
+  \begin{tabularx}{\textwidth}{l l l}
     \toprule
     \textbf{Entità}      & \textbf{Memoria}                                          & \textbf{Gestione}  \\
     \midrule
@@ -231,12 +231,12 @@ thread. Occorre usare un costrutto di sincronizzazione esplicito che permetta di
 \begin{center}
   \begin{minipage}{0.47\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-27-12-27-32.png}
+    \includegraphics[width=0.75\linewidth]{content/API_Programming/images/2026-04-27-12-27-32.png}
   \end{minipage}%
   \hfill
   \begin{minipage}{0.47\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-27-12-28-33.png}
+    \includegraphics[width=0.75\linewidth]{content/API_Programming/images/2026-04-27-12-28-33.png}
   \end{minipage}
 \end{center}
 
@@ -262,7 +262,7 @@ Il processore non ha consapevolezza  della sua esistenza.
 \begin{table}[h!]
   \renewcommand{\arraystretch}{1.5}
   \centering
-  \begin{tabularx}{0.8\textwidth}{l X X}
+  \begin{tabularx}{\textwidth}{l X X}
     \toprule
     \textbf{Problema} & \textbf{Domanda chiave}                                             & \textbf{Esempio intuitivo}                                                           \\
     \midrule
@@ -344,12 +344,9 @@ necessarie proprietà di funzionamento
 
 Tutti i thread presenti in un processo condividono:
 
-\begin{itemize}
-  \item Le variabili globali
-  \item Le costanti
-  \item L'area eseguibile in cui è contenuto il codice
-  \item Lo heap
-\end{itemize}
+\begin{center}
+  Le variabili globali - le costanti - l'area eseguibile in cui è contenuto il codice - lo heap
+\end{center}
 
 \subsection{Esecuzione e non determinismo}
 
@@ -603,19 +600,51 @@ Si ha garanzia di progressione quando sono assenti i seguenti fenomeni:
 \subsection{Accesso condiviso: i possibili problemi}
 
 \begin{itemize}
-  \item Atomicità:
-  \item Visibilità:
-  \item Ordinamento:
+  \item \textbf{Atomicità}: quali operazioni di memoria hanno effetti indivisibili? Se
+        due thread \textbf{fanno accesso alla stessa struttura dati}, rispettivamente in
+        lettura e scrittura, non c'è nessuna garanzia su quale delle due
+        operazioni sia \textbf{eseguita per prima}.
+  \item \textbf{Visibilità}: la scrittura di una variabile può essere osservata da una lettura eseguita
+        da un altro thread? Se un thread legge un dato che un altro thread sta modificando, il valore letto può essere
+        \textbf{diverso} sia dal valore \textbf{iniziale} che da quello \textbf{finale}.
+  \item \textbf{Ordinamento}: sotto quali condizioni, sequenze di operazioni effettuate
+        da un thread sono visibili nello stesso ordine da parte di altri thread? Se,
+        \textbf{quando osservato} dall'esterno, il comportamento di un singolo thread appare
+        indistinguibile a seguito di una modifica alla sequenza delle istruzioni. Sia il compilatore che la CPU possono \textbf{invertire l'ordine di
+          esecuzione} delle singole istruzioni
 \end{itemize}
 
 
 \subsection{Accesso condiviso: le possibili soluzioni}
 
-\begin{itemize}
-  \item Atomic
-  \item Mutex: dato accessibile solo da parte di un solo thread con un lock
-  \item Condition variable
-\end{itemize}
+\subsubsection{Atomic}
+
+Alla base di tutti i meccanismi di accesso condiviso ci sono istruzioni apposite,
+offerte dai singoli processori, volte a garantire operazioni di tipo
+Read-Modify-Write di tipo atomico (cioè, non interrompibili e non osservabili
+nei loro stati intermedi), su CPU single- e multi-core. Tali operazioni sono
+limitate a tipi semplici (booleani, interi, puntatori) e sono esposte dalle
+librerie standard di C++ e Rust attraverso opportune astrazioni, che incapsulano
+l'utilizzo di barriere di memoria
+
+
+\subsection{Mutex}
+Per estendere le garanzie di atomicità e dipendenza causale a strutture dati più complesse, occorre introdurre il
+concetto di Mutex.
+Essi estendono il principio della mutua esclusione a thread differenti.
+Un mutex può essere libero o posseduto da un singolo thread.
+Se un secondo thread cerca di ottenere il possesso del mutex mentre è in uso da parte di un altro thread, rimane in
+attesa (senza consumare cicli di CPU) fino a che esso non viene rilasciato
+
+\subsubsection{Condition variable}
+In alcuni casi, occorre attendere - senza consumare cicli di CPU - che si verifichi una condizione più complessa del
+semplice rilascio di un mutex da parte di un thread.
+Una condition variable permette di realizzare tale attesa, a condizione che il thread che causa l'avverarsi della
+condizione si occupi di segnalarlo, generando una notifica tramite appositi metodi.
+Una condition variable può essere usata solo in coppia con un mutex
+
+
+
 
 \subsection{Quale strumento utilizzare?}
 
@@ -788,7 +817,7 @@ I tipi che implementano una mutabilità interna, come Cell e RefCell, non dispon
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-28-12-10-05.png}
+    \includegraphics[width=0.75\linewidth]{content/API_Programming/images/2026-04-28-12-10-05.png}
   \end{minipage}
 \end{flushleft}
 
@@ -825,7 +854,7 @@ fn main() {
   \hfill
   \begin{minipage}{0.45\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-28-12-16-27.png}
+    \includegraphics[width=0.75\linewidth]{content/API_Programming/images/2026-04-28-12-16-27.png}
   \end{minipage}
 \end{center}
 
@@ -933,7 +962,7 @@ void add(int i){
   \hfill
   \begin{minipage}{0.65\linewidth}
     \centering
-    \includegraphics[width=0.5\linewidth]{content/API_Programming/images/2026-04-28-12-31-38.png}
+    \includegraphics[width=0.3\linewidth]{content/API_Programming/images/2026-04-28-12-31-38.png}
   \end{minipage}
 \end{center}
 
@@ -1523,7 +1552,7 @@ restituisce false
 \begin{table}[h!]
   \renewcommand{\arraystretch}{1.5}
   \centering
-  \begin{tabularx}{\textwidth}{l l l l }
+  \begin{tabularx}{\textwidth}{l X X X }
     \toprule
     \textbf{Modello}    & \textbf{Idea}                        & \textbf{Vantaggio}                             & \textbf{Costo}                            \\
     \midrule
