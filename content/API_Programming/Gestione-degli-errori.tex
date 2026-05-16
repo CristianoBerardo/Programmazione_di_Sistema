@@ -481,19 +481,17 @@ gestire successivamente tramite l'utilizzo del costrutto \textit{match}.
 È necessario implementare il tratto From per convertire i diversi errori nel tipo custom da
 propagare.
 
-\begin{minted}{rust}
-#[derive(Debug)]
-enum SumFileError {
-  Io(io::Error),
-  Parse(ParseIntError),
-}
-\end{minted}
 
 \begin{center}
   \begin{minipage}{\linewidth}
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.49\linewidth}
       \begin{minted}[breaklines]{rust}
+#[derive(Debug)]
+enum SumFileError {
+  Io(io::Error),
+  Parse(ParseIntError),
+}
 impl From<io::Error> for SumFileError {
   fn from(err: io::Error) -> Self { 
     SumFileError::Io(err) 
@@ -503,29 +501,44 @@ impl From<ParseIntError> for SumFileError {
   fn from(err: ParseIntError) -> Self { 
     SumFileError::Parse(err)
   }
-}
-impl fmt::Display for SumFileError {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      SumFileError::Io(err) => write!(f, "IO error: {}", err),
-      SumFileError::Parse(err) => write!(f, "Parse error: {}", err),
-    }
-  }
-}
-impl error::Error for SumFileError {
-  fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-    Some(match self {
-    SumFileError::Io(err) => err,
-    SumFileError::Parse(err) => err,
-    })
-  }
-}       
+}    
 \end{minted}
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill % Spazio elastico automatico per distanziare i due blocchi
     % Secondo blocco: 40% dello spazio per l'immagine
     \begin{minipage}{0.49\linewidth}
 
+      \begin{minted}[breaklines]{rust}
+impl fmt::Display for SumFileError {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      SumFileError::Io(err) => 
+        write!(f, "IO error: {}", err),
+      SumFileError::Parse(err) => 
+        write!(f, "Parse error: {}", err),
+    }
+  }
+}
+impl error::Error for SumFileError {
+  fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+    Some(match self {
+      SumFileError::Io(err) => err,
+      SumFileError::Parse(err) => err,
+    })
+  }
+}  
+        \end{minted}
+
+
+    \end{minipage}
+  \end{minipage}
+\end{center}
+
+
+\begin{center}
+  \begin{minipage}{\linewidth}
+    % Primo blocco: 50% dello spazio per il codice
+    \begin{minipage}{0.49\linewidth}
       \begin{minted}[breaklines]{rust}
 fn sum_file(path: &Path) -> Result<i32, SumFileError> {
   let mut file = File::open(path)?;
@@ -537,6 +550,14 @@ fn sum_file(path: &Path) -> Result<i32, SumFileError> {
   }
   Ok(sum)
 }
+\end{minted}
+    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+    \hfill % Spazio elastico automatico per distanziare i due blocchi
+    % Secondo blocco: 40% dello spazio per l'immagine
+    \begin{minipage}{0.49\linewidth}
+
+      \begin{minted}[breaklines]{rust}
+
 
 fn handle_sum_file_errors(path: &Path) {
   match sum_file(path) {
