@@ -116,7 +116,7 @@ let b2: Box<dyn Debug> = Box::new([1, 2, 3]);
   \hfill
   \begin{minipage}{0.45\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-21-13-26-12.png}
+    \includegraphics[width=0.5\linewidth]{content/API_Programming/images/2026-04-21-13-26-12.png}
   \end{minipage}
 \end{center}
 
@@ -144,9 +144,9 @@ fn main() {
   \hfill
   \begin{minipage}{0.45\linewidth}
     \centering
-    \includegraphics[width=0.75\linewidth]{content/API_Programming/images/2026-04-03-17-08-46.png}
-    \includegraphics[width=0.75\linewidth]{content/API_Programming/images/2026-04-03-17-09-30.png}
-    \includegraphics[width=0.75\linewidth]{content/API_Programming/images/2026-04-03-17-10-22.png}
+    \includegraphics[width=0.65\linewidth]{content/API_Programming/images/2026-04-03-17-08-46.png}
+    \includegraphics[width=0.65\linewidth]{content/API_Programming/images/2026-04-03-17-09-30.png}
+    \includegraphics[width=0.65\linewidth]{content/API_Programming/images/2026-04-03-17-10-22.png}
   \end{minipage}
 \end{center}
 
@@ -183,7 +183,7 @@ fn main() {
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-16-46-12.png}
+    \includegraphics[width=0.9\linewidth]{content/API_Programming/images/2026-04-03-16-46-12.png}
   \end{minipage}
 \end{center}
 
@@ -324,31 +324,31 @@ assert!(weak_five.upgrade().is_none());
 
 \subsection{\texttt{std::cell::Cell<T>}}
 
-\begin{center}
-  \begin{minipage}{0.75\linewidth}
-    In condizioni normali, Rust consente o più riferimenti condivisi
-    immutabili, oppure un unico riferimento mutabile. Esistono situazioni in cui
-    l'analisi statica eseguita in fase di compilazione è troppo restrittiva.
+% \begin{center}
+%   \begin{minipage}{0.87\linewidth}
+In condizioni normali, Rust consente o più riferimenti condivisi
+immutabili, oppure un unico riferimento mutabile. Esistono situazioni in cui
+l'analisi statica eseguita in fase di compilazione è troppo restrittiva.
 
 
-    Tuttavia, il modulo \verb|std::cell| offre contenitori per
-    \textit{mutabilità condivisa e controllata} in contesti single-thread. È
-    possibile cioè avere più riferimenti al valore pure essendo in grado di
-    mutarlo. I tipi offerti possono funzionare solo in contesti non concorrenti
-    (basati su singolo thread).
+Tuttavia, il modulo \verb|std::cell| offre contenitori per
+\textit{mutabilità condivisa e controllata} in contesti single-thread. È
+possibile cioè avere più riferimenti al valore pure essendo in grado di
+mutarlo. I tipi offerti possono funzionare solo in contesti non concorrenti
+(basati su singolo thread).
 
 
-    La struct \verb|std::cell::Cell<T>|implementa la mutabilità
-    del dato contenuto al suo interno attraverso metodi che non richiedono la
-    mutabilità del contenitore. Consente accessi per copia/sostituzione del
-    contenuto. Si dice che Cell implementa un meccanismo di \textbf{interior mutability}
-  \end{minipage}%
-  \hfill
-  \begin{minipage}{0.2\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-16-52-31.png}
-  \end{minipage}
-\end{center}
+La struct \verb|std::cell::Cell<T>|implementa la mutabilità
+del dato contenuto al suo interno attraverso metodi che non richiedono la
+mutabilità del contenitore. Consente accessi per copia/sostituzione del
+contenuto. Si dice che Cell implementa un meccanismo di \textbf{interior mutability}
+%   \end{minipage}%
+%   \hfill
+%   \begin{minipage}{0.1\linewidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-03-16-52-31.png}
+%   \end{minipage}
+% \end{center}
 
 
 
@@ -532,9 +532,10 @@ Un albero dove i nodi figli conoscono il padre e viceversa si implementa combina
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.45\linewidth]{content/API_Programming/images/2026-04-03-16-33-26.png}
+  \includegraphics[width=0.4\linewidth]{content/API_Programming/images/2026-04-03-16-33-26.png}
 \end{figure}
 
+\newpage
 \begin{minted}[breaklines]{rust}
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -595,6 +596,7 @@ impl Node {
 \end{minted}
 
 
+\newpage
 \section{Cheat Sheet dei Container in Rust}
 Per facilitare la comprensione del layout in memoria dei vari container e puntatori intelligenti:
 
