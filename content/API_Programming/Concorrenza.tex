@@ -147,15 +147,15 @@ Lo spazio di indirizzamento tra thread è condiviso, sia nel bene che nel male.
 \subsection{Concorrente e parallelismo}
 
 \paragraph{Concorrente} più flussi di elaborazione \textbf{attivi} nello stesso
-intervallo di tempo, il cui avanzamento può avvenire. In alternanza su uno
-stesso core sotto il controllo dello scheduler. Oppure in parallelo se sono
+intervallo di tempo, il cui avanzamento può avvenire in alternanza su uno
+stesso core sotto il controllo dello scheduler, oppure in parallelo se sono
 disponibili più core.
 
 \paragraph{Parallelismo} caso particolare in cui i flussi di elaborazione sono
-realmente in esecuzione nello stesso istante. Perché assegnati a core distinti
+realmente in esecuzione nello stesso istante poiché assegnati a core distinti
 
 \begin{tcolorbox}
-  \textbf{Nota}:  Ogni parallelismo è una forma di concorrenza,ma non ogni
+  \textbf{Nota}:  Ogni parallelismo è una forma di concorrenza, ma non ogni
   concorrenza implica parallelismo
 \end{tcolorbox}
 
@@ -245,18 +245,18 @@ thread. Occorre usare un costrutto di sincronizzazione esplicito che permetta di
 La cache porta con se un problema, ogni thread agisce sulla propria cache, se vogliamo che i
 dati fluiscano tra una cache e l'altra occorre tempo.
 
-Sorgono 3 problemi, in un contesto sequenziale non è presente:
+Sorgono 3 problemi che in un contesto sequenziale non sono presenti:
 
 \begin{itemize}
   \item\textbf{Atomicità}: Solitamente vogliamo salvare più di un byte alla volta. Non è detto che quella operazione stia perfettamente in una riga di cache.
-  \item \textbf{Visibilità}: Ogni thread scrive sulla propria cache, e se forzo il sync della cache solo a quel punto i dati sono visibili a tutti
-  \item \textbf{Ordinamento}: La sequenza, dato il tempo di re-sync, non è garantito e l'ordine dei risultati non è predicibile
+  \item \textbf{Visibilità}: Ogni thread scrive sulla propria cache, e solo forzando il sync della cache i dati sono resi visibili a tutti
+  \item \textbf{Ordinamento}: La sequenza delle operazioni, dato il tempo di re-sync, non è garantita e l'ordine dei risultati non è predicibile
 \end{itemize}
 
 
 La cache è un fatto puramente Hardware, in nessun linguaggio di programma, se pur a basso livello come ARM,
 non è possibile accedere direttamente alla cache.
-Il processore non ha consapevolezza che ha una cache.
+Il processore non ha consapevolezza  della sua esistenza.
 
 
 \begin{table}[h!]
@@ -266,7 +266,7 @@ Il processore non ha consapevolezza che ha una cache.
     \toprule
     \textbf{Problema} & \textbf{Domanda chiave}                                             & \textbf{Esempio intuitivo}                                                           \\
     \midrule
-    Atomicità         & L'operazione è atomica?                                             & a += 1 consiste in una lettira seguita da una scrittura, 3 operazioni, non è atomica \\
+    Atomicità         & L'operazione è atomica?                                             & a += 1 consiste in una lettura seguita da una scrittura, 3 operazioni, non è atomica \\
     Visibilità        & Un altro thread vede davvero la scrittura?                          & Un thread legge un valore obsoleto                                                   \\
     Ordinamento       & Gli altri thread osservano operazioni distinte nello stesso ordine? & Scritture viste in un ordine diverso                                                 \\
     \bottomrule
@@ -278,13 +278,13 @@ Il processore non ha consapevolezza che ha una cache.
 Ciascuna famiglia di processori offre una propria risposta ai problemi menzionati.
 
 La piattaforma \textbf{x86} adotta un modello \textbf{quasi sequenzialmente consistente} ed offre
-le istruzioni di tipo fence, che forzano il completamento delle operazioni di
+le istruzioni di tipo \textit{fence}, che forzano il completamento delle operazioni di
 scrittura, bloccando temporaneamente gli altri core che dovessero cercare di
 accedere nel frattempo allo stesso segmento di indirizzi
 
 Per contro, sulla
 piattaforma \textbf{ARM} viene usato un modello molto più lasco, basato su \textbf{liste di
-  propagazione dei cambiamenti}, ed offre le istruzioni di tipo barrier che
+  propagazione dei cambiamenti}, ed offre le istruzioni di tipo \textit{barrier} che
 consentono l'ordinamento causale rispettivamente per il calcolo degli indirizzi,
 delle istruzioni, dei dati.
 
@@ -311,8 +311,8 @@ necessarie proprietà di funzionamento
         comportamento non deterministico e asincrono dell'esecuzione concorrente.
         Estremamente difficili da riprodurre e da eliminare
   \item Gli errori possono manifestarsi cambiando la \textbf{piattaforma di esecuzione}, oppure
-        Oppure soltanto dopo numerose esecuzioni. Tipicamente emergono nel momento
-        meno adatto.
+        soltanto dopo numerose esecuzioni. Tipicamente emergono nel momento
+        meno adatto (chiaro).
 \end{itemize}
 
 
@@ -332,14 +332,7 @@ necessarie proprietà di funzionamento
     destinato ad ospitare lo stack che governerà la sua esecuzione
 
 
-    Tutti i thread presenti in un processo condividono:
 
-    \begin{itemize}
-      \item Le variabili globali
-      \item Le costanti
-      \item L'area eseguibile in cui è contenuto il codice
-      \item Lo heap
-    \end{itemize}
   \end{minipage}%
   \hfill
   \begin{minipage}{0.3\linewidth}
@@ -348,16 +341,25 @@ necessarie proprietà di funzionamento
   \end{minipage}
 \end{flushleft}
 
+
+Tutti i thread presenti in un processo condividono:
+
+\begin{itemize}
+  \item Le variabili globali
+  \item Le costanti
+  \item L'area eseguibile in cui è contenuto il codice
+  \item Lo heap
+\end{itemize}
+
 \subsection{Esecuzione e non determinismo}
 
 
 \begin{itemize}
   \item  L'esecuzione di ogni singolo thread procede secondo le normali regole sequenziali. Per cui è possibile prevedere cosa avvenga "prima" e cosa "dopo"
   \item Se più thread sono in esecuzione, non è possibile fare assunzioni sulle velocità relative di
-        avanzamento. Se non ricorrendo a forme esplicite di sincronizzazione e comunicazione
+        avanzamento, se non ricorrendo a forme esplicite di sincronizzazione e comunicazione
   \item  La sincronizzazione può riguardare il raggiungimento di un particolare stato da parte di un
-        thread.. Abilitando di conseguenza altri a procedere
-  \item  ...oppure l'esigenza di un thread di eseguire azioni su aree condivise. Allo scopo di impedire ad altri di accedere alle stesse aree
+        thread, abilitando di conseguenza altri a procedere, oppure l'esigenza di un thread di eseguire azioni su aree condivise. Allo scopo di impedire ad altri di accedere alle stesse aree
   \item  In alcuni casi, all'informazione logica che abilita/impedisce la prosecuzione di altri thread,
         si accompagna il trasferimento di informazioni più strutturate. Che rappresentano l'esito totale o parziale di una computazione avvenuta o la richiesta di elaborazione di
         ulteriori dati
@@ -375,7 +377,7 @@ fn run(msg: &str) {
     println!("{}{}",msg,i);
     thread::sleep(Duration::from_nanos(1));
   }
-  }
+}
 fn main() {
   let t1 = thread::spawn(|| {run( "aaaa"); });
   let t2 = thread::spawn(|| {run(" bbbb"); });
@@ -394,9 +396,7 @@ fn main() {
 
 \section{Esecuzione e non determinismo}
 
-\begin{itemize}
-  \item L'output dei programmi precedenti è \textbf{solo uno}
-\end{itemize}
+L'output dei programmi precedenti è \textbf{solo uno}
 
 \begin{minted}[breaklines]{rust}
 #include <iostream>
@@ -409,9 +409,9 @@ void run() {
     int after = a;
 
     //in un contesto sequenzale, non passerebbe mai
-    if (after-before != 1)
+    if (after - before != 1)
       std::cout << before << " -> " << after
-      << "(" << after-before << ")\n";
+      << "(" << after - before << ")\n";
   }
 }
 
@@ -434,6 +434,15 @@ variabile \textbf{a}?
 
 \subsection{Interferenza}
 
+Si verifica quando più thread
+fanno accesso a uno stesso
+dato, \textbf{modificandolo}, in assenza
+di sincronizzazione.
+
+La sua presenza dà origine a
+\textbf{malfunzionamenti casuali},
+molto difficili da identificare.
+
 \section{Sincronizzazione}
 
 Se due thread cercano di accedere in lettura/scrittura ad una stessa variabile
@@ -444,7 +453,7 @@ della prossima istruzione da eseguire, ...) il dato memorizzato potrebbe essere 
 thread, quello scritto dal secondo oppure un terzo valore \textbf{completamente arbitrario}
 
 
-L'accesso in lettura/scrittura a variabili il cui contenuto è (potenzialmente)
+L'accesso in lettura/scrittura a variabili il cui contenuto è, potenzialmente,
 scritto da altri thread è soggetto a diversi vincoli:
 
 \begin{itemize}
@@ -461,7 +470,7 @@ Che dipendono dal processore responsabile dell'esecuzione del codice.
 
 
 Altre richiedono la garanzia di \textbf{invarianti a livello sistema} che può essere
-fornita solo da meccanismi offerti dal sistema operativo. Che, controllando la
+fornita solo da meccanismi offerti dal sistema operativo, che, controllando la
 schedulazione dei thread, può farsi carico che avvenga / non avvenga una
 determinata condizione.
 
@@ -472,7 +481,7 @@ Ne consegue che i meccanismi di sincronizzazione dipendono dalla coppia
 processore/sistema operativo, che collettivamente definiscono l'interfaccia
 binaria dell'applicazione. ABI - Application Binary Interface.
 
-Le librerie standard dei diversi linguaggi di programmazione si fanno (talora)
+Le librerie standard dei diversi linguaggi di programmazione si fanno, talora,
 carico di standardizzare tale comportamento, offrendo API comuni a livello di
 codice sorgente. Come nei casi di C++11 e successivi e di Rust
 
@@ -1276,14 +1285,691 @@ fn main() {
 }
 \end{minted}
 
+\section{std::sync::Weak<T>}
+Analogamente a quanto succede con gli smart pointer di tipo \verb|Rc<T>|,
+anche nel caso di \verb|Arc<T>| la creazione di catene circolari impedisce il rilascio delle strutture.
+
+Per questo motivo è disponibile la \verb|struct std::sync::Weak<T>| che permette - sulla falsariga di
+quanto avviene con \verb|std::rc::Weak<T>| - di realizzare dipendenze circolari con riferimenti che non
+partecipano al conteggio, garantendo così la possibilità di rilascio.
+
+
+Per fare accesso al dato puntato, occorre invocare il metodo \verb|upgrade()|,
+he restituisce un valore di tipo \verb|Option<Arc<T>>|.
+
+Si crea un oggetto di tipo \verb|Weak<T>| a partire da un riferimento di tipo
+\verb|Arc<T>| invocato su quest'ultimo il metodo \verb|downgrade()|.
+
+
+\section{Attese condizionate}
+
+Spesso un thread deve aspettare uno o più risultati intermedi prodotti altri
+thread.
+Per motivi di efficienza, l'attesa non deve consumare risorse e deve terminare non appena un dato è
+disponibile.
+
+La presenza di dati condivisi richiede come minimo l'utilizzo di un mutex questo per
+garantire l'assenza di interferenze tra i due thread che devono fare accesso ai
+dati.
+
+Il polling ha due limiti:
+
+\begin{itemize}
+  \item Consuma capacità di calcolo e batteria in cicli inutili
+  \item Introduce una latenza tra il momento in cui il dato è disponibile e il
+        momento in cui il secondo thread si sblocca
+\end{itemize}
+
+Per gestire queste situazioni, i sistemi operativi offrono il concetto di \textit{condition variable}.
+Strutture dati di sincronizzazione che permettono di bloccare l'esecuzione di un thread, così da evitare
+il consumo di CPU, nell'attesa che qualcosa succeda.
+
+L'uso di Convar, che va usata con Mutex, - struttura dati gestita dal sistema operativo che permette di sospendere e
+mettere nella coda dei non runnable per non sprecare risorse, e poi
+ci deve essere un'altro meccanismo che ripesca questo thread e lo inserisca nuovamente
+nella coda dei runnable quando il dato è disponibile.
+Diverso da \verb|sleep()| nel quale devo specificare il tempo di attesa.
+
+L'uso di \textit{condvar} è basata sulla cooperazione all'interno del sistema:
+se un thread si sospende in attesa di una condizione, è necessario che tutti i
+thread che eseguono azioni che potrebbero provocare il verificarsi della
+condizione si facciano carico di inviare una notifica alla condition variable.
+
+
+Il pattern di utilizzo prevede che esista una espressione booleana il cui valore possa
+essere usato per determinare se occorre attendere o meno.
+
+
+La valutazione di tale espressione deve avvenire mentre si possiede un mutex, per garantire l'assenza
+di \textbf{corse critiche}. In Rust, questo vuol dire che le variabili che consentono la valutazione della condizione sono
+incapsulate nel \textbf{mutex}.
+
+
+Ogni condition variable deve essere usata in coppia con un singolo mutex.
+Eventuali tentativi di usare mutex diversi per una stessa condition variable può determinare un
+fallimento in fase di esecuzione.
+
+\begin{tcolorbox}
+  \textbf{Nota:} Condvar, utilizzata con un mutex, interfaccia con il SO  per aspettare i risultati di altri thread, permette di aspettare il dato contenuto nel mutex. Bisogna capire cosa stiamo aspettando, solitamente con una lambda function.
+\end{tcolorbox}
+
+\subsection{Condvar in C++}
+Il linguaggio C++ offre la classe \verb|std::condition_variable|, essa viene usata in coppia con un oggetto di tipo
+\verb|std::mutex| racchiuso all'interno di un oggetto di tipo \verb|std::unique_lock<std::mutex>|.
+
+\subsection{Condvar in Rust}
+Rust offre la struct \verb|std::sync::Condvar|. La sua semantica è totalmente allineata con la corrispondente classe C++.
+La struttura dei suoi metodi facilita il collegamento con il dato protetto dal
+mutex, rendendo più naturale il suo utilizzo.
+
+
+\subsection{Condvar - metodi principali}
+
+\begin{itemize}
+  \item \mintinline{rust}|pub fn new() -> Condvar| crea una nuova istanza
+  \item \mintinline{rust}|pub fn notify_one(&self)| Sveglia un thread \textbf{a caso} tra quelli in attesa sulla condition variable
+  \item \mintinline{rust}|pub fn notify_all(&self)| Sveglia tutti i thread in attesa sulla condition variable, che usciranno, \textbf{uno alla volta}, dal metodo wait
+        possedendo il lock (altrimenti ritora a dormire fino a che il lock è disponibile, in questo caso è in attesa del mutex e non di una notifica)
+  \item \mintinline{rust}|pub fn wait<'a, T>(&self, guard: MutexGuard<'a, T>) -> LockResult<MutexGuard<'a, T>>| Sospende il thread corrente fino alla ricezione di una notifica: durante la sospensione, rilascia il lock; al
+        ricevere della notifica, riacqiusisce il lock e restituisce una nuova guardia. Ha il mutex, gli altri non possono modificare nulla.
+\end{itemize}
+
+Quando si chiama \verb|wait| succedono due cose:
+\begin{itemize}
+  \item Viene distrutto il lock
+  \item Il thread corrente viene sospeso dal SO
+\end{itemize}
+
+
+\subsection{Pattern Condvar}
+
+
+\begin{minted}[breaklines]{rust}
+let pair = Arc::new((Mutex::new(false), Condvar::new()));
+let pair2 = Arc::clone(&pair);
+// Inside of our lock, spawn a new thread, and then wait for it to start.
+// guarda la handle se è partito altrimenti non ha senso aspettarlo nel while dopo
+thread::spawn(move|| {
+  let (lock, cvar) = &*pair2;
+  //ricorda di gestire e non usare unwrap, se errore? panico e non arriverebbe mai a notify!
+  let mut started = lock.lock().unwrap();
+  *started = true;
+  // We notify the condvar that the value has changed.
+  cvar.notify_one();
+});
+// Wait for the thread to start up.
+let (lock, cvar) = &*pair;
+// started, il lock viene rilasciato e resituito un nuovo lock dopo la notifica
+let mut started = lock.lock().unwrap();
+
+// se qui faccio operazioni stampalate, vado in panico e quello sopra panica perché ho usato unwrap!
+
+// prevenzione nel caso il primo thread abbia già inviato la notifica (partito prima del thread principale) rimarrei sempre ibernato.
+while !*started {
+  started = cvar.wait(started).unwrap();
+}
+\end{minted}
+
+
+\section{Meccanismo di funzionamento}
+
+Concettualmente, una condition variable mantiene una collezione di thread in
+attesa che si verifichi la condizione attesa.
+Inizialmente la lista è vuota, quando un thread esegue il metodo \verb|wait(...)|, viene sospeso e aggiunto alla lista e marcato come non eseguibile dall'SO.
+
+
+Quando sono eseguiti i metodi \verb|notify_one(...)| o \verb|notify_all(...)|, uno o tutti i
+thread presenti nella collezione sono risvegliati. Si basa sul S.O. per sospendere/risvegliare i thread
+
+
+La presenza di un unico lock fa si che, se più thread ricevono la notifica, il risveglio
+sia progressivo. Non appena un thread rilascia il lock, un altro può acquisirlo e proseguire.
+
+La relazione tra l'evento e la notifica è solo nella testa del programmatore.
+Per questo, si rende esplicito l'evento che si è verificato appoggiandosi ad una
+o più variabili condivise (sotto il controllo del mutex).
+
+
+\section{Notifiche spurie}
+Althri thread mandano notifica sulla condvar e sempre nell'while se è la mia notifica o meno
+(sveglio in anticipo).
+
+È possibile che un thread in attesa su una condition variable sia risvegliato in
+assenza di un'esplicita notifica. Problema delle cosiddette \textbf{notifiche spurie}.
+
+Occorre, al ritorno dal metodo \verb|wait(...)|, controllare se la condizione
+attesa è verificata. Per semplificare tale verifica, esiste una versione del
+metodi di attesa che riceve come argomento una funzione volta a valutare il
+predicato richiesto.
+
+Per questo Rust offre il metodo:
+
+
+\begin{minted}[breaklines]{rust}
+pub fn wait_while<'a, T, F>( &self, guard: MutexGuard<'a, T>, condition: F ) -> LockResult<MutexGuard<'a, T>>
+where F: FnMut(&mut T) -> bool{
+  ...
+}
+\end{minted}
+
+
+Al risveglio, ri-acquisisce il lock e valuta la funzione condition: se questa restituisce true, si riaddormenta,
+altrimenti esce dall'attesa
+
+\section{Notifiche perse}
+Il while mi protegge anche dalla prima iterazione, se sono partito in ritardo rispatto
+all'altro thread, se la notifica è già arrivata non rimango ibernato per sempre.
+(partenza in ritardo).
+
+
+Analogamente, se un thread ha eseguito una qualche azione che può abilitare la
+prosecuzione di un altro thread, ed invoca il metodo \verb|notify_one(...)| / \verb|notify_all(...)|
+per segnalare tale fatto, è possibile che la notifica vada persa.
+Succede se l'altro thread \textbf{non ha ancora eseguito} la corrispondente istruzione di attesa.
+
+
+Per questo motivo, occorre sempre racchiudere l'istruzione di attesa in un ciclo
+che verifica se occorra o meno addormentarsi e, al risveglio, se ci siano le
+condizioni o meno per continuare a dormire.
+In entrambi i casi, il metodo \verb|wait_while(...)| ci viene in aiuto e ci protegge.
+Esso è equivalente a:
+
+\begin{minted}[breaklines]{rust}
+while condition(&mut *guard) {
+  guard = self.wait(guard)?;
+}
+Ok(guard)
+\end{minted}
+
+\section{Attesa temporizzata}
+Altri metodi permettono di limitare il tempo massimo di attesa, permettendo al
+thread di risvegliarsi anche in assenza del verificarsi della condizione.
+
+\begin{center}
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+pub fn wait_timeout<'a, T>(
+  &self,
+  guard: MutexGuard<'a, T>,
+  dur: Duration
+  ) -> LockResult<(MutexGuard<'a, T>, WaitTimeoutResult)> {
+  ...
+}
+
+Attende per un tempo massimo pari a dur
+\end{minted}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\linewidth}
+    \begin{minted}[breaklines]{rust}
+pub fn wait_timeout_while<'a, T, F>(
+  &self,
+  guard: MutexGuard<'a, T>,
+  dur: Duration,
+  condition: F
+  ) -> LockResult<(MutexGuard<'a, T>, WaitTimeoutResult)>
+where F: FnMut(&mut T) -> bool {
+  ...
+}
+Attende per un tempo massimo pari a dur; eventuali notifiche ricevute portano a ri-addormentarsi se la funzione condition
+restituisce false
+\end{minted}
+  \end{minipage}
+\end{center}
+
+
+\section{Stato condiviso o scambio di messaggi?}
+
+\begin{table}[h!]
+  \renewcommand{\arraystretch}{1.6}
+  \centering
+  \begin{tabularx}{\textwidth}{l l l l }
+    \toprule
+    \textbf{Modello}    & \textbf{Idea}                        & \textbf{Vantaggio}                             & \textbf{Costo}                            \\
+    \midrule
+    Stato condiviso     & Più thread accedono agli stessi dati & Efficiente e flessibile                        & Richiede sinconizzazione esplicita        \\
+    Scambio di messaggi & I dati vengono trasferiti tra thread & Possesso più chiaro, meno interferenza diretta & Protocollo di comunicazione da progettare \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Condivisione di messaggi}
+In alternativa alla condivisione dello stato, Rust offre un meccanismo di
+comunicazione e sincronizzazione tra thread basato sulla condivisione di messaggi
+
+\begin{itemize}
+  \item La funzione \mintinline{rust}|std::sync::mpsc::channel<T>()| (multiple producer, single consumer) restituisce una coppia ordinata formata da una \mintinline{rust}|struct Sender<T>| e una \mintinline{rust}|struct Receiver<T>|.
+  \item Tutti i dati inviati tramite il metodo \mintinline{rust}|send(...)| della prima possono essere consumati attraverso il metodo \mintinline{rust}|recv(...)| della seconda, nello stesso ordine in cui sono stati inviati
+  \item Il metodo \mintinline{rust}|send(...)| offre la garanzia che chi lo invoca non sarà bloccato, ovvero il canale di comunicazione ha una capacità infinita di memorizzazione temporanea dei messaggi. Il canale funzione come un buffer, limitata alla memoria del mio pc, quiesto può provocare errori
+  \item Il metodo \mintinline{rust}|recv(...)|, invece, si blocca senza
+        consumare cicli macchina in attesa di un messaggio o della terminazione
+        dell'oggetto Sender e di tutti i suoi eventuali cloni
+
+\end{itemize}
+
+L'implementazione fornita gode della proprietà \textit{multiple producer, single consumer},
+ovvero, permette di creare più cloni dell'oggetto \textit{sender}.
+Mentre obbliga ad avere una singola copia dell'oggetto \textit{receiver}.
+
+
+In questo modello di comunicazione, il singolo dato prodotto da un thread viene
+ceduto al canale e da questo al thread ricevente che diventa il possessore
+finale del valore.
+
+Questa operazione agisce al tempo stesso da sincronizzazione (la ricezione è
+necessariamente successiva all'invio) e da comunicazione (il dato passato
+rappresenta l'unità di messaggio).
+
+
+\begin{tcolorbox}
+  \textbf{Nota:} I messaggi funzionano molto bene in una pipeline, dove ogni stage ha un proprio thread. Facili da usare ma non sempre possibile utilizzabili.
+\end{tcolorbox}
+
+Un numero arbitrario di messaggi può essere scambiato sul canale
+
+\begin{itemize}
+  \item A condizione che il ricevitore sia attivo
+  \item Se il ricevitore viene deallocato, eventuali tentativi di invio falliscono con la generazione di un valore di tipo \verb|SendError<T>|,
+  \item Se tutti i trasmettitori vengono deallocati, tentativi di lettura sul ricevitore falliscono con la
+        generazione di un valore di tipo \verb|RecvError|
+\end{itemize}
 
 
 
 
+\begin{minted}[breaklines]{rust}
+use std::sync::mpsc::sync_channel;
+use std::thread;
+
+let (tx, rx) = channel();
+
+for _ in 0..3 {
+  let tx = tx.clone();
+  // cloned tx dropped within thread
+  thread::spawn(move || tx.send("ok").unwrap());
+}
+// Drop the last sender to stop `rx` waiting for message.
+// The program will not complete if we comment this out.
+// **All** `tx` needs to be dropped for `rx` to have `Err`.
+drop(tx);
+// Unbounded receiver waiting for all senders to complete.
+while let Ok(msg) = rx.recv() {
+  println!("{}", msg);
+}
+\end{minted}
+
+\section{Canali sincroni}
+
+La funzione \mintinline{rust}|std::sync::mpsc::sync_channel<T>(bound: usize)|
+restituisce invece una coppia di valori di tipo \verb|SyncSender<T>, Receiver<T>|.
+
+A differenza di un canale semplice, questo è limitato: se il numero di messaggi
+giacenti nel canale raggiunge il limite definito (bound) le invocazioni del
+metodo \verb|send(... )| diventano bloccanti fino a che non si libera un posto
+eseguendo una lettura con successo.
+
+Se viene costruito un canale sincrono di dimensione 0, diventa un canale di tipo
+\textit{rendezvous}: ogni operazione di lettura deve sovrapporsi temporalmente
+ad una di scrittura. Le restanti operazioni offerte da \verb|SyncSender<T>|
+hanno semantica simile alle corrispondenti offerte da \verb|Sender<T>|.
+
+
+\begin{minted}[breaklines]{rust}
+use std::sync::mpsc::sync_channel;
+use std::thread;
+let (sender, receiver) = sync_channel(1);
+// this returns immediately
+sender.send(1).unwrap();
+thread::spawn(move|| {
+  // this will block until the previous message has been received
+  sender.send(2).unwrap();
+});
+assert_eq!(receiver.recv().unwrap(), 1);
+assert_eq!(receiver.recv().unwrap(), 2);
+\end{minted}
+
+\section{Condvar esempi}
+Esempio di un buffer limitato, bounded budffer con dimensione fissata e logica fifo (vec no, vecdec si).
+Non sono stati considerati i cari a buffer lunghezza zero.
+
+Se cerco di leggere e non c'è nulla, devo aspettare (attesa indeterminata, non voglio
+usare cicli CPU), usiamo una condvar
+
+src/lib.rs (mod bounded\_buffer)
+src/bounded\_buffer.rs
+
+\begin{tcolorbox}
+  \textbf{Note:} Il flag si deve mettere dentro allo stesso Mutex. No a 1 condvar e 2 mutex, massimo 1 mutex e 2 condvar.
+\end{tcolorbox}
+
+
+\begin{minted}[breaklines]{rust}
+struct BoundedBuffer<T: Send> {
+  //proteggo il buffer con mutex, e un flag
+  data: Mutex<(VecDeque<T>, bool)>, // (data, is_open)
+  // vogliamo un'attesa indeterminata, non vogliamo consumare CPU
+  cv: Condvar,
+  // read-only non mi serve il mutex
+  capacity: usize,
+}
+
+// per il passaggio di T tra i Thread deve implemnetare il tratto Send
+impl<T:Send> BoundedBuffer<T> {
+
+  // no problema di concorrenza
+  pub fn new(capacity: usize) -> Self {
+    Self {
+      data: Mutex::new((VecDeque::with_capacity(capacity), true)),
+      cv: Condvar::new(),
+      capacity,
+    }
+  }
+
+  // i metodi devono essere &Self e non &mut Self!
+  // non aspetto se c'è spazio e se è aperto il canale
+  pub fn push(&self, item: T) -> bool {
+    //primo passo: prendere il possesso
+    let mut data = self.data.lock().unwrap();
+
+    //aspetto fino a che c'è spazio nel buffer
+    data = self.cv.wait_while(data, |data| data.0.len() >= self.capacity && data.1).unwrap();
+
+    // mi sveglio, ma il canale è chiuso esco
+    if !data.1 {
+      return false;
+    }
+
+    //ora c'è spazio, posso inserire
+    data.0.push_back(item);
+
+    // finisco di fare i cambiamenti, per evitare problemi con il lock,
+    drop(data);
+    // notifico che c'è un nuovo elemento
+    // preferisci notificare quando non si ha il lock! Più efficiente
+    self.cv.notify_all();
+    true
+  }
+
+  // se la coda è vuota aspetto, anche per sempre
+  pub fn pop(&self) -> Option<T> {
+    let mut data = self.data.lock().unwrap();
+  
+    // aspetto fino a che c'è almeno un elemento
+    data = self.cv.wait_while(data, |data| data.0.is_empty() && data.1).unwrap();
+
+    // se c'è qualcosa da leggere lo ritorno, altrimenti il canale è chiuso
+    if data.0.len() > 0 {
+      
+      // ora c'è almeno un elemento, posso rimuovere
+      let item = data.0.pop_front();   
+      
+      // finisco di fare i cambiamenti, per evitare problemi con il lock,
+      drop(data);
+      // notifico che c'è posto
+      // preferisci notificare quando non si ha il lock! Più efficiente
+      self.cv.notify_all();
+
+      Some(item)
+    } else {
+      // il canale è chiuso e non ci sono più elementi
+      None
+    }
+  }
+
+  pub fn close(&self) {
+    let mut data = self.data.lock().unwrap();
+    data.1 = false; // chiudo il canale
+    drop(data);
+    self.cv.notify_all(); // sveglio tutti i thread in attesa
+  }
+}
+
+impl<T: Send> Drop for BoundedBuffer<T> {
+  fn drop(&mut self) {
+    self.close();
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn it_works() {
+    let buffer = BoundedBuffer::new(10);
+    buffer.push(1);
+    buffer.push(2);
+    assert_eq!(buffer.pop(), Some(1));
+    assert_eq!(buffer.pop(), Some(2));
+  }
+
+  #[test]
+  fn it_is_thread_safe(){
+    let buffer = Arc::new(BoundedBuffer::new(10));
+    let buffer1 = Arc::clone(&buffer);
+
+    let mut handles = std::thread::spawn(move || {
+      for i in 0..10 {
+        buffer1.push(i);
+      }
+      thread::sleep(std::time::Duration::from_millis(1000));
+      buffer1.close();
+    });
+
+    for i in 0..10 {
+      assert_eq!(buffer.pop(), Some(i));
+      std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+
+    assert_eq!(buffer.pop(), None); // il canale è chiuso e non ci sono più elementi
+
+    handles.join().unwrap();
+  }
+
+  #[test]
+  fn it_closes(){
+    let buffer = BoundedBuffer::new(10);
+    buffer.close();
+    assert_eq!(buffer.pop(), None);
+  }
+}
+
+\end{minted}
+
+\section{Gestione dell'attesa}
+
+La struct \verb|Receiver<T>| offre il metodo \verb|recv_timeout(d: Duration)|.
+Esso consente di limitare il tempo massimo di attesa alla durata passata come parametro.
+
+Questo metodo può restituire due tipi di errore
+
+\begin{itemize}
+  \item \verb|mpsc::RecvTimeoutError::Timeout| per indicare che non è stato ricevuto alcun messaggio entro il tempo indicato
+  \item \verb|mpsc::RecvTimeoutError::Disconnected| per indicare che il canale è vuoto e non sono più disponibili in \textit{Sender} in grado di spedire messaggi
+\end{itemize}
+
+Quando occorre non bloccarsi nell'attesa di nuovi messaggi, è possibile utilizzare il
+metodo \verb|try_recv()|.
+
+Se nessun messaggio è presente, il metodo torna subito con un errore di tipo \verb|mpsc::TryRecvError::Empty|.
+Se non sono più disponibili \textit{Sender}, il metodo restituisce un errore di tipo \verb|mpsc::TryRecvError::Disconnected|
 
 
 
+\section{Canali: regole pratiche}
+
+\begin{itemize}
+  \item \verb|send()| trasferiscce il valore al destinatario
+  \item \verb|recv()| attende un messaggio oppure la richiesta di chiusura del canale
+\end{itemize}
+
+Finché esiste almeno un \textit{Sender}, il \textit{Receiver} resta in attesa.
+Chiudere gli estremi inutilizzati è parte del protocollo
 
 
 
+\section{La libreria Crossbeam}
+Libreria ben documentata e attivamente mantenuta che offre una serie di costrutti a
+supporto dell'elaborazione concorrente.
 
+\begin{itemize}
+  \item \textbf{Costrutti atomici}
+  \item \textbf{Strutture dati concorrenti}
+  \item \textbf{Canali MPMC}: le funzioni \mintinline{rust}|crossbeam::channel::{bounded(...), unbounded()}|
+        creano canali unidirezionali con capacità limitata o illimitata basati sul
+        paradigma MPMC i cui estremi possono essere condivisi per semplice clonazione;
+        le funzioni \mintinline{rust}|crossbeam::channel::{after(...), tick(...)}| creano il solo estremo di ricezione che
+        consegnerà un messaggio dopo il tempo indicato o periodicamente (una sorta di sveglia)
+\end{itemize}
+
+\begin{tcolorbox}
+  \textbf{Nota:} Noi ci concentreremo principalmente su "Canali MPMC" - Multiple Producer, Multiple Consumer, creando delle pipeline competitive. Il consumer più veloce pesca e gestisce.
+\end{tcolorbox}
+
+
+\section{Uso della libreria Crossbeam}
+
+Il paradigma MPMC offre un meccanismo potente per l'implementazione di pattern
+concorrenti in Rust:
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    \subsection{Fan-out / Fan-in}
+    Permette di distribuire attività a più thread indipendenti e raccogliere i risultati
+    prodotti in un singolo punto; usa una coppia di canali per distribuire e raccogliere i dati.
+
+    Esempio: mi entrano tanti pdf e il producer crea tanti worker che li processa separatamente
+    per poi raccogliere i risultati in un unico punto.
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-05-12-14-11-33.png}
+  \end{minipage}
+\end{center}
+
+\begin{minted}[breaklines]{rust}
+fn worker(id: usize, rx: Receiver<i32>, tx: Sender<String>) {
+  while let Ok(value) = rx.recv() {
+    tx.send(format!("W{} ({})", id, value)).unwrap();
+  }
+}
+fn main() {
+  let (tx_input, rx_input) = bounded::<i32>(10);
+  let (tx_output, rx_output) = bounded::<String>(10);
+  let mut worker_handles = Vec::new();
+  for i in 0..3 {
+    let rx = rx_input.clone();
+    let tx = tx_output.clone();
+    worker_handles.push( thread::spawn(move || worker(i, rx, tx)) );
+  }
+  for i in 1..=10 { tx_input.send(i).unwrap(); }
+  drop(tx_input);
+  drop(tx_output);
+  while let Ok(result) = rx_output.recv() {
+    println!("Received result: {}", result);
+  }
+  for handle in worker_handles { handle.join().unwrap(); }
+}
+\end{minted}
+
+\subsection{Pipeline}
+
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    Computazioni se i singoli passi sono onerose ma deve essere garantita
+    la sequenza di esecuzione.
+
+    Crea una serie di fasi di lavorazione, ciascuna delle quali è eseguita da un singolo thread e
+    utilizza un canale per inoltrare i semi-lavorati tra due fasi successive.
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-05-12-14-18-42.png}
+  \end{minipage}
+\end{center}
+
+
+\begin{minted}[breaklines]{rust}
+fn stage_one(rx: Receiver<i32>, tx: Sender<String>) {
+  while let Ok(value) = rx.recv() {
+    tx.send(format!("S1({})", value)).unwrap();
+  }
+}
+fn stage_two(rx: Receiver<String>, tx: Sender<String>) {
+  while let Ok(value) = rx.recv() {
+    tx.send(format!("S2( {} )", value)).unwrap();
+  }
+}
+fn main() {
+  let (tx_input, rx_input) = bounded::<i32>(10);
+  let (tx_stage_one, rx_stage_one) = bounded::<String>(10);
+  let (tx_output, rx_output) = bounded::<String>(10);
+  let stage_one_handle = thread::spawn(move || stage_one(rx_input, tx_stage_one));
+  let stage_two_handle = thread::spawn(move || stage_two(rx_stage_one, tx_output));
+  for i in 1..=10 { tx_input.send(i).unwrap(); }
+  drop(tx_input);
+  while let Ok(result) = rx_output.recv() { println!("Received result: {}", result); }
+  stage_one_handle.join().unwrap();
+  stage_two_handle.join().unwrap();
+}
+\end{minted}
+
+\section{Producer/consumer - Thread pool}
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    Consente ad uno o più thread produttori di generare valori che saranno
+    elaborati dal primo thread consumatore disponibile; usa un singolo canale per la comunicazione
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-05-12-14-21-28.png}
+  \end{minipage}
+\end{center}
+
+
+\begin{minted}[breaklines]{rust}
+fn producer(id: usize, tx: Sender<(usize,i32)>) {
+  for i in 1..=5 { tx.send((id,i)).unwrap(); }
+}
+fn consumer(id: usize, rx: Receiver<(usize,i32)>) {
+  while let Ok((sender_id, val)) = rx.recv() {
+    println!("Consumer {} received {} from {}", id, val, sender_id);
+  }
+}
+fn main() {
+  let (tx, rx) = bounded::<(usize,i32)>(10);
+  let mut handles = Vec::new();
+  for i in 0..3 {
+  let tx = tx.clone();
+  handles.push( thread::spawn(move || producer(i, tx)) );
+  }
+  for i in 0..2 {
+    let rx = rx.clone();
+    handles.push(thread::spawn(move || consumer(i, rx)));
+  }
+  drop(tx);
+  for handle in handles { handle.join().unwrap(); }
+}
+\end{minted}
+
+\section{Checklist finale}
+
+Prima di introdurre concorrenza, chiedersi sempre:
+
+\begin{itemize}
+
+  \item I thread devono condividere uno stato o scambiarsi dei messaggi? Più semplice con i canali, ma non sempre è possibile utilizzarlo (mutex + condvar è la più generale)
+  \item Serve mutua esclusione, lettura condivisa o sincronizzazione su un evento?
+  \item Il programma è corretto solo per alcuni modi con cui i thread possono alternarsi o per tutti?
+  \item Ci sono rischi di deadlock, livelock o starvation?
+  \item Esiste una soluzione più semplice con meno condivisione?
+
+\end{itemize}

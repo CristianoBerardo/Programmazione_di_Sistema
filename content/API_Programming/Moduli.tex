@@ -35,8 +35,8 @@ strutture dati.
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.65\linewidth}
       Un progetto Rust è organizzato, chiamato, \textbf{package} eè
-      rappresentato da una cartella con al suo interno un file \texttt{Cargo.
-        toml} che gestisce la compilazione.
+      rappresentato da una cartella con al suo interno un file 
+      \texttt{Cargo.toml} che gestisce la compilazione.
 
 
       Il package contiene la cartella \texttt{src} la quale contiene i
@@ -691,6 +691,10 @@ struct Args {
   /// Number of times to greet
   #[arg(short, long, default_value_t = 1)]
   count: u8,
+
+  //Può essere specificata più volte
+  #[arg(long)]
+    filter: Option<Vec<String>>, 
 }
 
 fn main() {

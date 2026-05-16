@@ -302,7 +302,7 @@ let f2 = move |x| { x + y.f() + z };
 \begin{table}[h!]
   \renewcommand{\arraystretch}{1.6}
   \centering
-  \begin{tabularx}{\textwidth}{l c c c }
+  \begin{tabular}{l c c c }
     \toprule
     \textbf{Tratto} & \textbf{Ricevitore concettuale} & \textbf{Ambiente catturato} & \textbf{Invocazioni} \\
     \midrule
@@ -310,7 +310,7 @@ let f2 = move |x| { x + y.f() + z };
     \texttt{FnMut}  & \texttt{\&mut self}             & Può essere modificato       & zero o più           \\
     \texttt{Fn}     & \texttt{\&self}                 & È in sola lettura           & zero o più           \\
     \bottomrule
-  \end{tabularx}
+  \end{tabular}
 \end{table}
 
 

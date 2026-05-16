@@ -49,7 +49,7 @@ catalogati in due gruppi principali
 % Altri sono irrecuperabili, quindi ipediscono qualuncuq operazione di
 % recupero. Ed occorre interrompere il processi
 
-Nei casi irrecuperabili, occorre terminare il processo, eventaimente eseguendo
+Nei casi irrecuperabili, occorre terminare il processo, eventualmente eseguendo
 qualche operazione di pulizia sull'ambiente esterno.
 
 % Solitamente voglimao uscire dal processo in maniera pulita, negli
@@ -282,7 +282,9 @@ un errore, occorre mettere in atto una strategia di gestione:
 \end{itemize}
 
 Sebbene terminare il programma possa apparire facile, è sufficiente invocare la
-funzione \mintinline{rust}{std::process::exit(code: i32) -> !}, farlo in modo pulito può
+funzione
+
+\mintinline{rust}{std::process::exit(code: i32) -> !}, farlo in modo pulito può
 essere complesso.
 
 Occorre infatti garantire che non vengano lasciati oggetti persistenti, come
@@ -294,7 +296,7 @@ thread corrente, esegue un processo di pulizia.
 In alcune situazioni, lo stato del programma risulta così compromesso che non è
 pensabile eseguire azioni di ripristino: questo spesso è dovuto alla presenza di
 errori logici nel programma stesso, come l'accesso ad array al di fuori dei relativi
-limiti, divisioini intere per zero, fallimenti di assegnazione, etc.\newline
+limiti, divisioni intere per zero, fallimenti di assegnazione, etc.\newline
 
 In questi casi Rust offre la macro \mintinline{rust}{panic!(...)} che accetta
 argomenti simili a quelli offerti dalla macro \mintinline{rust}{println!(...)}
@@ -493,10 +495,14 @@ enum SumFileError {
     \begin{minipage}{0.49\linewidth}
       \begin{minted}[breaklines]{rust}
 impl From<io::Error> for SumFileError {
-  fn from(err: io::Error) -> Self { SumFileError::Io(err) }
+  fn from(err: io::Error) -> Self { 
+    SumFileError::Io(err) 
+  }
 }
 impl From<ParseIntError> for SumFileError {
-  fn from(err: ParseIntError) -> Self { SumFileError::Parse(err) }
+  fn from(err: ParseIntError) -> Self { 
+    SumFileError::Parse(err)
+  }
 }
 impl fmt::Display for SumFileError {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -590,7 +596,7 @@ gestione idiomatica degli errori.
 Si può usare il tipo \textit{anyhow::Error} per incapsulare il valore di ritorno di
 una funzione che può fallire.
 
-Questo tipo offre un'implementazione automatica del tratto \mintinline{rust}{From<T: Error}, il
+Questo tipo offre un'implementazione automatica del tratto \mintinline{rust}{From<T: Error>}, il
 che permette di utilizzare la notazione basata sull'operatore \textit{?} per propagare
 l'errore ritornato.
 

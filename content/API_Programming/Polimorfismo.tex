@@ -83,7 +83,7 @@ legata al dominio che modellano, o meno.
     Il costrutto \mintinline{rust}|impl <trait> for <type> { ... }| e specifica, al
     tempo stesso, l'implementazione dei metodi corrispondenti.
 
-    ale costrutto è separato da quello relativo all'implementazione dei
+    Tale costrutto è separato da quello relativo all'implementazione dei
     metodi peculiari al tipo: \mintinline{rust}|impl <type> { ... }|
   \end{minipage}%
   \hfill
@@ -653,7 +653,7 @@ ai tipi definiti dall'utente attraverso la macro \verb|#[derive]|.
 
 
 \begin{center}
-  \begin{minipage}{0.47\linewidth}
+  \begin{minipage}{0.3\linewidth}
     \begin{minted}[breaklines]{rust}
         #[derive(PartialEq)]
         struct Foo<T> {
@@ -664,7 +664,7 @@ ai tipi definiti dall'utente attraverso la macro \verb|#[derive]|.
 
   \end{minipage}
   \hfill
-  \begin{minipage}{0.47\linewidth}
+  \begin{minipage}{0.65\linewidth}
     \begin{minted}[breaklines]{rust}
         impl<T: PartialEq> PartialEq for Foo<T> {
           fn eq(&self, other: &Foo<T>) -> bool {
@@ -686,7 +686,7 @@ ai tipi definiti dall'utente attraverso la macro \verb|#[derive]|.
             l'uguaglianza, \verb|==| e \verb|!=| tra valori. Non richiede che
             tutti i valori siano confrontabili come ad esempio il NaN nei float
       \item \textbf{Eq}: Estende \textbf{PartialEq}. Indica che l'uguaglianza è totale. Ogni valore
-      \item è confrontabile con sé stesso.
+      è confrontabile con sé stesso.
       \item \textbf{PartialOrd}: Permette confronti di ordine, \verb|<|, \verb|>|, \verb|<=|, \verb|>=|. Può essere parziale, alcuni confronti non sono definiti
       \item \textbf{Ord}: Estende \textbf{PartialOrd} ed \textbf{Eq}.
             Definisce un ordinamento totale, tutti i valori sono confrontabili.
@@ -753,7 +753,7 @@ Il tratto \textbf{Copy} è un sotto-tratto di \textbf{Clone}.
 
 \section{Rilasciare le risorse}
 
-Il tratto \textbf{Drop} permette di definire il metodo \verb|drop(\&mut self)| che fa le veci
+Il tratto \textbf{Drop} permette di definire il metodo \verb|drop(&mut self)| che fa le veci
 del distruttore nel linguaggio C++.
 
 Il compilatore Rust garantisce che tale metodo sarà chiamato nel momento in cui
@@ -796,7 +796,7 @@ trait Into<T>: Sized {
 }
 \end{minted}
 
-Il tratto \textbf{FromStr} permette di gestire la conversione da stringa el'eventuale
+Il tratto \textbf{FromStr} permette di gestire la conversione da stringa e l'eventuale
 fallimento. Il metodo \mintinline{rust}|from_str()| viene implicitamente richiamato
 tutte le volte che si utilizza il metodo \mintinline{rust}|parse|
 

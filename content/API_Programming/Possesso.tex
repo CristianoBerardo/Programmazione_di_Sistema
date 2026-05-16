@@ -337,25 +337,32 @@ Fino a che il riferimento è accessibile, non è possibile modificare il valore,
   \item Finché esiste almeno un riferimento, il dato originale \textbf{non potrà essere né modificato né distrutto}
 \end{itemize}
 
-\subsection{Riferimenti mut - mutual exclusion}
-A partire da una variabile che possiede un valore è possibile estrarre \textbf{un solo riferimento mutabile} per volta. \mintinline{rust}{let r = &mut v;}.
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \subsection{Riferimenti mut - mutual exclusion}
+    A partire da una variabile che possiede un valore è possibile estrarre \textbf{un solo riferimento mutabile} per volta. \mintinline{rust}{let r = &mut v;}.
 
 
-Mentre esiste un riferimento mutabile
+    Mentre esiste un riferimento mutabile
 
-\begin{itemize}
-  \item Non possono esistere riferimenti semplici, in sola lettura
-  \item Non è possibile modificare né muovere la variabile che possiede il valore
-\end{itemize}
+    \begin{itemize}
+      \item Non possono esistere riferimenti semplici, in sola lettura
+      \item Non è possibile modificare né muovere la variabile che possiede il valore
+    \end{itemize}
 
-È possibile creare un riferimento mutabile solo se la variabile che possiede il dato è a sua volta dichiarata come mutabile.
+    È possibile creare un riferimento mutabile solo se la variabile che possiede il dato è a sua volta dichiarata come mutabile.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.55\linewidth]{images//API_Programming//Possesso/Possesso-esempio10.png}
-\end{figure}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images//API_Programming//Possesso/Possesso-esempio10.png}
+  \end{minipage}
+\end{flushleft}
 
-\newpage
+
+
 \subsection{Riferimenti: disposizione in memoria}
 
 I riferimenti sono implementati diversamente in base al tipo puntato
@@ -379,7 +386,7 @@ let r1: &i32 = &i;
     \hfill
     \begin{minipage}[c]{0.30\linewidth} % Colonna Immagine (40%)
       \centering
-      \includegraphics[width=\linewidth]{images/API_Programming/Possesso/Possesso-esempio13.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Possesso/Possesso-esempio13.png}
       \captionof{figure}{Single pointer}
     \end{minipage}
   \end{minipage}
@@ -397,7 +404,7 @@ let r2: &[i32] = &a;
     \hfill
     \begin{minipage}[c]{0.40\linewidth}
       \centering
-      \includegraphics[width=\linewidth]{images/API_Programming/Possesso/Possesso-esempio14.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Possesso/Possesso-esempio14.png}
       \captionof{figure}{Fat pointer}
     \end{minipage}
   \end{minipage}
@@ -720,51 +727,64 @@ Questo parte dal presupposto che se un metodo di un oggetto restituisce un dato 
 \end{table}
 
 \section{Slice}
-Una slice (fetta) è una VISTA di una sequenza contigua di elementi, la cui lunghezza NON è nota in fase di compilazione, ma disponibile durante l'esecuzione.
 
-Internamente viene rappresentata come \textbf{fat pointer} una tupla di due elementi, i primi 64 bits puntano al valore della sequenza, mentre i secondi 64 bits indicano il numero di elementi consecutivi. Una slice di elementi T ha tipo [T].
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    Una slice (fetta) è una VISTA di una sequenza contigua di elementi, la cui lunghezza NON è nota in fase di compilazione, ma disponibile durante l'esecuzione.
 
-Una slice \textbf{non possiede}, è un prestito a tutti gli effetti, i dati cui fa riferimento. Questi appartengono sempre ad un'altra variabile, da cui la slice viene derivata. Tutti i valori contenuti sono garantiti essere inizializzati, gli accessi sono verificati in fase di esecuzione.
+    Internamente viene rappresentata come \textbf{fat pointer} una tupla di due elementi, i primi 64 bits puntano al valore della sequenza, mentre i secondi 64 bits indicano il numero di elementi consecutivi. Una slice di elementi T ha tipo [T].
 
-È possibile ricavare una slice a partire da un array, ma anche da altri tipi di contenitori quali std::Vec<T>, String, Box<[T]>, etc.
+    Una slice \textbf{non possiede}, è un prestito a tutti gli effetti, i dati cui fa riferimento. Questi appartengono sempre ad un'altra variabile, da cui la slice viene derivata. Tutti i valori contenuti sono garantiti essere inizializzati, gli accessi sono verificati in fase di esecuzione.
 
-\begin{minted}[breaklines]{rust}
-let a: [i32; 5] = [1, 2, 3, 4, 5]; // a è un array di 5 interi
-let s = &a[1..3]; // s è una slice formata da 2 elementi [2,3]
-let two = s[0]; // two contiene il valore 2
+    È possibile ricavare una slice a partire da un array, ma anche da altri tipi di contenitori quali std::Vec<T>, String, Box<[T]>, etc.
+
+    \begin{minted}[breaklines]{rust}
+let a: [i32; 5] = [1, 2, 3, 4, 5]; 
+// a è un array di 5 interi
+let s = &a[1..3]; 
+// s è una slice formata da 2 elementi [2,3]
+let two = s[0]; 
+// two contiene il valore 2
 \end{minted}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.4\linewidth]{images/API_Programming/Possesso/Possesso-slice.png}
-\end{figure}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/API_Programming/Possesso/Possesso-slice.png}
+  \end{minipage}
+\end{center}
 
-\newpage
+
 \section{Vantaggi introdotti dal concetto di possesso}
 
-Un programma Rust, pur non avendo un garbage collector, offre molteplici garanzie
-relative alla correttezza degli accessi in memoria e del rilascio delle risorse.
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    Un programma Rust, pur non avendo un garbage collector, offre molteplici garanzie
+    relative alla correttezza degli accessi in memoria e del rilascio delle risorse.
 
-\begin{itemize}
-  \item Non esiste il concetto di \textbf{riferimento nullo} e, di conseguenza, non c'è il rischio di dereferenziarlo
-  \item Poiché il borrow checker vigila sulle assegnazioni dei riferimenti e sugli intervalli temporali in cui essi sono effettivamente usati impedendo accessi illeciti, non c'è il rischio di originare errori di
-        segmentazione o accesso illegale ad aree ristrette di memoria, né la possibilità di avere riferimenti ad aree già rilasciate (dangling pointer)
-  \item Poiché in ogni istante il borrow checker è in grado di determinare la dimensione di un blocco di memoria cui un riferimento punta, vedi le slice, non possono verificarsi \textbf{buffer overflow} né \textbf{buffer underflow}
-  \item Per lo stesso motivo, gli iteratori offerti da Rust \textbf{non eccedono} mai i loro limiti
-\end{itemize}
+    \begin{itemize}
+      \item Non esiste il concetto di \textbf{riferimento nullo} e, di conseguenza, non c'è il rischio di dereferenziarlo
+      \item Poiché il borrow checker vigila sulle assegnazioni dei riferimenti e sugli intervalli temporali in cui essi sono effettivamente usati impedendo accessi illeciti, non c'è il rischio di originare errori di
+            segmentazione o accesso illegale ad aree ristrette di memoria, né la possibilità di avere riferimenti ad aree già rilasciate (dangling pointer)
+      \item Poiché in ogni istante il borrow checker è in grado di determinare la dimensione di un blocco di memoria cui un riferimento punta, vedi le slice, non possono verificarsi \textbf{buffer overflow} né \textbf{buffer underflow}
+      \item Per lo stesso motivo, gli iteratori offerti da Rust \textbf{non eccedono} mai i loro limiti
+    \end{itemize}
 
-Tutte le variabili sono \textbf{immutabili} per default e occorre una dichiarazione esplicita
-per renderle mutabili. Questo obbliga il programmatore a riflettere attentamente sul come e dove i dati debbano essere modificati e su quale sia il ciclo di vita di ciascun valore.
+    Tutte le variabili sono \textbf{immutabili} per default e occorre una dichiarazione esplicita
+    per renderle mutabili. Questo obbliga il programmatore a riflettere attentamente sul come e dove i dati debbano essere modificati e su quale sia il ciclo di vita di ciascun valore.
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/API_Programming/Possesso/Possesso-disposizione-in-memoria.png}
+  \end{minipage}
+\end{flushleft}
 
 Il modello di possesso non riguarda solo la gestione della memoria, ma anche la
 \textbf{gestione delle risorse} contenute in un valore come socket di rete, handle di file e database, descrittori dei dispositivi.
 
 L'assenza di un garbage collector impedisce \textbf{comportamenti non deterministici}. In particolare, la sospensione totale del funzionamento ogni qual volta occorra ricompattare la
 memoria.
-
-\section{Disposizione in memoria}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.6\linewidth]{images/API_Programming/Possesso/Possesso-disposizione-in-memoria.png}
-\end{figure}
