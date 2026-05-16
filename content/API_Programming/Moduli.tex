@@ -35,7 +35,7 @@ strutture dati.
     % Primo blocco: 50% dello spazio per il codice
     \begin{minipage}{0.65\linewidth}
       Un progetto Rust è organizzato, chiamato, \textbf{package} eè
-      rappresentato da una cartella con al suo interno un file 
+      rappresentato da una cartella con al suo interno un file
       \texttt{Cargo.toml} che gestisce la compilazione.
 
 
@@ -320,7 +320,8 @@ mod my_mod {
   mod private_nested_mod { // sotto-modulo privato
     fn test() {} // può accedere a my_mod::private_fn()
   }
-  pub mod public_nested_mod { //accessibile a chi ha accesso a my_mod
+  pub mod public_nested_mod { 
+    //accessibile a chi ha accesso a my_mod
     pub fn api() {}
   }
 }
@@ -339,7 +340,7 @@ fn main() {
 
       \vspace{0.5cm}
 
-      \includegraphics[width=1\linewidth]{images/API_Programming/Moduli/M-esempio3.png}
+      \includegraphics[width=0.7\linewidth]{images/API_Programming/Moduli/M-esempio3.png}
 
     \end{minipage}
 
@@ -457,13 +458,13 @@ versione
     % Aggiunto [t] qui sotto
     \begin{minipage}[t]{0.48\linewidth}
       \subsection{Struttura di un progetto eseguibile Rust}
-      \includegraphics[width=1\linewidth]{images/API_Programming/Moduli/M-esempio4.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Moduli/M-esempio4.png}
     \end{minipage}
     \hfill%
     % Aggiunto [t] qui sotto
     \begin{minipage}[t]{0.48\linewidth}
       \subsection{Struttura di un progetto con due o più eseguibili}
-      \includegraphics[width=1\linewidth]{images/API_Programming/Moduli/M-esempio5.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Moduli/M-esempio5.png}
     \end{minipage}
   \end{minipage}
 \end{center}
@@ -579,6 +580,8 @@ Una libreria può essere collegata in due modalità:
 % inoltre cargo possiamo dire, chiamata anche libebrie fatte per il C o solo per rust.
 % (il C è il defacto standar per le liberie).
 
+
+\newpage
 Le applicazioni tipiche sono:
 
 \begin{itemize}
@@ -637,11 +640,11 @@ può assumere i seguenti valori:
 \section{Preludio}
 
 Come in molti linguaggi di programmazione, anche in Rust esiste un insieme di
-simboli, funzioni, tipi e tratti, come Vec e String, che sono sempre disponibili 
-in ogni modulo senza includere esplicitamente alcuna dichiarazione anche se facenti 
+simboli, funzioni, tipi e tratti, come Vec e String, che sono sempre disponibili
+in ogni modulo senza includere esplicitamente alcuna dichiarazione anche se facenti
 parte di create diversi dal crate corrente.
 
-Questi sono elencati all'interno di un modulo chiamato \mintinline{rust}{std::prelude} 
+Questi sono elencati all'interno di un modulo chiamato \mintinline{rust}{std::prelude}
 che viene importato automaticamente all'atto della compilazione di un file sorgente.
 In questo modo si evita di rendere verboso il codice sorgente.
 
@@ -678,8 +681,8 @@ sul pattern builder.
   \begin{minipage}{\linewidth}
     % Aggiunto [t] qui sotto
     \begin{minipage}[t]{0.44\linewidth}
-      
-\begin{minted}[breaklines]{rust}
+
+      \begin{minted}[breaklines]{rust}
 use clap::Parser;
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -709,7 +712,7 @@ fn main() {
     \hfill%
     % Aggiunto [t] qui sotto
     \begin{minipage}[t]{0.54\linewidth}
-\begin{minted}[breaklines]{rust}
+      \begin{minted}[breaklines]{rust}
 $ demo --help
 Simple program to greet a person
 
