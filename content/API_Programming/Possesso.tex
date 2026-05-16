@@ -140,7 +140,7 @@ Viceversa i riferimenti a valori mutabili NON sono copiabili.\newline
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.85\linewidth]{images/API_Programming/Possesso/Possesso-esempio3.png}
+  \includegraphics[width=0.65\linewidth]{images/API_Programming/Possesso/Possesso-esempio3.png}
 \end{figure}
 
 \begin{tcolorbox}
@@ -206,11 +206,11 @@ println!("s2: {}", s2); //hi
     % Secondo blocco: 40% dello spazio per l'immagine
     \begin{minipage}{0.40\linewidth}
       \centering
-      \includegraphics[width=0.75\linewidth]{images/API_Programming/Possesso/Possesso-esempio5.png}
+      \includegraphics[width=0.65\linewidth]{images/API_Programming/Possesso/Possesso-esempio5.png}
 
       \vspace{0.1cm}
 
-      \includegraphics[width=0.75\linewidth]{images/API_Programming/Possesso/Possesso-esempio6.png}
+      \includegraphics[width=0.65\linewidth]{images/API_Programming/Possesso/Possesso-esempio6.png}
 
 
     \end{minipage}
@@ -289,18 +289,17 @@ fn main() {
     % Secondo blocco: 40% dello spazio per l'immagine
     \begin{minipage}{0.40\linewidth}
       \centering
-      \includegraphics[width=0.75\linewidth]{images//API_Programming//Possesso/Possesso-esempio8.png}
+      \includegraphics[width=0.65\linewidth]{images//API_Programming//Possesso/Possesso-esempio8.png}
 
       \vspace{0.1cm}
 
-      \includegraphics[width=0.75\linewidth]{images//API_Programming//Possesso/Possesso-esempio9.png}
+      \includegraphics[width=0.65\linewidth]{images//API_Programming//Possesso/Possesso-esempio9.png}
 
 
     \end{minipage}
   \end{minipage}
 \end{center}
 
-\newpage
 \section{Riferimenti}
 Per risolvere i problemi di accesso, Rust introduce diverse forme di puntatori, volte a rendere espliciti responsabilità e diritti di chi le maneggia.
 Il borrow checker si occupa di garantire che il codice sia scritto in conformità con tali regole e impedisce la compilazione in caso contrario.
@@ -386,7 +385,7 @@ let r1: &i32 = &i;
     \hfill
     \begin{minipage}[c]{0.30\linewidth} % Colonna Immagine (40%)
       \centering
-      \includegraphics[width=0.75\linewidth]{images/API_Programming/Possesso/Possesso-esempio13.png}
+      \includegraphics[width=0.65\linewidth]{images/API_Programming/Possesso/Possesso-esempio13.png}
       \captionof{figure}{Single pointer}
     \end{minipage}
   \end{minipage}
@@ -395,7 +394,7 @@ let r1: &i32 = &i;
 
   % --- ESEMPIO 2: FAT POINTER ---
   \begin{minipage}{0.85\linewidth}
-    \begin{minipage}[c]{0.55\linewidth}
+    \begin{minipage}[c]{0.45\linewidth}
       \begin{minted}[breaklines]{rust}
 let a: [i32;3] = [1,2,3];
 let r2: &[i32] = &a;
@@ -404,7 +403,7 @@ let r2: &[i32] = &a;
     \hfill
     \begin{minipage}[c]{0.40\linewidth}
       \centering
-      \includegraphics[width=0.75\linewidth]{images/API_Programming/Possesso/Possesso-esempio14.png}
+      \includegraphics[width=0.65\linewidth]{images/API_Programming/Possesso/Possesso-esempio14.png}
       \captionof{figure}{Fat pointer}
     \end{minipage}
   \end{minipage}
@@ -709,7 +708,7 @@ Questo parte dal presupposto che se un metodo di un oggetto restituisce un dato 
 \section{Puntatori in Rust}
 
 \begin{table}[H]
-  \renewcommand{\arraystretch}{1.6}
+  \renewcommand{\arraystretch}{1.5}
   \centering
   \begin{tabular}{>{\bfseries}l p{4.7cm} p{4.7cm}}
     % \hline
