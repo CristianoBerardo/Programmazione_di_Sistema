@@ -2339,7 +2339,7 @@ un singolo frame di pagina.
 
 
 
-\chapter{Approfondimento sulla Memoria Virtuale}
+\chapter{Memoria Virtuale}
 
 \section{Swapping delle Pagine}
 
@@ -2381,38 +2381,36 @@ La parte principale del tempo di swap è il tempo di trasferimento; il tempo tot
 proporzionale alla quantità di memoria trasferita. Il sistema mantiene una \textbf{ready queue} di processi pronti all'esecuzione che
 possiedono immagini di memoria su disco.
 
-\begin{center}
-  \centering
-  \begin{minipage}{1\linewidth}
-    % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.65\linewidth}
-      Il processo che è stato rimosso (swap out) deve tornare agli stessi indirizzi fisici?
 
-      Di solito no, ma dipende dal metodo di binding degli indirizzi; occorre anche considerare l'I/O in attesa verso/dalla memoria del processo.
-      Ogni OS può decidere come gestire il metodo di swap:
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    Il processo che è stato rimosso (swap out) deve tornare agli stessi indirizzi fisici?
 
-      \begin{itemize}
-        \item Swapping normalmente disabilitato
-        \item Avviato se la quantità di memoria allocata supera una soglia
-        \item Disabilitato nuovamente quando la domanda di memoria scende sotto la soglia
-      \end{itemize}
-    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-    \hfill
-    \begin{minipage}{0.3\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfbngt.png}
-      \captionof{figure}{Processo di swapping}
-    \end{minipage}
+    Di solito no, ma dipende dal metodo di binding degli indirizzi; occorre anche considerare l'I/O in attesa verso/dalla memoria del processo.
+    Ogni OS può decidere come gestire il metodo di swap:
+
+    \begin{itemize}
+      \item Swapping normalmente disabilitato
+      \item Avviato se la quantità di memoria allocata supera una soglia
+      \item Disabilitato nuovamente quando la domanda di memoria scende sotto la soglia
+    \end{itemize}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfbngt.png}
+    \captionof{figure}{Processo di swapping}
   \end{minipage}
-\end{center}
+\end{flushleft}
 
-QUando lo riporto dentro posso portarlo in un posti diverso, è meno vincolato mettendolo in
+
+Quando lo riporto dentro posso portarlo in un posti diverso, è meno vincolato mettendolo in
 un'altra partizione solo se gli indirizzi sono rilocabili e dipende da come hai fatto binding
 degli indirizzi.
 
 
-\newpage
 \subsection{Tempo di Context Switch con lo Swapping}
-
 
 
 Se il prossimo processo da eseguire sulla CPU non è in memoria e la RAM è piena,
@@ -2432,30 +2430,28 @@ trasferimento di 50MB/sec:
 È possibile ridurre il tempo sapendo quanta memoria viene effettivamente usata. Chiamate di sistema per informare l'OS sull'uso della memoria tramite
 \verb|request_memory()| e \verb|release_memory()|.
 
-\begin{center}
-  \centering
-  \begin{minipage}{1\linewidth}
-    % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.65\linewidth}
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
 
-      \paragraph{Altri vincoli: } se un task ha I/O in attesa non può essere rimosso (swap out), poiché l'I/O avverrebbe sul processo sbagliato; oppure si trasferisce sempre l'I/O nello spazio kernel e poi al dispositivo I/O, ma questo causa il cosiddetto double buffering, aggiungendo overhead.
+    \paragraph{Altri vincoli: } se un task ha I/O in attesa non può essere rimosso (swap out), poiché l'I/O avverrebbe sul processo sbagliato; oppure si trasferisce sempre l'I/O nello spazio kernel e poi al dispositivo I/O, ma questo causa il cosiddetto double buffering, aggiungendo overhead.
 
 
-      Allora come funziona nei \textbf{sistemi operativi moderni}?
+    Allora come funziona nei \textbf{sistemi operativi moderni}?
 
-      \begin{itemize}
-        \item[] Lo swap viene attivato solo quando la memoria libera è quasi esaurita
-        \item[] Con la memoria a pagine si scambiano intere pagine dentro e fuori dalla RAM
-        \item[] Le pagine spostate su disco vengono in genere salvate in un “file di paging”
-      \end{itemize}
-    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-    \hfill
-    \begin{minipage}{0.3\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/ndgf.png}
-      \captionof{figure}{Swapping con paginazione}
-    \end{minipage}
+    \begin{itemize}
+      \item[] Lo swap viene attivato solo quando la memoria libera è quasi esaurita
+      \item[] Con la memoria a pagine si scambiano intere pagine dentro e fuori dalla RAM
+      \item[] Le pagine spostate su disco vengono in genere salvate in un “file di paging”
+    \end{itemize}
+  \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \includegraphics[width=1\linewidth]{content/OS_Internals/img/ndgf.png}
+    \captionof{figure}{Swapping con paginazione}
   \end{minipage}
-\end{center}
+
+\end{flushleft}
 
 Oltre che per i singoli processi, la tecnica dello swapping è implementata anche a livello di
 pagine. Non tutte le pagine di un processo devono stare in memoria.
@@ -2499,7 +2495,7 @@ Una soluzione semplice è dividere la tabella delle pagine in unità più piccol
   \centering
   \begin{minipage}{1\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.65\linewidth}
+    \begin{minipage}{0.73\linewidth}
 
       \subsubsection{Shared code}
       Una sola copia in modalità read-only (reentrant), è condivisa tra i processi (eg. text editors, compilers, windows systems).
@@ -2514,7 +2510,7 @@ Una soluzione semplice è dividere la tabella delle pagine in unità più piccol
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.3\linewidth}
+    \begin{minipage}{0.25\linewidth}
       \includegraphics[width=1\linewidth]{images/OS_internals/Main-memory/MM-esempio1.png}
 
     \end{minipage}
@@ -2524,42 +2520,33 @@ Una soluzione semplice è dividere la tabella delle pagine in unità più piccol
 
 \subsection{Paginazione gerarchica}
 
-
-\begin{center}
-  \centering
-  \begin{minipage}{1\linewidth}
-    % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.75\linewidth}
-
-      Con questo metodo si suddivide lo spazio di indirizzamento logico in più tabelle delle pagine. Una tecnica semplice è la tabella delle pagine a due livelli: in questo modo si carica solo la sezione di interesse.
+\begin{flushleft}
+  \begin{minipage}{0.73\linewidth}
+    \raggedright
+    Con questo metodo si suddivide lo spazio di indirizzamento logico in più tabelle delle pagine. Una tecnica semplice è la tabella delle pagine a due livelli: in questo modo si carica solo la sezione di interesse.
 
 
-      Con indirizzi a 32 bit e pagine da 4 KB, l'indirizzo logico si divide in:
+    Con indirizzi a 32 bit e pagine da 4 KB, l'indirizzo logico si divide in:
 
-    \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
-    \hfill
-    \begin{minipage}{0.25\linewidth}
-      \includegraphics[width=1\linewidth]{content/OS_Internals/img/sbdf.png}
+    \begin{itemize}
+      \item un numero di pagina di 20 bit, suddiviso in due parti da 10 bit ciascuna:
+            \begin{itemize}
+              \item[] p1 per selezionare la pagina delle page table, cioè la \textbf{pagina esterna}
+              \item[] p2 per selezionare la riga specifica del “blocco” di page table, la \textbf{pagina interna}
+            \end{itemize}
+      \item un offset di pagina di 12 bit
+    \end{itemize}
 
-    \end{minipage}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.25\linewidth}
+    \centering
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/sbdf.png}
+
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/mu.png}
   \end{minipage}
-\end{center}
+\end{flushleft}
 
-
-
-\begin{itemize}
-  \item un numero di pagina di 20 bit, suddiviso in due parti da 10 bit ciascuna:
-        \begin{itemize}
-          \item[] p1 per selezionare la pagina delle page table, cioè la \textbf{pagina esterna}
-          \item[] p2 per selezionare la riga specifica del “blocco” di page table, la \textbf{pagina interna}
-        \end{itemize}
-  \item un offset di pagina di 12 bit
-\end{itemize}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.3\linewidth]{content/OS_Internals/img/mu.png}
-\end{figure}
 
 \textbf{ATTENZIONE ERRORE: non è 10 10 12 bensì 10 12 10
   ETA da cambiare perché è su 3 livelli e non 2}
@@ -2572,13 +2559,13 @@ Una soluzione semplice è dividere la tabella delle pagine in unità più piccol
   \centering
   \begin{minipage}{1\linewidth}
     % Primo blocco: 50% dello spazio per il codice
-    \begin{minipage}{0.65\linewidth}
+    \begin{minipage}{0.73\linewidth}
 
       Anche uno schema di paginazione a due livelli potrebbe non essere sufficiente; se la dimensione della pagina è ancora 4 KB, la tabella delle pagine ha $2^{52}$ voci e le tabelle delle pagine interne potrebbero essere $2^{10}$, vedi figura affianco.
 
     \end{minipage}% <-- IMPORTANTE: il simbolo % qui evita spazi bianchi extra
     \hfill
-    \begin{minipage}{0.3\linewidth}
+    \begin{minipage}{0.25\linewidth}
       \includegraphics[width=1\linewidth]{content/OS_Internals/img/ndg.png}
 
 
