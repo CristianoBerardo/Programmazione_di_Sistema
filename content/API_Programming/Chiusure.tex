@@ -104,10 +104,6 @@ i tratti \verb|FnMut| e \verb|Fn|.
       \item Il compilatore decide come catturarla: per riferimento, come riferimento mutabile o per valore
     \end{itemize}
 
-    \begin{tcolorbox}
-      \textbf{Nota:} Una chiusura è una funzione accompagnata dal proprio ambiente
-    \end{tcolorbox}
-
   \end{minipage}%
   \hfill
   \begin{minipage}{0.45\linewidth}
@@ -125,6 +121,10 @@ fn main() {
 \end{minted}
   \end{minipage}
 \end{flushleft}
+
+\begin{tcolorbox}
+  \textbf{Nota:} Una chiusura è una funzione accompagnata dal proprio ambiente
+\end{tcolorbox}
 
 
 \subsection{Chiusure che non catturano}

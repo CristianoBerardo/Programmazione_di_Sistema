@@ -3,7 +3,7 @@ Un iteratore è una struttura dati dotata di stato, in grado di generare una seq
 I valori possono essere estratti da un contenitore, di cui l'iteratore detiene un riferimento, o
 generati programmaticamente, come nel caso di un intervallo di valori.
 
-Un iteratore offre tipicamente un modo per verificare se sono presenti ulteriori valori da generare,
+Un iteratore offre tipicamente un modo per verificare se sono presenti ulteriori valori da generare,\\
 \mintinline{rust}|hasNext() -> bool|,
 ed un altro per accedere al valore successivo, \mintinline{rust}|next() -> E|.
 
@@ -225,16 +225,16 @@ fn main() {
 
 
 \section{Iteratori e possesso}
-I contenitori presenti nella libreria standard mettono normalmente a disposizione tre metodi per ricavare 
+I contenitori presenti nella libreria standard mettono normalmente a disposizione tre metodi per ricavare
 un iteratore ai dati contenuti al loro interno:
 
 \begin{itemize}
-  \item \mintinline{rust}|iter()|: restituisce oggetti di tipo \mintinline{rust}|&Item| e non consuma il 
-  contenuto del contenitore.
-  \item \mintinline{rust}|iter_mut()|: restituisce oggetti di tipo \mintinline{rust}|&mut Item| e permette 
-  di modificare gli elementi all'interno del contenitore.
-  \item \mintinline{rust}|into_iter()|: prende possesso del contenitore e restituisce oggetti di tipo 
-  \mintinline{rust}|Item| estraendoli dal contenitore.
+  \item \mintinline{rust}|iter()|: restituisce oggetti di tipo \mintinline{rust}|&Item| e non consuma il
+        contenuto del contenitore.
+  \item \mintinline{rust}|iter_mut()|: restituisce oggetti di tipo \mintinline{rust}|&mut Item| e permette
+        di modificare gli elementi all'interno del contenitore.
+  \item \mintinline{rust}|into_iter()|: prende possesso del contenitore e restituisce oggetti di tipo
+        \mintinline{rust}|Item| estraendoli dal contenitore.
 \end{itemize}
 
 È comune, per tali contenitori, dichiarare tre implementazioni distinte del tratto \verb|IntoIterator|:
@@ -243,8 +243,8 @@ un iteratore ai dati contenuti al loro interno:
   \item una per il tipo \verb|Container| (\mintinline{rust}|into_iter()|),
   \item una per il tipo \verb|&Container| (\mintinline{rust}|iter()|),
   \item una per il tipo \verb|&mut Container| (\mintinline{rust}|iter_mut()|).
-  \item In alcuni casi (come \verb|HashSet<T>|, \verb|HashMap<T>|) la terza implementazione non è 
-  fornita perché romperebbe le astrazioni.
+  \item In alcuni casi (come \verb|HashSet<T>|, \verb|HashMap<T>|) la terza implementazione non è
+        fornita perché romperebbe le astrazioni.
 \end{itemize}
 % una per il tipo \verb|Container| (\mintinline{rust}|into_iter()|), una per il tipo \verb|&Container| (\mintinline{rust}|iter()|), e una per il tipo \verb|&mut Container| (\mintinline{rust}|iter_mut()|).
 % In alcuni casi (come \verb|HashSet<T>|, \verb|HashMap<T>|) la terza implementazione non è fornita perché romperebbe le astrazioni.
@@ -281,11 +281,11 @@ for s in it { // it.into_iter() -> it
 
 
 \section{Adattatori}
-Il tratto \verb|Iterator| definisce un molti metodi che consumano un iteratore 
+Il tratto \verb|Iterator| definisce un molti metodi che consumano un iteratore
 costruiscono un nuovo iteratore derivato, in grado di offrire funzionalità ulteriori.
-Possono essere combinati in catene più o meno lunghe al termine delle quali occorre porre un 
+Possono essere combinati in catene più o meno lunghe al termine delle quali occorre porre un
 consumatore finale.
-Tutti gli adattatori sono infatti pigri (\textit{lazy}) di natura e non invocano il metodo 
+Tutti gli adattatori sono infatti pigri (\textit{lazy}) di natura e non invocano il metodo
 \mintinline{rust}|next()| dell'oggetto a monte se non a seguito di una richiesta proveniente da un loro consumatore.
 
 \begin{center}
@@ -301,7 +301,7 @@ v.iter()
   \end{minipage}%
   \hfill
   \begin{minipage}{0.5\linewidth}
-    \includegraphics[width=1\linewidth]{content/API_Programming/images/2026-04-03-16-20-34.png}
+    \includegraphics[width=0.75\linewidth]{content/API_Programming/images/2026-04-03-16-20-34.png}
   \end{minipage}
 \end{center}
 
@@ -382,19 +382,21 @@ v.iter()
   \item \mintinline{rust}|by_ref(&mut self)|: Prende in prestito un iteratore senza consumarlo, lasciando intatto il possesso dell'originale.
 \end{itemize}
 
+\begin{flushleft}
+  \begin{minipage}{0.7\linewidth}
+    \raggedright
+    \subsection{fold(...): riduzione esplicita di un iteratore}
 
-\subsection{fold(...): riduzione esplicita di un iteratore}
-
-\mintinline{rust}|fold(init, f)| è un consumatore finale che attraversa l'iteratore mantenendo un accumulatore.
-\begin{itemize}
-  \item L'accumulatore viene inizializzato con il valore \verb|init|.
-  \item Ad ogni passo applica \verb|f(acc, item)| e produce un nuovo accumulatore.
-  \item Al termine restituisce il valore finale dell'accumulatore.
-\end{itemize}
-Molte aggregazioni possono essere espresse con \mintinline{rust}|fold(...)|, come somma, prodotto, conteggio, concatenazione, costruzione di strutture, ecc.
+    \mintinline{rust}|fold(init, f)| è un consumatore finale che attraversa l'iteratore mantenendo un accumulatore.
+    \begin{itemize}
+      \item L'accumulatore viene inizializzato con il valore \verb|init|.
+      \item Ad ogni passo applica \verb|f(acc, item)| e produce un nuovo accumulatore.
+      \item Al termine restituisce il valore finale dell'accumulatore.
+    \end{itemize}
+    Molte aggregazioni possono essere espresse con \mintinline{rust}|fold(...)|, come somma, prodotto, conteggio, concatenazione, costruzione di strutture, ecc.
 
 
-\begin{minted}[breaklines]{rust}
+    \begin{minted}[breaklines]{rust}
 let v = vec![1, 2, 3, 4];
 
 let sum = v.iter().fold(0, |acc, x| acc + x);
@@ -402,13 +404,13 @@ let count = v.iter().fold(0, |acc, _| acc + 1);
 let product = v.iter().fold(1, |acc, x| acc * x);
 \end{minted}
 
-
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.5\linewidth]{content/API_Programming/images/2026-04-11-18-03-39.png}
-\end{figure}
-
-
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.27\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-11-18-03-39.png}
+  \end{minipage}
+\end{flushleft}
 
 
 \subsection{Consumatori: aggregare}
