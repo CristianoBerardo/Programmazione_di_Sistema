@@ -73,7 +73,8 @@ Il modello base di esecuzione prevede l'alternarsi continuo di tre fasi:
     \hfill
     \begin{minipage}{0.3\linewidth}
 
-      \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio7.png}
+      \centering
+      \includegraphics[width=0.8\linewidth]{images/API_Programming/Memoria/Memoria-esempio7.png}
 
 
     \end{minipage}
@@ -119,21 +120,26 @@ Tale traduzione garantisce che:
 \end{itemize}
 
 
-\section{Gerarchia di memoria  }
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    \section{Gerarchia di memoria  }
 
-Nei sistemi non elementari, il processore \textbf{non legge/scrive} direttamente dalla memoria RAM. Tra i due elementi viene interposta la memoria \textbf{cache}. Questa ha il compito di velocizzare l'accesso alle informazioni cercando di anticipare il bisogno di informazioni da parte della CPU.
+    Nei sistemi non elementari, il processore \textbf{non legge/scrive} direttamente dalla memoria RAM. Tra i due elementi viene interposta la memoria \textbf{cache}. Questa ha il compito di velocizzare l'accesso alle informazioni cercando di anticipare il bisogno di informazioni da parte della CPU.
 
-Si basa sul \textbf{principio di località} dei programmi: se è stato appena fatto accesso all'indirizzo I, è molto probabile che venga fatto subito dopo accesso all'indirizzo $I + \Delta$ (con $\Delta$ molto piccolo).
+    Si basa sul \textbf{principio di località} dei programmi: se è stato appena fatto accesso all'indirizzo I, è molto probabile che venga fatto subito dopo accesso all'indirizzo $I + \Delta$ (con $\Delta$ molto piccolo).
 
-La memoria cache si basa su dispositivi il cui tempo di accesso è molto più rapido di quello offerto dalla memoria RAM tradizionale, ma dotati di una capacità molto inferiore (pochi KB/MB).
+    La memoria cache si basa su dispositivi il cui tempo di accesso è molto più rapido di quello offerto dalla memoria RAM tradizionale, ma dotati di una capacità molto inferiore (pochi KB/MB).
 
-Per questo Vec<T> è quasi sempre meglio di LinkedList<T>
-\section{Località }
+    Per questo Vec<T> è quasi sempre meglio di LinkedList<T>
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/API_Programming/Memoria/Memoria-esempio6.png}
+    \captionof{figure}{Località}
+  \end{minipage}
+\end{center}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.4\linewidth]{images/API_Programming/Memoria/Memoria-esempio6.png}
-\end{figure}
 
 \section{Esecuzione e programmi di alto livello  }
 
@@ -154,14 +160,22 @@ Questo strato è composto, da un lato, da una specifica modalità di traduzione 
 livello in istruzioni macchina e, dall'altro, da un insieme di funzionalità di supporto offerte sotto forma
 di libreria di supporto all'esecuzione (run-time library).
 
-\section{Livelli di astrazione}
-La compilazione trasforma il programma sorgente in un nuovo programma dotato di
-un modello di esecuzione ed un insieme di istruzioni più semplice. Che può essere eseguito da una macchina fisica (CPU) o subire un'ulteriore trasformazione (esecuzione virtuale)
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.4\linewidth]{images/API_Programming/Memoria/Memoria-esempio1.png}
-\end{figure}
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+
+    \section{Livelli di astrazione}
+    La compilazione trasforma il programma sorgente in un nuovo programma dotato di
+    un modello di esecuzione ed un insieme di istruzioni più semplice. Che può essere eseguito da una macchina fisica (CPU) o subire un'ulteriore trasformazione (esecuzione virtuale)
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/API_Programming/Memoria/Memoria-esempio1.png}
+  \end{minipage}
+\end{center}
+
 
 \section{Librerie di esecuzione}
 
@@ -264,11 +278,11 @@ int main() {
     \end{minipage}
     \begin{minipage}{0.40\linewidth}
       \centering
-      \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio2.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Memoria/Memoria-esempio2.png}
 
       \vspace{0.2cm}
 
-      \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio5.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Memoria/Memoria-esempio5.png}
 
     \end{minipage}
   \end{minipage}
@@ -315,11 +329,11 @@ int main() {
     \end{minipage}
     \begin{minipage}{0.40\linewidth}
       \centering
-      \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esempio3.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Memoria/Memoria-esempio3.png}
 
       \vspace{0.2cm}
 
-      \includegraphics[width=1\linewidth]{images/API_Programming/Memoria/Memoria-esercizio4.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Memoria/Memoria-esercizio4.png}
 
     \end{minipage}
   \end{minipage}
@@ -532,7 +546,7 @@ ovunque. Può causare una violazione di accesso oppure corrompere un'area di mem
 \section{Problemi dei puntatori in C/C++  }
 
 \begin{table}[H]
-  \renewcommand{\arraystretch}{1.6}
+  \renewcommand{\arraystretch}{1.5}
   \centering
   \begin{tabular}{l p{5.5cm}}
     % \hline
@@ -553,7 +567,7 @@ ovunque. Può causare una violazione di accesso oppure corrompere un'area di mem
 \section{Le risposte di Rust  }
 
 \begin{table}[H]
-  \renewcommand{\arraystretch}{1.6}
+  \renewcommand{\arraystretch}{1.5}
   \centering
   \begin{tabular}{l p{5.5cm}}
     % \hline

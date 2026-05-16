@@ -118,7 +118,7 @@ let mut s2 = s1 \\s2 possiede "hello"
 let mut s1 ...  \\Questo s1 nasconde il precedente s1
 \end{minted}
 
-\newpage
+
 \section{Copia}
 Alcuni tipo, tra cui quelli numerici, sono definiti \textbf{copiabili}.
 
@@ -174,7 +174,7 @@ let num2 = num1; //nessun vincolo su num1!
   \end{minipage}
 \end{center}
 
-\newpage
+
 \section{Clonazione}
 
 Alcune volte non vogliamo cedere il possesso ma solamente avere una copia e se un tipo implementa il tratto \textit{Clone} può essere duplicato invocando il metodo \textit{clone()}.
@@ -206,18 +206,18 @@ println!("s2: {}", s2); //hi
     % Secondo blocco: 40% dello spazio per l'immagine
     \begin{minipage}{0.40\linewidth}
       \centering
-      \includegraphics[width=0.8\linewidth]{images/API_Programming/Possesso/Possesso-esempio5.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Possesso/Possesso-esempio5.png}
 
       \vspace{0.1cm}
 
-      \includegraphics[width=0.8\linewidth]{images/API_Programming/Possesso/Possesso-esempio6.png}
+      \includegraphics[width=0.75\linewidth]{images/API_Programming/Possesso/Possesso-esempio6.png}
 
 
     \end{minipage}
   \end{minipage}
 \end{center}
 
-\newpage
+
 \section{Box<T> - Puntatore con possesso}
 
 Una variabile locale è SEMPRE allocata sullo stack. Questo si estende di una quantità pari alla dimensione del valore che deve essere memorizzato nella variabile. Quando la variabile esce dal proprio scope sintattico, lo stack si contrae ed il valore viene rilasciato.
@@ -260,7 +260,7 @@ fn useBox() {
     % Secondo blocco: 40% dello spazio per l'immagine
     \begin{minipage}{0.40\linewidth}
       \centering
-      \includegraphics[width=1\linewidth]{images//API_Programming//Possesso/Possesso-esempio7.png}
+      \includegraphics[width=0.75\linewidth]{images//API_Programming//Possesso/Possesso-esempio7.png}
 
     \end{minipage}
   \end{minipage}
@@ -289,11 +289,11 @@ fn main() {
     % Secondo blocco: 40% dello spazio per l'immagine
     \begin{minipage}{0.40\linewidth}
       \centering
-      \includegraphics[width=1\linewidth]{images//API_Programming//Possesso/Possesso-esempio8.png}
+      \includegraphics[width=0.75\linewidth]{images//API_Programming//Possesso/Possesso-esempio8.png}
 
       \vspace{0.1cm}
 
-      \includegraphics[width=1\linewidth]{images//API_Programming//Possesso/Possesso-esempio9.png}
+      \includegraphics[width=0.75\linewidth]{images//API_Programming//Possesso/Possesso-esempio9.png}
 
 
     \end{minipage}

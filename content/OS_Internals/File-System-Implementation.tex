@@ -424,7 +424,7 @@ Lista collegata (free list):
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/andjfgt.png}
+  \includegraphics[width=0.2\linewidth]{content/OS_Internals/img/andjfgt.png}
 \end{figure}
 
 
@@ -460,9 +460,9 @@ A partire da Windows NT 3.1, è il file system predefinito della famiglia Window
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dnfga.png}
+  \includegraphics[width=0.2\linewidth]{content/OS_Internals/img/dnfga.png}
 \end{figure}
-\newpage
+
 \textbf{FAT}, nota anche come File Allocation Table, è un file system sviluppato per personal computer.
 
 
@@ -473,25 +473,25 @@ Originariamente sviluppata nel 1977 per l'uso su floppy disk, è stata adattata 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.55\linewidth]{content/OS_Internals/img/zndfg.png}
+  \includegraphics[width=0.2\linewidth]{content/OS_Internals/img/zndfg.png}
   \caption{Struttura del file system FAT32}
 \end{figure}
 
 
-\subsection{Il File System di Apple}
+% \subsection{Il File System di Apple}
 
-Nel 2017, Apple, Inc., ha rilasciato un nuovo file system per sostituire il suo HFS+ di 30 anni. HFS+ era stato esteso per aggiungere molte nuove funzionalità, ma come di consueto, questo processo ha aggiunto complessità, insieme a righe di codice, e ha reso più difficile aggiungere ulteriori funzionalità. Partire da zero su una pagina bianca consente di avviare una progettazione con le tecnologie e le metodologie attuali e di fornire l'esatto insieme di funzionalità necessarie.
+% Nel 2017, Apple, Inc., ha rilasciato un nuovo file system per sostituire il suo HFS+ di 30 anni. HFS+ era stato esteso per aggiungere molte nuove funzionalità, ma come di consueto, questo processo ha aggiunto complessità, insieme a righe di codice, e ha reso più difficile aggiungere ulteriori funzionalità. Partire da zero su una pagina bianca consente di avviare una progettazione con le tecnologie e le metodologie attuali e di fornire l'esatto insieme di funzionalità necessarie.
 
-\paragraph{}
+% \paragraph{}
 
-\textbf{Apple File System} (APFS) è un buon esempio di tale progettazione. Il suo obiettivo è funzionare su tutti i dispositivi Apple attuali, dall'Apple Watch all'iPhone fino ai Mac. Creare un file system che funzioni su watchOS, iOS, tvOS e macOS è certamente una sfida. APFS è ricco di funzionalità, tra cui puntatori a 64 bit, cloni per file e directory, snapshot, condivisione dello spazio, calcolo rapido della dimensione delle directory, operazioni atomiche di salvataggio sicuro, design copy-on-write, cifratura (mono- e multi-chiave) e I/O coalescing. Supporta sia l'archiviazione NVM che HDD.
+% \textbf{Apple File System} (APFS) è un buon esempio di tale progettazione. Il suo obiettivo è funzionare su tutti i dispositivi Apple attuali, dall'Apple Watch all'iPhone fino ai Mac. Creare un file system che funzioni su watchOS, iOS, tvOS e macOS è certamente una sfida. APFS è ricco di funzionalità, tra cui puntatori a 64 bit, cloni per file e directory, snapshot, condivisione dello spazio, calcolo rapido della dimensione delle directory, operazioni atomiche di salvataggio sicuro, design copy-on-write, cifratura (mono- e multi-chiave) e I/O coalescing. Supporta sia l'archiviazione NVM che HDD.
 
-\paragraph{}
+% \paragraph{}
 
-Molte di queste funzionalità sono state già discusse, ma ci sono alcuni nuovi concetti che vale la pena esplorare. La \textbf{condivisione dello spazio} è una funzionalità simile a ZFS in cui lo storage è disponibile come uno o più grandi spazi liberi (\textbf{container}) da cui i file system possono attingere allocazioni (permettendo ai volumi APFS di crescere e ridursi).
+% Molte di queste funzionalità sono state già discusse, ma ci sono alcuni nuovi concetti che vale la pena esplorare. La \textbf{condivisione dello spazio} è una funzionalità simile a ZFS in cui lo storage è disponibile come uno o più grandi spazi liberi (\textbf{container}) da cui i file system possono attingere allocazioni (permettendo ai volumi APFS di crescere e ridursi).
 
-Il \textbf{calcolo rapido della dimensione delle directory} fornisce un aggiornamento rapido dello spazio usato. L'\textbf{atomic safe-save} è una primitiva (disponibile tramite API, non tramite comandi del file system) che esegue ridenominazioni di file, bundle di file e directory come operazioni atomiche singole. L'I/O coalescing è un'ottimizzazione per i dispositivi NVM in cui più piccole scritture vengono raggruppate in una grande scrittura per ottimizzare le prestazioni di scrittura.
-\paragraph{}
-Apple ha scelto di non implementare RAID come parte del nuovo APFS, dipendendo invece dal meccanismo Apple RAID volume per il RAID software. APFS è anche compatibile con HFS+, consentendo una facile conversione delle installazioni esistenti.
+% Il \textbf{calcolo rapido della dimensione delle directory} fornisce un aggiornamento rapido dello spazio usato. L'\textbf{atomic safe-save} è una primitiva (disponibile tramite API, non tramite comandi del file system) che esegue ridenominazioni di file, bundle di file e directory come operazioni atomiche singole. L'I/O coalescing è un'ottimizzazione per i dispositivi NVM in cui più piccole scritture vengono raggruppate in una grande scrittura per ottimizzare le prestazioni di scrittura.
+% \paragraph{}
+% Apple ha scelto di non implementare RAID come parte del nuovo APFS, dipendendo invece dal meccanismo Apple RAID volume per il RAID software. APFS è anche compatibile con HFS+, consentendo una facile conversione delle installazioni esistenti.
 
 

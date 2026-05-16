@@ -21,20 +21,20 @@ possesso, località della memoria e pattern di accesso
 \begin{table}[h!]
   \renewcommand{\arraystretch}{1.6}
   \centering
-  \begin{tabular}{l c c c c}
+  \begin{tabularx}{\textwidth}{l c c c c}
     \toprule
-    \textbf{Descrizione} & \textbf{Accesso} & \textbf{Ricerca} & \textbf{Inserimento}              & \textbf{Cancellazione}            \\
+    \textbf{Descrizione} & \textbf{Accesso} & \textbf{Ricerca} & \textbf{Inserimento}             & \textbf{Cancellazione}           \\
     \midrule
-    std::Vec<T>          & $O(1)$           & $O(n)$           & Fine: $O(1)$, posizionale: $O(n)$ & Fine: $O(1)$, posizionale: $O(n)$ \\
-    std::VecDeque<T>     & $O(n)$           & $O(n)$           & Estremi: $O(1)$, interno: $O(n)$  & Estremi: $O(1)$, interno: $O(n)$  \\
-    std::LinkedList<T>   & $O(n)$           & $O(n)$           & dato il nodo/estremi: $O(1)$      & dato il nodo/estremi: $O(1)$      \\
-    std::BinaryHeap<T>   & max/min: $O(1)$  & $O(1)$           & $O(\log(n))$                      & Pop: $O(\log(n))$                 \\
-    std::HashMap<T>      & -                & medio: $O(1)$    & medio: $O(1)$                     & Medio:$O(1)$                      \\
-    std::BTreeMap<T>     & -                & $O(\log(n))$     & $O(\log(n))$                      & $O(\log(n))$                      \\
-    std::HashSet<T>      & -                & medio: $O(1)$    & medio: $O(1)$                     & Medio: $O(1)$                     \\
-    std::BTreeSet<T>     & -                & $O(\log(n))$     & $O(\log(n))$                      & $O(\log(n))$                      \\
+    Vec<T>               & $O(1)$           & $O(n)$           & Fine: $O(1)$, posiz: $O(n)$      & Fine: $O(1)$, posiz: $O(n)$      \\
+    VecDeque<T>          & $O(n)$           & $O(n)$           & Estremi: $O(1)$, interno: $O(n)$ & Estremi: $O(1)$, interno: $O(n)$ \\
+    LinkedList<T>        & $O(n)$           & $O(n)$           & dato il nodo: $O(1)$             & dato il nodo: $O(1)$             \\
+    BinaryHeap<T>        & $O(1)$           & $O(1)$           & $O(\log(n))$                     & Pop: $O(\log(n))$                \\
+    HashMap<T>           & -                & avg: $O(1)$      & avg: $O(1)$                      & avg:$O(1)$                       \\
+    BTreeMap<T>          & -                & $O(\log(n))$     & $O(\log(n))$                     & $O(\log(n))$                     \\
+    HashSet<T>           & -                & avg: $O(1)$      & avg: $O(1)$                      & avg: $O(1)$                      \\
+    BTreeSet<T>          & -                & $O(\log(n))$     & $O(\log(n))$                     & $O(\log(n))$                     \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 
