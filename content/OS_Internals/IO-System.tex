@@ -695,7 +695,7 @@ Linea Interrupt-request della CPU attivata dal dispositivo di I/O, controllata d
 
 
 \begin{flushleft}
-  \begin{minipage}{0.65\linewidth}
+  \begin{minipage}{0.7\linewidth}
     \raggedright
 
     Meccanismo di interrupt utilizzato anche per le eccezioni: terminare un processo, crash del sistema a causa di un errore hardware.
@@ -712,7 +712,7 @@ Linea Interrupt-request della CPU attivata dal dispositivo di I/O, controllata d
 
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.3\linewidth}
+  \begin{minipage}{0.25\linewidth}
     \centering
     \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-31-17-03-06.png}
   \end{minipage}
@@ -766,19 +766,25 @@ Nuovi dispositivi che comunicano con protocolli già implementati non richiedono
 Ogni sistema operativo ha le proprie strutture del sottosistema di I/O e framework per i device driver.
 I dispositivi variano in molte dimensioni:
 
-\begin{itemize}
-  \item Stream di caratteri o a blocchi (Character-stream o block)
-  \item Sequenziale o ad accesso casuale (random-access)
-  \item Sincrono o asincrono (o entrambi)
-  \item Condivisibile (Sharable) o dedicato
-  \item Velocità operativa
-  \item lettura-scrittura, sola lettura, o sola scrittura
-\end{itemize}
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \begin{itemize}
+      \item Stream di caratteri o a blocchi (Character-stream o block)
+      \item Sequenziale o ad accesso casuale (random-access)
+      \item Sincrono o asincrono (o entrambi)
+      \item Condivisibile (Sharable) o dedicato
+      \item Velocità operativa
+      \item lettura-scrittura, sola lettura, o sola scrittura
+    \end{itemize}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-31-17-11-50.png}
+  \end{minipage}
+\end{flushleft}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.25\linewidth]{content/OS_Internals/images/2026-03-31-17-11-50.png}
-\end{figure}
 
 \section{Caratteristiche dei dispositivi di I/O}
 
@@ -833,10 +839,7 @@ I dispositivi a blocchi includono le unità disco (disk drives)
 \begin{itemize}
   \item I comandi includono read, write, seek
   \item Raw I/O, I/O diretto, o accesso al file system
-  \item Accesso tramite memory-mapped file possibile
-        \begin{itemize}
-          \item[-] File mappato nella memoria virtuale e cluster portati tramite demand paging
-        \end{itemize}
+  \item Accesso tramite memory-mapped file possibile: File mappato nella memoria virtuale e cluster portati tramite demand paging
   \item DMA
 \end{itemize}
 
@@ -933,35 +936,37 @@ Questo metodo scatter-gather è migliore di molteplici chiamate I/O individuali
 
 
 \begin{center}
-  \begin{minipage}[t]{0.45\linewidth}
-    \section{Tabella di stato del dispositivo (Device-status Table)}
-    \centering
-    \includegraphics[width=\linewidth]{./content/OS_Internals/images/2026-03-31-17-37-10.png}
-  \end{minipage}%
-  \hfill
-  \begin{minipage}[t]{0.45\linewidth}
-    \section{Dispositivi I/O comuni per PC e Data-center e velocità delle interfacce}
-    \centering
-    \includegraphics[width=0.5\linewidth]{./content/OS_Internals/images/2026-03-31-17-37-28.png}
+  \begin{minipage}{1\linewidth}
+    \begin{minipage}[t]{0.47\linewidth}
+      \section{Device-status Table}
+      \centering
+      \includegraphics[width=0.6\linewidth]{./content/OS_Internals/images/2026-03-31-17-37-10.png}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.47\linewidth}
+      \section{Velocità disp. I/O}
+      \centering
+      \includegraphics[width=0.4\linewidth]{./content/OS_Internals/images/2026-03-31-17-37-28.png}
+    \end{minipage}
   \end{minipage}
 \end{center}
 
 \section{Sottosistema di I/O del Kernel (Cont.)}
 
-\subsubsection{Caching} - dispositivo più veloce che mantiene una copia dei dati
+\paragraph{Caching} - dispositivo più veloce che mantiene una copia dei dati
 \begin{itemize}
   \item Sempre solo una copia
   \item Fondamentale per le prestazioni
   \item A volte combinato con il buffering
 \end{itemize}
 
-\subsubsection{Spooling} - trattiene l'output per un dispositivo
+\paragraph{Spooling} - trattiene l'output per un dispositivo
 \begin{itemize}
   \item Se il dispositivo può servire solo una richiesta alla volta
   \item es. Stampa
 \end{itemize}
 
-\subsubsection{Prenotazione del dispositivo (Device reservation)} - fornisce accesso esclusivo a un dispositivo
+\paragraph{Prenotazione del dispositivo (Device reservation)} - fornisce accesso esclusivo a un dispositivo
 \begin{itemize}
   \item System call per l'allocazione e la de-allocazione
   \item Attenzione ai deadlock
@@ -1010,6 +1015,8 @@ Windows usa il message passing:
   \item Pro/contro?
 \end{itemize}
 
+
+\newpage
 \section{Struttura del Kernel di I/O in UNIX}
 
 \begin{figure}[h!]
@@ -1156,7 +1163,7 @@ L'I/O è un fattore determinante per le prestazioni del sistema
   \end{minipage}%
   \hfill
   \begin{minipage}[t]{0.45\linewidth}
-    \section{Prestazioni I/O dello Storage (e Latenza di Rete)}
+    \section{Prestazioni I/O dello Storage e Latenza Rete}
     \centering
     \includegraphics[width=0.8\linewidth]{./content/OS_Internals/images/2026-03-31-17-41-46.png}
   \end{minipage}
