@@ -17,7 +17,7 @@ computazionali delle diverse strutture dati, per scegliere quella adatta al caso
 d'uso. La scelta del contenitore deve tener conto anche di vincoli legati al
 possesso, località della memoria e pattern di accesso
 
-\section{Complessità nel tempo}
+\section{Complessità}
 \begin{table}[h!]
   \renewcommand{\arraystretch}{1.5}
   \centering
@@ -37,7 +37,10 @@ possesso, località della memoria e pattern di accesso
   \end{tabularx}
 \end{table}
 
-
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.35\linewidth]{content/API_Programming/images/2026-04-13-11-42-19.png}
+\end{figure}
 
 
 \clearpage
@@ -67,16 +70,9 @@ possesso, località della memoria e pattern di accesso
   \end{tabularx}
 \end{sidewaystable}
 
-
-
 \clearpage
 \FloatBarrier
-\section{Complessità}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.4\linewidth]{content/API_Programming/images/2026-04-13-11-42-19.png}
-\end{figure}
 
 
 
@@ -175,7 +171,7 @@ let row = vec![
   \end{minipage}
 \end{center}
 
-\subsection{Quando utilizzarlo}
+\subsubsection{Quando usarlo}
 
 \begin{itemize}
   \item Serve tenere i dati in una sequenza ordinata con accesso casuale
@@ -186,11 +182,11 @@ let row = vec![
 \end{itemize}
 
 
-\subsection{Punti di forza}
+\subsubsection{Punti di forza}
 Eccellente località dei dati che favorisce l'uso della cache infatti accedere ad
 un elemento ha costo unitario, inserire al fondo ha costo unitario ammortizzato
 
-\subsection{Punti di debolezza}
+\subsubsection{Punti di debolezza}
 
 Inserire/rimuovere all'inizio o al centro richiede lo spostamento di tutti gli
 elementi successivi.
@@ -223,7 +219,7 @@ algoritmi di sorting.
   gli estremi. In tutti gli altri casi è preferibile utilizzare \texttt{Vec<T>}.
 \end{tcolorbox}
 
-\subsection{Quando usarlo}
+\subsubsection{Quando usarlo}
 
 \begin{itemize}
   \item Occorre una coda con comportamento FIFO
@@ -233,13 +229,13 @@ algoritmi di sorting.
   \item Serve estrarre/inserire sia in testa che in coda
 \end{itemize}
 
-\subsection{Punti di forza}
+\subsubsection{Punti di forza}
 
 Le operazioni in testa e in coda sono efficienti e gli elementi sono memorizzati
 in un array, con accessi efficienti all'i-esimo elemento
 
 
-\subsection{Punti di debolezza}
+\subsubsection{Punti di debolezza}
 
 Non tutti gli elementi sono contigui, talora occorre renderli tali invocando
 \verb|make_contiguous()|. Inserire nel mezzo ha un costo proporzionale al numero
@@ -269,7 +265,7 @@ sottoinsieme dei metodi offerti da \texttt{VecDeque<T>}.
 Tuttavia, è quasi sempre preferibile utilizzare \texttt{Vec<T>}  o \texttt{VecDeque<T>}
 poiché superiori in termini di prestazioni ed uso della memoria.
 
-\subsection{Quando usarla}
+\subsubsection{Quando usarla}
 
 \begin{itemize}
   \item Occorre suddividere una sequenza o concatenare due sequenze in tempo
@@ -279,13 +275,13 @@ poiché superiori in termini di prestazioni ed uso della memoria.
         ritardi variabili (VecDeque<T>)
 \end{itemize}
 
-\subsection{Punti di forza}
+\subsubsection{Punti di forza}
 
 Concatenazione e suddivisione molto efficienti. Le operazioni in testa e coda
 hanno tempo costante
 
 
-\subsection{Punti di debolezza}
+\subsubsection{Punti di debolezza}
 
 Località della cache molto limitata rispetto a \verb|Vec<T>| o
 \verb|VecDeque<T>|. L'accesso casuale ha costo lineare. Nella maggior parte dei
@@ -294,7 +290,7 @@ casi reali ha comportamento più lento rispetto a \verb|Vec<T>| o
 
 
 
-\subsection{Metodi}
+\subsubsection{Metodi}
 
 I metodi attualmente offerti da \texttt{LinkedList<T>} sono un ristretto
 sottoinsieme dei metodi offerti da \texttt{VecDeque<T>}.
@@ -383,7 +379,7 @@ causare la riallocazione ed il movimento dei dati.
 
 Iterazione ordinata naturalmente. Interrogazioni su intervalli di chiavi
 
-\subsection{Punti di debolezza}
+\subsubsection{Punti di debolezza}
 
 Il costo di accesso ad un elemento è più costoso, $O(log(n))$. Le chiavi devono
 implementare il tratto \textbf{Ord} e devono garantire immutabilità di confronto
@@ -419,7 +415,7 @@ In particolare:
 \end{itemize}
 
 
-\section{Entry<'a,K,V>}
+\subsection{Entry<'a,K,V>}
 Rust offre la possibilità di ottimizzare l'utilizzo delle mappe: in particolare
 attraverso il metodo \texttt{entry} che permette di cercare una chiave
 all'interno di una mappa e ritorna un enum in base al risultato della ricerca.
@@ -546,7 +542,7 @@ Verificare l'appartenenza di un elemento ha costo logaritmico.
 Gli elementi devono avere un ordinamento totale stabile
 
 
-\section{BinaryHeap<T>}
+\subsection{BinaryHeap<T>}
 
 Un \texttt{BinaryHeap<T>} è una collezione di elementi di tipo \texttt{T} i cui
 valori sono salvati nello heap mantenendo il massimo elemento accessibile in
