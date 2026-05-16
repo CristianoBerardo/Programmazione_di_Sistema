@@ -526,12 +526,12 @@ Il modello e scalabile orizzontalmente, content-addressable e non strutturato.
 % \begin{flushleft}
 %   \begin{minipage}{0.65\linewidth}
 %     \raggedright
-    Spazio di indirizzamento logico contiguo. Tipi:
+Spazio di indirizzamento logico contiguo. Tipi:
 
-    \begin{itemize}
-      \item File di Dati: Numerico, Carattere, Binario
-      \item File di Programma
-    \end{itemize}
+\begin{itemize}
+  \item File di Dati: Numerico, Carattere, Binario
+  \item File di Programma
+\end{itemize}
 %   \end{minipage}%
 %   \hfill
 %   \begin{minipage}{0.3\linewidth}
@@ -645,24 +645,29 @@ Un file è un \textbf{record logico} di lunghezza fissa:
   \item Altri Metodi di Accesso
 \end{itemize}
 
-\subsubsection{Accesso Sequenziale}
-Operazioni: \texttt{read next}, \texttt{write next}, \texttt{reset}; nessuna lettura dopo l'ultima scrittura (rewrite) e nessuna operazione di seek.
 
+\begin{center}
+  \begin{minipage}[t]{0.45\linewidth}
+    \subsubsection{Accesso Sequenziale}
+    Operazioni: \texttt{read next}, \texttt{write next}, \texttt{reset}; nessuna lettura dopo l'ultima scrittura (rewrite) e nessuna operazione di seek.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.25\linewidth]{content/OS_Internals/img/andfg.png}
-  \caption{Accesso sequenziale}
-\end{figure}
+    \vspace{0.5cm}
 
-\subsubsection{Accesso Diretto}
-Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco relativo
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/andfg.png}
+    \captionof{figure}{Accesso sequenziale}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t]{0.45\linewidth}
+    \subsubsection{Accesso Diretto}
+    Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco relativo
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.25\linewidth]{content/OS_Internals/img/dbfs.png}
-  \caption{Accesso diretto}
-\end{figure}
+    \vspace{0.9cm}
+    \centering
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dbfs.png}
+    \captionof{figure}{Accesso diretto}
+  \end{minipage}
+\end{center}
 
 \subsubsection{Accesso Sequenziale vs Diretto}
 
@@ -693,9 +698,7 @@ Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco
       \item Un motore simile, MyISAM, è un modo per indicizzare i DB MySQL
     \end{itemize}
 
-    \begin{tcolorbox}
-      \textbf{Nota:} Questa è una struttura data ad alto livello, più avanti ne vedremo una di più basso livello.
-    \end{tcolorbox}
+
 
   \end{minipage}%
   \hfill
@@ -705,13 +708,15 @@ Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco
   \end{minipage}
 \end{flushleft}
 
-
+\begin{tcolorbox}
+  \textbf{Nota:} Questa è una struttura data ad alto livello, più avanti ne vedremo una di più basso livello.
+\end{tcolorbox}
 
 \section{File Mappati in Memoria}
 
 
 \begin{center}
-  \begin{minipage}{0.65\linewidth}
+  \begin{minipage}{0.7\linewidth}
     Invece di accedere ai file di dati dall'HD ad ogni accesso, i file di dati possono essere paginati in memoria come i file di processo, risultando in accessi molto più veloci.
 
     Si può vederlo come il "paging" di un file = una tabella delle pagine per file, eccetto ovviamente quando si verificano page-fault. Questo è noto come memory-mapping di un file.
@@ -725,7 +730,7 @@ Operazioni: leggi n, scrivi n, Reset, Posiziona (seek) a n. n = numero di blocco
 
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.3\linewidth}
+  \begin{minipage}{0.25\linewidth}
     \centering
     \includegraphics[width=\linewidth]{content/OS_Internals/img/mfh.png}
     \captionof{figure}{File mappati in memoria}
@@ -764,7 +769,7 @@ Si consideri Solaris, che ha:
 
 Anche Linux ha più file system.
 
-
+\newpage
 \section{Struttura delle Directory}
 Una collezione di nodi contenenti informazioni su tutti i file, ed alcuni
 sui attributi come data di creazione, dimensioni, etc.
@@ -800,7 +805,7 @@ In particolare:
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.3\linewidth]{content/OS_Internals/img/dfgnb.png}
+  \includegraphics[width=0.25\linewidth]{content/OS_Internals/img/dfgnb.png}
   \caption{Una singola directory per tutti gli utenti}
 \end{figure}
 
@@ -810,7 +815,7 @@ Molti problemi: il problema della denominazione e il problema del raggruppamento
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.3\linewidth]{content/OS_Internals/img/fng.png}
+  \includegraphics[width=0.25\linewidth]{content/OS_Internals/img/fng.png}
   \caption{Directory separata per ogni utente}
 \end{figure}
 
@@ -828,11 +833,11 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
     \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfsbv.png}
   \end{minipage}
   \hfill % Aggiunge spazio elastico tra le due minipage
-  \begin{minipage}[c]{0.6\textwidth}
+  \begin{minipage}[c]{0.68\textwidth}
     \centering
     \renewcommand{\arraystretch}{1.5}
     % Rimosso \begin{table}, usiamo direttamente tabular
-    \begin{tabular}{c c}
+    \begin{tabularx}{\textwidth}{l l}
       \toprule
       \textbf{Pro}                  & \textbf{Contro}                       \\
       \midrule
@@ -840,7 +845,7 @@ Caratteristiche: Percorso lungo (negativo), Possibilità di avere lo stesso nome
       Raggruppamento                & Nessuna condivisione di file          \\
       Facile da cercare             & Duplicazione di file in più directory \\
       \bottomrule
-    \end{tabular}
+    \end{tabularx}
   \end{minipage}
 \end{center}
 
@@ -862,7 +867,7 @@ Esempio: se nella directory corrente /mail
 
 
 \begin{flushleft}
-  \begin{minipage}{0.65\linewidth}
+  \begin{minipage}{0.7\linewidth}
     \raggedright
     Hanno sottodirectory e file condivisi con nomi diversi (alias), ma possono fare riferimento agli stessi dati, quindi la condivisione è possibile.
 
@@ -886,7 +891,7 @@ Esempio: se nella directory corrente /mail
     \end{itemize}
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.3\linewidth}
+  \begin{minipage}{0.25\linewidth}
     \centering
     \includegraphics[width=\linewidth]{content/OS_Internals/img/fdbg.png}
   \end{minipage}
@@ -902,7 +907,7 @@ Esempio: se nella directory corrente /mail
 
     \vspace{10pt} % Spazio tra testo e immagine
     {\centering
-      \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/dngf.png}
+      \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/dngf.png}
       \par}
   \end{minipage}%
   \hfill
@@ -913,7 +918,7 @@ Esempio: se nella directory corrente /mail
 
     \vspace{10pt}
     {\centering
-      \includegraphics[width=0.7\linewidth]{content/OS_Internals/images/2026-03-22-17-53-56.png}
+      \includegraphics[width=0.5\linewidth]{content/OS_Internals/images/2026-03-22-17-53-56.png}
       \par}
   \end{minipage}
 \end{figure}
