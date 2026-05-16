@@ -265,22 +265,31 @@ Il boot block inizializza il sistema ed è memorizzato in ROM, firmware. Il prog
 
 
 
-\subsection{Gestione dello Spazio di Swap}
-Utilizzato per spostare interi processi o pagine dalla DRAM all'archiviazione secondaria quando la DRAM non è sufficiente per tutti i processi. Il sistema operativo fornisce la \textbf{gestione dello spazio di swap}:
-
-\begin{itemize}
-  \item L'archiviazione secondaria è più lenta della DRAM, quindi è importante ottimizzare le prestazioni
-  \item Di solito sono possibili più spazi di swap, riducendo il carico di I/O su ogni singolo dispositivo
-  \item È preferibile avere dispositivi dedicati
-  \item Può essere in una partizione raw o in un file all'interno di un file system (per comodità)
-\end{itemize}
 
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.4\linewidth]{content/OS_Internals/img/amrjkyt.png}
-  \caption{Strutture dati per lo swapping nei sistemi Linux}
-\end{figure}
+
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    \subsection{Gestione dello Spazio di Swap}
+    Utilizzato per spostare interi processi o pagine dalla DRAM all'archiviazione secondaria quando la DRAM non è sufficiente per tutti i processi. Il sistema operativo fornisce la \textbf{gestione dello spazio di swap}:
+
+    \begin{itemize}
+      \item L'archiviazione secondaria è più lenta della DRAM, quindi è importante ottimizzare le prestazioni
+      \item Di solito sono possibili più spazi di swap, riducendo il carico di I/O su ogni singolo dispositivo
+      \item È preferibile avere dispositivi dedicati
+      \item Può essere in una partizione raw o in un file all'interno di un file system (per comodità)
+    \end{itemize}
+
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=0.3\linewidth]{content/OS_Internals/img/amrjkyt.png}
+    \captionof{figure}{Strutture dati per lo swapping nei sistemi Linux}
+  \end{minipage}
+\end{flushleft}
 
 
 \subsection{Collegamento dello Storage all'Host}
@@ -306,7 +315,7 @@ L'accesso collegato all'host avviene tramite porte I/O locali, usando una delle 
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/OS_Internals/img/tdmng.png}
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/tdmng.png}
     \captionof{figure}{NAS}
   \end{minipage}
 \end{center}
@@ -352,7 +361,7 @@ Uno storage array ha uno o piu controller e offre funzionalita ai sistemi host c
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-22-17-19-31.png}
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/images/2026-03-22-17-19-31.png}
   \end{minipage}
 \end{center}
 
@@ -407,29 +416,33 @@ I sistemi RAID migliorano le prestazioni e l'affidabilità dello storage memoriz
   \item La parità a blocchi interlacciati (\textbf{RAID 4, 5, 6}) usa molta meno ridondanza
 \end{itemize}
 
-Il RAID all'interno di un array di storage può comunque fallire se l'array si guasta, quindi la replica automatica dei dati tra array è comune. Spesso un piccolo numero di dischi hot-spare viene lasciato non allocato, pronto a sostituire automaticamente un disco guasto e a ricostruire i dati su di esso.
 
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    Il RAID all'interno di un array di storage può comunque fallire se l'array si guasta, quindi la replica automatica dei dati tra array è comune. Spesso un piccolo numero di dischi hot-spare viene lasciato non allocato, pronto a sostituire automaticamente un disco guasto e a ricostruire i dati su di esso.
 
-\begin{center}
-  \begin{minipage}{0.85\linewidth}
+    \begin{itemize}
+      \item RAID 0: striping senza ridondanza. La probabilità che si guastino 4 dispositivi assieme è molto molto bassa.
+      \item RAID 1: mirroring, duplica i dati, stesso metodo utilizzato nell'aviazione.
+    \end{itemize}
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
     \centering
-    \begin{minipage}[h!]{0.35\textwidth}
+    \begin{minipage}[h!]{0.3\textwidth}
       \centering
       \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmfdg.png}
-      \captionof{figure}{Schemi RAID}
     \end{minipage}%
-    \begin{minipage}[h!]{0.35\textwidth}
+    \begin{minipage}[h!]{0.3\textwidth}
       \centering
       \includegraphics[width=1\linewidth]{content/OS_Internals/img/zmnfdg.png}
-      \captionof{figure}{Schemi RAID}
     \end{minipage}
   \end{minipage}
-\end{center}
+\end{flushleft}
 
-\begin{itemize}
-  \item RAID 0: striping senza ridondanza. La probabilità che si guastino 4 dispositivi assieme è molto molto bassa.
-  \item RAID 1: mirroring, duplica i dati, stesso metodo utilizzato nell'aviazione.
-\end{itemize}
+
 
 
 \section{Altre Funzionalita}
@@ -510,28 +523,23 @@ Il modello e scalabile orizzontalmente, content-addressable e non strutturato.
 \section{Cos'è un File?}
 
 
-\begin{flushleft}
-  \begin{minipage}{0.65\linewidth}
-    \raggedright
+% \begin{flushleft}
+%   \begin{minipage}{0.65\linewidth}
+%     \raggedright
     Spazio di indirizzamento logico contiguo. Tipi:
 
     \begin{itemize}
-      \item File di Dati
-            \begin{itemize}
-              \item Numerico
-              \item Carattere
-              \item Binario
-            \end{itemize}
+      \item File di Dati: Numerico, Carattere, Binario
       \item File di Programma
     \end{itemize}
-  \end{minipage}%
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-    \centering
-    \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/fgnfnfg.png}
-    \captionof{figure}{Tipi di file}
-  \end{minipage}
-\end{flushleft}
+%   \end{minipage}%
+%   \hfill
+%   \begin{minipage}{0.3\linewidth}
+%     \centering
+%     \includegraphics[width=0.7\linewidth]{content/OS_Internals/img/fgnfnfg.png}
+%     \captionof{figure}{Tipi di file}
+%   \end{minipage}
+% \end{flushleft}
 
 
 \subsection{Attributi del File}
