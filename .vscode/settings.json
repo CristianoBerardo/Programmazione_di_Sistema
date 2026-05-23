@@ -72,5 +72,7 @@
     "%DIR%/",
     "%TMPFILE%",
     "-y=defaultIndent: '  '"
-  ]
+  ],
+  "pasteImage.path": "${currentFileDir}/images",
+  "pasteImage.insertPattern": "\\begin{figure}[h!]\n\t\\centering\n\t\\includegraphics[width=0.3\\linewidth]{content/API_Programming/${imageFilePath}}\n\\end{figure}"
 }

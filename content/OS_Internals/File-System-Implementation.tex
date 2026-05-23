@@ -28,7 +28,7 @@
   \end{minipage}
 \end{flushleft}
 
-\subsection{Driver dei Dispositivi}
+\subsection{Driver dei Dispositivi - I/O Controller}
 
 \textbf{I driver dei dispositivi} gestiscono i dispositivi I/O al livello di controllo I/O.
 
@@ -38,7 +38,7 @@ Ricevuti comandi come: leggi drive1, cilindro 72, traccia 2, settore 10, in posi
 
 Emette comandi hardware di basso livello specifici per il controller hardware
 
-\subsection{File System di Base}
+\subsection{Basic File Systeme}
 
 \textbf{Il file system di base}, ricevuto un comando come “recupera blocco 123”, lo traduce in comando per il driver del dispositivo.
 
@@ -52,7 +52,7 @@ Gestisce anche i buffer e le cache in memoria (allocazione, liberazione, sostitu
 
 
 
-\subsection{Modulo di Organizzazione dei File}
+\subsection{File organization module}
 
 \textbf{Il modulo di organizzazione} dei file comprende file, indirizzi logici e blocchi fisici.
 
@@ -66,7 +66,7 @@ Gestisce lo spazio libero e l'allocazione del disco.
 
 
 
-\subsection{File System Logico}
+\subsection{Logical File System}
 Il file system logico gestisce le informazioni sui metadati:
 
 \begin{itemize}
@@ -104,7 +104,7 @@ Ne continuano ad arrivare di nuovi - ZFS, GoogleFS, Oracle ASM, FUSE
 
 \subsection{Operazioni del File System}
 
-Abbiamo system call al livello API: Open, close, read, write, seek... ma come implementiamo le loro funzioni? Mediante strutture su disco e in memoria.
+Abbiamo system call al livello API: Open, close, read, write, seek... ma come implementiamo le loro funzioni? Mediante strutture \textbf{su disco} e \textbf{in memoria}.
 
 \paragraph{}
 \textbf{Boot control block} (o \textbf{MBR}) contiene le informazioni necessarie al sistema per avviare l'OS da quel volume. Necessario se il volume contiene l'OS, di solito il primo blocco del volume.
@@ -113,7 +113,7 @@ Abbiamo system call al livello API: Open, close, read, write, seek... ma come im
 
 La struttura delle directory organizza i file: nomi e numeri di inode, master file table.
 
-\subsection{Blocco di Controllo dei File - FCB}
+\subsection{File Control Block - FCB}
 
 L'OS mantiene un FCB per ogni file, che contiene molti dettagli sul file: tipicamente, numero di inode (se Linux), permessi, dimensione, date.
 
@@ -150,6 +150,38 @@ In generale, i metadati contenuti in un inode sono:
   \item ora di modifica dei metadati
   \item numero di hard link
 \end{itemize}
+
+\paragraph{Esercizio}
+
+Blocco: 4KB
+Indice = 4B
+
+\#indici/blocco = 4K/4B = 1K
+
+file = 4GB = 4GB/4KB = 1M blocchi
+
+1M indice nella tabella (un indice per ogni blocco)
+
+tabella richiede 1K blocchi di 2ndo livello
+1 blocco di primo livello
+
+se file > 4GB serve un terzo livello.
+
+
+Essendo che non sappiamo quanto è grande il file, quando parti (primi 10)
+sono gratis e li metto nel FCB (inode) se cresce gioco l'indice ad un solo livello
+ed ospito 1K blocchi.
+
+\paragraph{}
+
+
+I file piccoli sono veloci, quelli grandi sono più lenti
+ma hai tanto da leggere e scrivere.
+
+
+
+
+
 
 
 % \begin{figure}[h!]
@@ -195,6 +227,15 @@ In generale, i metadati contenuti in un inode sono:
       \item fh file handler in Windows
       \item stessa denominazione delle funzioni C
     \end{itemize}
+
+    La open() cerca, mentre la read() si dimentica dei direttori e legge.
+    Il processo A può avere aperto un file 5.
+    Un'altro processo può avere un altro file 5 ma può essere un'altro file
+
+    Se ogni file fosse accessibile esclusivamente per ogni processo
+    (no shering) basterebbe la \textbf{tabella dei file aperti per processo}
+    mentre la \textbf{tabella globale dei file aperti} tiene traccia dei lock
+    sui vari file.
 
   \end{minipage}%
   \hfill
@@ -301,16 +342,17 @@ Un metodo di allocazione definisce come i blocchi del disco vengono assegnati ai
 \begin{flushleft}
   \begin{minipage}{0.7\linewidth}
     \raggedright
-    \subsection{Allocazione Collegata}
+    \subsection{Allocazione Collegata - Linked}
 
     \begin{itemize}
       \item Ogni file è una lista collegata di blocchi
       \item Il file termina con un puntatore null
       \item Nessuna frammentazione esterna
-      \item Ogni blocco contiene un puntatore al blocco successivo
+      \item Ogni blocco contiene un puntatore al blocco successivo (minimo overhead)
       \item Nessuna compattazione, nessuna frammentazione esterna
       \item Il sistema di gestione dello spazio libero viene chiamato quando è necessario un nuovo blocco
       \item Si migliora l'efficienza raggruppando i blocchi in cluster, ma aumenta la frammentazione interna
+      \item Se perdi un puntatore perdi il resto del file/ dei file
     \end{itemize}
     \textbf{Grande problema}: localizzare un blocco richiede molti I/O e seek del disco.
 
@@ -326,6 +368,8 @@ Un metodo di allocazione definisce come i blocchi del disco vengono assegnati ai
 
 
 Il blocco da accedere è il $Q^{esimo}$ blocco nella catena collegata di blocchi che rappresenta il file. Spostamento nel blocco = R + 1.
+
+Se vogliamo capire dove sta il blocco 1500 dividiamo per (512-1) dato il puntatore.
 
 % \subsection{Metodo di Allocazione FAT}
 
@@ -346,15 +390,22 @@ Il blocco da accedere è il $Q^{esimo}$ blocco nella catena collegata di blocchi
 %   \includegraphics[width=0.5\linewidth]{content/OS_Internals/img/fbfbf.png}
 % \end{figure}
 
-\subsection{Metodo di Allocazione FAT}
+\subsection{Metodo di Allocazione File-Allocation Table FAT}
 
 \begin{minipage}{0.75\textwidth}
+  Scorporiamo i puntatori dai file e mantengo il pointer di 1 e il blocco 512.
+  Due vettori di dati PARALLELI. Devo stare attento a non corrompere il vettore
+  dei pointer.
+
   L'inizio del volume ha una tabella, indicizzata per numero di blocco. Simile a una lista collegata, ma più veloce su disco e memorizzabile in cache. L'allocazione di nuovi blocchi è semplice.
+
+
 \end{minipage}
 \hfill\
 \begin{minipage}{0.2\textwidth}
   \begin{center}
     \includegraphics[width=\linewidth]{content/OS_Internals/img/nddgndg.png}
+    \captionof{figure}{Struttura che contiene solo il puntatore}
   \end{center}
 \end{minipage}
 
@@ -363,7 +414,18 @@ Il blocco da accedere è il $Q^{esimo}$ blocco nella catena collegata di blocchi
 \subsection{Metodo di Allocazione Indicizzata}
 
 \begin{minipage}{0.75\textwidth}
+  C'è un difetto delle liste: l'accesso diretto è O(n). Usando la FAT devo sempre
+  scorrere il vettore dei puntatori anche se molto meglio di una lista collegata.
+
   Ogni file ha il proprio/i propri blocco/i indice con puntatori ai propri blocchi dati.
+  Può esserci frammentazione interna, dipende quanto occupa il file.
+  Filosofia simile alla page-table.
+
+
+  Se ti serve più spazio:
+  \begin{itemize}
+    \item Metti più blocchi indice in lista
+  \end{itemize}
 \end{minipage}
 \hfill
 \begin{minipage}{0.2\textwidth}
@@ -378,31 +440,43 @@ Il blocco da accedere è il $Q^{esimo}$ blocco nella catena collegata di blocchi
 Il metodo migliore dipende dal tipo di accesso al file:
 
 \begin{itemize}
-  \item L'allocazione contigua è ottima per accesso sequenziale e casuale
+  \item L'allocazione contigua è ottima per accesso sequenziale e casuale, unico difetto c'è frammentazione
   \item L'allocazione collegata è buona per l'accesso sequenziale, non per quello casuale
+  \item L'indicizzata è più complessa: per accedere a un singolo blocco potrebbe essere necessario leggere prima il blocco indice e poi il blocco dati.
 \end{itemize}
 
 Dichiarare il tipo di accesso alla creazione: scegliere tra contigua o collegata.
 
-L'indicizzata è più complessa: per accedere a un singolo blocco potrebbe essere necessario leggere prima il blocco indice e poi il blocco dati.
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    \section{Gestione dello Spazio Libero}
+
+    Il file system mantiene la \textbf{lista dello spazio libero} per tracciare i blocchi disponibili. Simile alla lista delle pagine libere per la gestione della memoria virtuale.
+
+    \textbf{Vettore di bit} o \textbf{bit map} (n blocchi).
+
+    \begin{tcolorbox}
+      \textbf{Nota:} la scelta di che struttura usare per allocare file e della gestione dello spazio libero può essere diversa (inode per i file e lista continua per il free space)
+    \end{tcolorbox}
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/img/mngaz.png}
+    \captionof{figure}{bit map}
+  \end{minipage}
+\end{center}
 
 
-\section{Gestione dello Spazio Libero}
+Calcolo del numero di blocco:
 
-Il file system mantiene la \textbf{lista dello spazio libero} per tracciare i blocchi disponibili. Simile alla lista delle pagine libere per la gestione della memoria virtuale.
-
-\textbf{Vettore di bit} o \textbf{bit map} (n blocchi)
-
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.25\linewidth]{content/OS_Internals/img/mngaz.png}
-\end{figure}
-
-Calcolo del numero di blocco:\newline
+\vspace{0.5cm}
 
 \begin{equation*}
   \text{(numero di bit per parola) * (numero di parole con valore 0) + offset del primo bit a 1}
 \end{equation*}
+
 Semplice, ma la bit map richiede spazio extra.
 
 \paragraph{Esempio: }
@@ -437,14 +511,14 @@ Vantaggio: è facile ottenere spazio per file contigui verificando se ci sono ab
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/OS_Internals/img/andjfgt.png}
+    \includegraphics[width=0.75\linewidth]{content/OS_Internals/img/andjfgt.png}
   \end{minipage}
 \end{flushleft}
 
 
 \subsection{Lista Collegata dello Spazio Libero}
 
-\textbf{Raggruppamento:}
+\paragraph{Raggruppamento:}
 
 \begin{itemize}
   \item Modificare la lista collegata per memorizzare l'indirizzo degli n-1 blocchi liberi successivi nel primo blocco libero, più un puntatore al blocco successivo che contiene puntatori a blocchi liberi (come questo)
@@ -452,13 +526,88 @@ Vantaggio: è facile ottenere spazio per file contigui verificando se ci sono ab
   \item L'n-esimo conterrà puntatori agli n-1 blocchi liberi successivi
 \end{itemize}
 
-\textbf{Conteggio}
+\paragraph{Conteggio}
 
 \begin{itemize}
   \item Poiché lo spazio viene spesso usato e liberato in modo contiguo, con allocazione contigua, estensioni o clustering, si mantiene l'indirizzo del primo blocco libero e il conteggio dei blocchi liberi successivi. La lista dello spazio libero contiene quindi voci con indirizzi e conteggi.
   \item Il primo blocco della lista libera conterrà l'indirizzo del blocco libero successivo + il numero di blocchi liberi dopo di esso
   \item Gli altri saranno effettivamente blocchi liberi
 \end{itemize}
+
+
+\subsection{TRIMing Unused Blocks}
+
+Nelle SSD ci sono i blocchi liberi ma ancora da cancellare
+
+\subsection{Efficiency and Performance of File Systems}
+
+\begin{itemize}
+  \item Come organizzi i file
+  \item Come organizzi le directory
+  \item Come organizzi lo spazio libero
+  \item Come gestisci i metadati (file control block)
+\end{itemize}
+
+In questo contesto possiamo pensare a strutture dati a lunghezza fissa
+o a lunghezza variabile.
+
+Per migliorare le prestazioni bisogna fare attenzione a:
+quanto è O(1) o O(n) ma quanto incide?
+
+\begin{itemize}
+  \item tenere dati e metadati vicini
+  \item Buffer cache - non leggo sempre il disco ma lo tengo in memoria per blocchi usati frequentemente. Riduce le richieste al disco.
+  \item Distinguere scritture sincrone e asincrone
+  \item Read-ahead - lettura seq. da file con lettura blocco 3 leggo anche il 4 se sono vicini. Migliore accesso sequenziale
+\end{itemize}
+
+\subsection{Page Cache }
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+    Il \textit{memory-mapped I/O} scrivi su file senza usare le read e write, il SO
+    per essere efficiente usa una \textbf{page cache}.
+
+    Quindi 2 accessi a file presente nell'immagine.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-05-22-10-19-09.png}  \end{minipage}
+\end{center}
+
+
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+
+    \paragraph{Unified Buffer Cache }
+    Per evitare di avere due copie e ottimizzazione a più livelli di cache si è passato ad avere un
+    \textbf{unified buffer cache}, meno overhead.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=1\linewidth]{content/OS_Internals/images/2026-05-22-10-24-56.png}
+  \end{minipage}
+\end{center}
+
+
+\subsection{Recovery}
+
+Avere ridondanza sui file, come i dischi, posso usare i backup.
+Ma tra un backup e l'altro si perde qualcosa. Si può usare quindi 
+il \textit{journal}.
+
+\subsection{Log Structured File Systems}
+Come agire se si rompe a metà strada? Mantine una copia della transazione
+e prima di effetturare l'operazione salva cosa si voleva fare questo
+si ottieme uno stato più consistente.
+
+Una volta che sono nel log si considerano fatte.
+La transazione dunque è come dire "voglio fare il bonifico" e poi in modo
+asincrono verrà eseguita.
+
 
 \section{File System in altri OS}
 

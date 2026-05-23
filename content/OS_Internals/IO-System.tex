@@ -583,7 +583,7 @@
 %   \end{minipage}
 % \end{center}
 \section{Panoramica}
-(non lo abbiamo visto, abbiamo fatto cap 11 e 13)
+(fatto alla velox, ma alcune domande all'esame ci possono essere)
 La gestione dell'I/O è un componente principale della progettazione e del funzionamento dei sistemi operativi.
 
 \begin{itemize}
@@ -650,7 +650,10 @@ Concetti comuni - i segnali dai dispositivi di I/O si interfacciano con il compu
       \item Tipicamente 1-4 byte, o buffer FIFO
     \end{itemize}
 
-    I dispositivi hanno indirizzi, utilizzati da: Istruzioni di I/O dirette o Memory-mapped I/O (MMIO), dati del dispositivo e registri di comando mappati nello
+    I dispositivi hanno indirizzi, utilizzati da: Istruzioni di I/O dirette o
+    Memory-mapped I/O (MMIO - il dispositivo si prende un pezzo di memoria, non c'è ram
+    ma c'è il dispositivi diverso da quello che verrà presentato nei prossimi capitoli),
+    dati del dispositivo e registri di comando mappati nello
     spazio degli indirizzi del processore, specialmente per ampi spazi di indirizzamento (grafica).
 
 
@@ -664,6 +667,9 @@ Concetti comuni - i segnali dai dispositivi di I/O si interfacciano con il compu
 \end{flushleft}
 
 \section{Polling}
+(Parte interessante)
+
+In memoria secondaria bisogna controllare se il disco è pronto, se è occupato, etc.
 
 Per ogni byte di I/O:
 
@@ -710,6 +716,8 @@ Linea Interrupt-request della CPU attivata dal dispositivo di I/O, controllata d
     Utilizzato per elaborazioni sensibili al tempo, frequenti, deve essere veloce.
 
 
+    Colori diversi sono attori diversi.
+
   \end{minipage}%
   \hfill
   \begin{minipage}{0.25\linewidth}
@@ -729,33 +737,44 @@ Per esempio, un desktop macOS a riposo ha generato 23.000 interrupt in 10 second
 
 \section{Direct Memory Access (DMA)}
 
-Utilizzato per evitare l'I/O programmato (un byte alla volta) per grandi spostamenti
-di dati. Richiede un controller DMA.
-
-Bypassa la CPU per trasferire i dati direttamente tra il dispositivo di I/O e la
-memoria.
 
 
-Il sistema operativo scrive il blocco di comando DMA in memoria:
 
-\begin{itemize}
-  \item Indirizzi di origine e destinazione
-  \item Modalità di lettura o scrittura
-  \item Conteggio dei byte
-  \item Scrive la posizione del blocco di comandi nel controller DMA
-  \item Bus mastering del controller DMA - prende il controllo del bus dalla CPU. Ruba cicli (Cycle stealing) alla CPU ma è comunque molto più efficiente
-  \item Al termine, lancia un interrupt per segnalare il completamento
-\end{itemize}
 
-Una versione consapevole degli indirizzi virtuali può essere ancora più efficiente -
-DVMA.
 
-\section{Processo in sei fasi per eseguire un trasferimento DMA}
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.25\linewidth]{content/OS_Internals/images/2026-03-31-17-09-14.png}
-\end{figure}
+    Utilizzato per evitare l'I/O programmato (un byte alla volta) per grandi spostamenti
+    di dati. Richiede un controller DMA.
+
+    Bypassa la CPU per trasferire i dati direttamente tra il dispositivo di I/O e la
+    memoria. Tipo thread parallelo.
+
+
+    Il sistema operativo scrive il blocco di comando DMA in memoria:
+
+    \begin{itemize}
+      \item Indirizzi di origine e destinazione
+      \item Modalità di lettura o scrittura
+      \item Conteggio dei byte
+      \item Scrive la posizione del blocco di comandi nel controller DMA
+      \item Bus mastering del controller DMA - prende il controllo del bus dalla CPU. Ruba cicli (Cycle stealing) alla CPU ma è comunque molto più efficiente
+      \item Al termine, lancia un interrupt per segnalare il completamento
+    \end{itemize}
+
+    Una versione consapevole degli indirizzi virtuali può essere ancora più efficiente -
+    DVMA.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-03-31-17-09-14.png}
+    \captionof{figure}{Processo in sei fasi per eseguire un trasferimento DMA}
+  \end{minipage}
+\end{flushleft}
+
 
 
 \section{Interfaccia di I/O per le applicazioni}
@@ -898,6 +917,7 @@ a risoluzione più alta. Timer a intervallo programmabile utilizzato per tempist
 \end{figure}
 
 \section{Vectored I/O}
+(saltato)
 
 Il Vectored I/O consente a una singola system call di eseguire più operazioni di I/O.
 
@@ -951,220 +971,231 @@ Questo metodo scatter-gather è migliore di molteplici chiamate I/O individuali
   \end{minipage}
 \end{center}
 
-\section{Sottosistema di I/O del Kernel (Cont.)}
+nota: gli osbook  tutti e os161 intor memory overview sincro
 
-\paragraph{Caching} - dispositivo più veloce che mantiene una copia dei dati
-\begin{itemize}
-  \item Sempre solo una copia
-  \item Fondamentale per le prestazioni
-  \item A volte combinato con il buffering
-\end{itemize}
+file, user process e IO fanno riferimento ai lab ma non li chiede
 
-\paragraph{Spooling} - trattiene l'output per un dispositivo
-\begin{itemize}
-  \item Se il dispositivo può servire solo una richiesta alla volta
-  \item es. Stampa
-\end{itemize}
-
-\paragraph{Prenotazione del dispositivo (Device reservation)} - fornisce accesso esclusivo a un dispositivo
-\begin{itemize}
-  \item System call per l'allocazione e la de-allocazione
-  \item Attenzione ai deadlock
-\end{itemize}
-
-\section{Gestione degli errori (Error Handling)}
-
-Il SO può riprendersi da errori di lettura del disco, dispositivo non disponibile, fallimenti di scrittura transitori
-\begin{itemize}
-  \item Riprovare una lettura o una scrittura, per esempio
-  \item Alcuni sistemi sono più avanzati - Solaris FMA, AIX. Tracciano le frequenze degli errori, smettono di usare il dispositivo se aumenta la frequenza di errori riprovabili (retry-able errors)
-\end{itemize}
-
-La maggior parte restituisce un numero o codice di errore quando una richiesta di I/O fallisce.
-I log di sistema degli errori conservano i report dei problemi.
-
-\section{Protezione dell'I/O}
-
-Un processo utente potrebbe tentare accidentalmente o intenzionalmente di interrompere le normali operazioni tramite istruzioni di I/O illegali
-\begin{itemize}
-  \item Tutte le istruzioni di I/O sono definite come privilegiate
-  \item L'I/O deve essere eseguito tramite system call. Anche le locazioni di memoria mappate in memoria e le porte di I/O devono essere protette
-\end{itemize}
-
-\section{Uso di una System Call per eseguire l'I/O}
-
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.25\linewidth]{./content/OS_Internals/images/2026-03-31-17-38-05.png}
-\end{figure}
+gli es su os161 comprendono anche lab5 ma non è programma (no file system).
 
 
-\section{Strutture Dati del Kernel}
+OS161 -> esercizio da esami hai fatto il lab? come si risolve il problema?
 
-Il Kernel mantiene informazioni di stato per i componenti di I/O, comprese tabelle dei file aperti, connessioni di rete, stato dei dispositivi a caratteri.
+% \section{Sottosistema di I/O del Kernel (Cont.)}
 
-Molteplici strutture dati complesse per tracciare buffer, allocazione di memoria, blocchi "sporchi" (dirty blocks).
+% ! NON  l'ha fatto
 
-Alcuni usano metodi orientati agli oggetti e passaggio di messaggi (message passing) per implementare l'I/O.
+% \paragraph{Caching} - dispositivo più veloce che mantiene una copia dei dati
+% \begin{itemize}
+%   \item Sempre solo una copia
+%   \item Fondamentale per le prestazioni
+%   \item A volte combinato con il buffering
+% \end{itemize}
 
+% \paragraph{Spooling} - trattiene l'output per un dispositivo
+% \begin{itemize}
+%   \item Se il dispositivo può servire solo una richiesta alla volta
+%   \item es. Stampa
+% \end{itemize}
 
-Windows usa il message passing:
-\begin{itemize}
-  \item Il messaggio con le informazioni di I/O passa dalla modalità utente al kernel
-  \item Il messaggio viene modificato mentre scorre fino al device driver e torna al processo
-  \item Pro/contro?
-\end{itemize}
+% \paragraph{Prenotazione del dispositivo (Device reservation)} - fornisce accesso esclusivo a un dispositivo
+% \begin{itemize}
+%   \item System call per l'allocazione e la de-allocazione
+%   \item Attenzione ai deadlock
+% \end{itemize}
 
+% \section{Gestione degli errori (Error Handling)}
 
-\newpage
-\section{Struttura del Kernel di I/O in UNIX}
+% Il SO può riprendersi da errori di lettura del disco, dispositivo non disponibile, fallimenti di scrittura transitori
+% \begin{itemize}
+%   \item Riprovare una lettura o una scrittura, per esempio
+%   \item Alcuni sistemi sono più avanzati - Solaris FMA, AIX. Tracciano le frequenze degli errori, smettono di usare il dispositivo se aumenta la frequenza di errori riprovabili (retry-able errors)
+% \end{itemize}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.35\linewidth]{./content/OS_Internals/images/2026-03-31-17-38-25.png}
-\end{figure}
+% La maggior parte restituisce un numero o codice di errore quando una richiesta di I/O fallisce.
+% I log di sistema degli errori conservano i report dei problemi.
 
-\section{Gestione dell'energia (Power Management)}
+% \section{Protezione dell'I/O}
 
-Non è strettamente dominio dell'I/O, ma gran parte è correlato all'I/O.
-I computer e i dispositivi usano elettricità, generano calore, spesso richiedono raffreddamento.
-I sistemi operativi possono aiutare a gestirne e migliorarne l'uso.
+% Un processo utente potrebbe tentare accidentalmente o intenzionalmente di interrompere le normali operazioni tramite istruzioni di I/O illegali
+% \begin{itemize}
+%   \item Tutte le istruzioni di I/O sono definite come privilegiate
+%   \item L'I/O deve essere eseguito tramite system call. Anche le locazioni di memoria mappate in memoria e le porte di I/O devono essere protette
+% \end{itemize}
 
-Gli ambienti di Cloud computing spostano macchine virtuali tra i server. Possono finire per evacuare interi sistemi e spegnerli.
+% \section{Uso di una System Call per eseguire l'I/O}
 
-Il mobile computing ha il power management come aspetto di primaria importanza nel SO.
-
-
-Per esempio, Android implementa a livello di componente:
-
-\begin{itemize}
-  \item level power management (gestione dell'energia a livello di componente):
-        \begin{itemize}
-          \item[] Comprende la relazione tra i componenti
-          \item[] Costruisce l'albero dei dispositivi che rappresenta la topologia fisica dei dispositivi
-          \item[] System bus -> Sottosistema I/O -> \{flash, USB storage\}
-          \item[] Il device driver tiene traccia dello stato del dispositivo, se è in uso
-          \item[] Componente non utilizzato - lo spegne
-          \item[] Tutti i dispositivi in un ramo dell'albero non sono utilizzati - spegne il ramo
-        \end{itemize}
-  \item Wake locks - come altri lock, ma prevengono la sospensione (sleep) del dispositivo quando il lock è mantenuto
-  \item Power collapse - mette un dispositivo in un sonno molto profondo (very deep sleep)
-        \begin{itemize}
-          \item[] Uso di energia marginale
-          \item[] Sveglio solo quel tanto che basta per rispondere agli stimoli esterni (pressione di un pulsante, chiamata in arrivo)
-        \end{itemize}
-\end{itemize}
+% \begin{figure}[h!]
+%   \centering
+%   \includegraphics[width=0.25\linewidth]{./content/OS_Internals/images/2026-03-31-17-38-05.png}
+% \end{figure}
 
 
-I sistemi moderni utilizzano un firmware ACPI (Advanced Configuration and Power Interface) che fornisce codice che viene eseguito come routine chiamate dal kernel per il rilevamento del dispositivo, la gestione, gli errori e la gestione dell'alimentazione.
+% \section{Strutture Dati del Kernel}
 
-\section{Riepilogo del Sottosistema di I/O del Kernel}
+% Il Kernel mantiene informazioni di stato per i componenti di I/O, comprese tabelle dei file aperti, connessioni di rete, stato dei dispositivi a caratteri.
 
-In sintesi, il sottosistema I/O coordina una vasta gamma di servizi disponibili per le applicazioni e per altre parti del kernel
-\begin{itemize}
-  \item Gestione dello spazio dei nomi per file e dispositivi
-  \item Controllo degli accessi a file e dispositivi
-  \item Controllo delle operazioni (per esempio, un modem non può eseguire una seek())
-  \item Allocazione dello spazio nel file-system
-  \item Allocazione dei dispositivi
-  \item Buffering, caching e spooling
-  \item Scheduling dell'I/O
-  \item Monitoraggio dello stato dei dispositivi, gestione degli errori e ripristino dai guasti
-  \item Configurazione e inizializzazione dei device-driver
-  \item Gestione energetica (Power management) dei dispositivi di I/O
-\end{itemize}
+% Molteplici strutture dati complesse per tracciare buffer, allocazione di memoria, blocchi "sporchi" (dirty blocks).
 
-I livelli superiori del sottosistema di I/O accedono ai dispositivi tramite l'interfaccia uniforme fornita dai device driver.
-
-\section{Trasformazione delle richieste di I/O in operazioni hardware}
-
-Consideriamo la lettura di un file dal disco per un processo
-\begin{itemize}
-  \item Determinare il dispositivo che contiene il file
-  \item Tradurre il nome nella rappresentazione del dispositivo
-  \item Leggere fisicamente i dati dal disco nel buffer
-  \item Rendere i dati disponibili al processo richiedente
-  \item Restituire il controllo al processo
-\end{itemize}
-
-\section{Ciclo di vita di una richiesta di I/O}
-
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.25\linewidth]{./content/OS_Internals/images/2026-03-31-17-38-53.png}
-\end{figure}
+% Alcuni usano metodi orientati agli oggetti e passaggio di messaggi (message passing) per implementare l'I/O.
 
 
-\section{STREAMS}
+% Windows usa il message passing:
+% \begin{itemize}
+%   \item Il messaggio con le informazioni di I/O passa dalla modalità utente al kernel
+%   \item Il messaggio viene modificato mentre scorre fino al device driver e torna al processo
+%   \item Pro/contro?
+% \end{itemize}
 
 
-\begin{flushleft}
-  \begin{minipage}{0.65\linewidth}
-    \raggedright
-    STREAM - un canale di comunicazione full-duplex tra un processo a livello utente e un dispositivo in Unix System V e successivi
+% \newpage
+% \section{Struttura del Kernel di I/O in UNIX}
 
-    Uno STREAM è composto da
-    \begin{itemize}
-      \item STREAM head che si interfaccia con il processo utente
-      \item driver end che si interfaccia con il dispositivo
-      \item zero o più moduli STREAM tra di loro
-    \end{itemize}
+% \begin{figure}[h!]
+%   \centering
+%   \includegraphics[width=0.35\linewidth]{./content/OS_Internals/images/2026-03-31-17-38-25.png}
+% \end{figure}
 
-    Ogni modulo contiene una coda di lettura e una coda di scrittura.
-    Il passaggio di messaggi (Message passing) viene utilizzato per comunicare tra le code.
-    Opzione di controllo di flusso (Flow control) per indicare disponibile o occupato.
-    Asincrono internamente, sincrono dove il processo utente comunica con lo stream head.
+% \section{Gestione dell'energia (Power Management)}
 
-  \end{minipage}%
-  \hfill
-  \begin{minipage}{0.3\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{./content/OS_Internals/images/2026-03-31-17-39-39.png}
-    \captionof{figure}{La struttura degli STREAMS}
-  \end{minipage}
-\end{flushleft}
+% Non è strettamente dominio dell'I/O, ma gran parte è correlato all'I/O.
+% I computer e i dispositivi usano elettricità, generano calore, spesso richiedono raffreddamento.
+% I sistemi operativi possono aiutare a gestirne e migliorarne l'uso.
+
+% Gli ambienti di Cloud computing spostano macchine virtuali tra i server. Possono finire per evacuare interi sistemi e spegnerli.
+
+% Il mobile computing ha il power management come aspetto di primaria importanza nel SO.
 
 
-\section{Prestazioni (Performance)}
+% Per esempio, Android implementa a livello di componente:
 
-L'I/O è un fattore determinante per le prestazioni del sistema
-\begin{itemize}
-  \item Richiede la CPU per eseguire i device driver, il codice di I/O del kernel
-  \item Context switch causati dagli interrupt
-  \item Copia dei dati (Data copying)
-  \item Il traffico di rete è particolarmente gravoso
-\end{itemize}
+% \begin{itemize}
+%   \item level power management (gestione dell'energia a livello di componente):
+%         \begin{itemize}
+%           \item[] Comprende la relazione tra i componenti
+%           \item[] Costruisce l'albero dei dispositivi che rappresenta la topologia fisica dei dispositivi
+%           \item[] System bus -> Sottosistema I/O -> \{flash, USB storage\}
+%           \item[] Il device driver tiene traccia dello stato del dispositivo, se è in uso
+%           \item[] Componente non utilizzato - lo spegne
+%           \item[] Tutti i dispositivi in un ramo dell'albero non sono utilizzati - spegne il ramo
+%         \end{itemize}
+%   \item Wake locks - come altri lock, ma prevengono la sospensione (sleep) del dispositivo quando il lock è mantenuto
+%   \item Power collapse - mette un dispositivo in un sonno molto profondo (very deep sleep)
+%         \begin{itemize}
+%           \item[] Uso di energia marginale
+%           \item[] Sveglio solo quel tanto che basta per rispondere agli stimoli esterni (pressione di un pulsante, chiamata in arrivo)
+%         \end{itemize}
+% \end{itemize}
 
-\section{Comunicazioni tra computer}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.5\linewidth]{./content/OS_Internals/images/2026-03-31-17-40-43.png}
-\end{figure}
+% I sistemi moderni utilizzano un firmware ACPI (Advanced Configuration and Power Interface) che fornisce codice che viene eseguito come routine chiamate dal kernel per il rilevamento del dispositivo, la gestione, gli errori e la gestione dell'alimentazione.
+
+% \section{Riepilogo del Sottosistema di I/O del Kernel}
+
+% In sintesi, il sottosistema I/O coordina una vasta gamma di servizi disponibili per le applicazioni e per altre parti del kernel
+% \begin{itemize}
+%   \item Gestione dello spazio dei nomi per file e dispositivi
+%   \item Controllo degli accessi a file e dispositivi
+%   \item Controllo delle operazioni (per esempio, un modem non può eseguire una seek())
+%   \item Allocazione dello spazio nel file-system
+%   \item Allocazione dei dispositivi
+%   \item Buffering, caching e spooling
+%   \item Scheduling dell'I/O
+%   \item Monitoraggio dello stato dei dispositivi, gestione degli errori e ripristino dai guasti
+%   \item Configurazione e inizializzazione dei device-driver
+%   \item Gestione energetica (Power management) dei dispositivi di I/O
+% \end{itemize}
+
+% I livelli superiori del sottosistema di I/O accedono ai dispositivi tramite l'interfaccia uniforme fornita dai device driver.
+
+% \section{Trasformazione delle richieste di I/O in operazioni hardware}
+
+% Consideriamo la lettura di un file dal disco per un processo
+% \begin{itemize}
+%   \item Determinare il dispositivo che contiene il file
+%   \item Tradurre il nome nella rappresentazione del dispositivo
+%   \item Leggere fisicamente i dati dal disco nel buffer
+%   \item Rendere i dati disponibili al processo richiedente
+%   \item Restituire il controllo al processo
+% \end{itemize}
+
+% \section{Ciclo di vita di una richiesta di I/O}
+
+% \begin{figure}[h!]
+%   \centering
+%   \includegraphics[width=0.25\linewidth]{./content/OS_Internals/images/2026-03-31-17-38-53.png}
+% \end{figure}
 
 
-\section{Migliorare le prestazioni}
+% \section{STREAMS}
 
-\begin{itemize}
-  \item Ridurre il numero di context switch
-  \item Ridurre la copia dei dati
-  \item Ridurre gli interrupt utilizzando trasferimenti di grandi dimensioni, controller intelligenti, polling
-  \item Utilizzare il DMA
-  \item Utilizzare dispositivi hardware più intelligenti
-  \item Bilanciare le prestazioni di CPU, memoria, bus e I/O per ottenere il massimo throughput
-  \item Spostare processi in user-mode / demoni in kernel thread
-\end{itemize}
 
-\begin{center}
-  \begin{minipage}[t]{0.45\linewidth}
-    \section{Progressione delle funzionalità del dispositivo}
-    \centering
-    \includegraphics[width=0.8\linewidth]{./content/OS_Internals/images/2026-03-31-17-41-05.png}
-  \end{minipage}%
-  \hfill
-  \begin{minipage}[t]{0.45\linewidth}
-    \section{Prestazioni I/O dello Storage e Latenza Rete}
-    \centering
-    \includegraphics[width=0.8\linewidth]{./content/OS_Internals/images/2026-03-31-17-41-46.png}
-  \end{minipage}
-\end{center}
+% \begin{flushleft}
+%   \begin{minipage}{0.65\linewidth}
+%     \raggedright
+%     STREAM - un canale di comunicazione full-duplex tra un processo a livello utente e un dispositivo in Unix System V e successivi
+
+%     Uno STREAM è composto da
+%     \begin{itemize}
+%       \item STREAM head che si interfaccia con il processo utente
+%       \item driver end che si interfaccia con il dispositivo
+%       \item zero o più moduli STREAM tra di loro
+%     \end{itemize}
+
+%     Ogni modulo contiene una coda di lettura e una coda di scrittura.
+%     Il passaggio di messaggi (Message passing) viene utilizzato per comunicare tra le code.
+%     Opzione di controllo di flusso (Flow control) per indicare disponibile o occupato.
+%     Asincrono internamente, sincrono dove il processo utente comunica con lo stream head.
+
+%   \end{minipage}%
+%   \hfill
+%   \begin{minipage}{0.3\linewidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{./content/OS_Internals/images/2026-03-31-17-39-39.png}
+%     \captionof{figure}{La struttura degli STREAMS}
+%   \end{minipage}
+% \end{flushleft}
+
+
+% \section{Prestazioni (Performance)}
+
+% L'I/O è un fattore determinante per le prestazioni del sistema
+% \begin{itemize}
+%   \item Richiede la CPU per eseguire i device driver, il codice di I/O del kernel
+%   \item Context switch causati dagli interrupt
+%   \item Copia dei dati (Data copying)
+%   \item Il traffico di rete è particolarmente gravoso
+% \end{itemize}
+
+% \section{Comunicazioni tra computer}
+
+% \begin{figure}[h!]
+%   \centering
+%   \includegraphics[width=0.5\linewidth]{./content/OS_Internals/images/2026-03-31-17-40-43.png}
+% \end{figure}
+
+
+% \section{Migliorare le prestazioni}
+
+% \begin{itemize}
+%   \item Ridurre il numero di context switch
+%   \item Ridurre la copia dei dati
+%   \item Ridurre gli interrupt utilizzando trasferimenti di grandi dimensioni, controller intelligenti, polling
+%   \item Utilizzare il DMA
+%   \item Utilizzare dispositivi hardware più intelligenti
+%   \item Bilanciare le prestazioni di CPU, memoria, bus e I/O per ottenere il massimo throughput
+%   \item Spostare processi in user-mode / demoni in kernel thread
+% \end{itemize}
+
+% \begin{center}
+%   \begin{minipage}[t]{0.45\linewidth}
+%     \section{Progressione delle funzionalità del dispositivo}
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{./content/OS_Internals/images/2026-03-31-17-41-05.png}
+%   \end{minipage}%
+%   \hfill
+%   \begin{minipage}[t]{0.45\linewidth}
+%     \section{Prestazioni I/O dello Storage e Latenza Rete}
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{./content/OS_Internals/images/2026-03-31-17-41-46.png}
+%   \end{minipage}
+% \end{center}

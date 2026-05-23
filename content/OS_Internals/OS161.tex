@@ -20,7 +20,7 @@
 
 
 \begin{center}
-  \begin{minipage}{0.5\linewidth}
+  \begin{minipage}{0.65\linewidth}
     Un \textbf{Thread} rappresenta il control state di un processo (programma in eseguzione).
     Questo context include:
     \begin{itemize}
@@ -34,7 +34,7 @@
     record di attivazione delle funzioni.
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.\linewidth}
+  \begin{minipage}{0.3\linewidth}
     \centering
     \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-05-05-13-34-37.png}
   \end{minipage}
@@ -69,6 +69,54 @@
     \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-05-05-13-41-57.png}
   \end{minipage}
 \end{center}
+
+\section{Lab 4}
+
+Vogliamo evitare che un thread sia in uno stato zombiee, ovvero che nessuno
+ha collezionato il risultato del thread e i suoi metadati.
+Si vuole implementare waitpid, attesa di fine processo.
+Inizialmente crealo lato kernel dato che non serve il PID, 
+perché il kernel ha accesso alla strutture e metadati.
+
+proc.h e in struct proc aggiungere p\_id e p\_status e un semaforo (o cvar con boolean, cv e un lock).
+
+
+\begin{tcolorbox}
+  \textbf{Nota:} la soluzione propsta per cvar non include l'uso del bool. Quindi in proc.h è aggiunto bool p\_terminated e poi devi implementarlo.
+  
+\end{tcolorbox}
+
+
+proc.c proc\_create criamo il semaforo o la cvar e poi le distruggo 
+quando uso la proc\_destroy
+
+successivamente quando abbiamo creato ciò creiamo la proc\_wait
+
+un attesa se è un semaforo o un attesa e un while  e poi 
+prendo i dati di ritorno.
+
+Questa era la prima parte del kernel.
+
+\paragraph{Ora modifichiamo la sysexit}
+Quella precedente nel lab 2 distruggeva la struct proc (che ora è nella proc
+wait) mentre ora vogliamo collezionare i dati. 
+proc\_syscall.c
+
+poi deve fare un thread\_exit, ma attenzione che 
+se il padre viene svegliato tropo presto potrebbe essere
+che voglia distriigere un figlio ancora in esexuioen.
+Per risolvere al posto di scriverla della proc\_destry la faccio nella
+proc\_syscall.c (V->p\_sem) e dobbiamo intrdurrre in thread.c in thread\_exit
+deve essere chiamata anche quando non cis ono processi in esecuzione.
+
+
+if(cur->t\_prc != null) {
+  proc\_destroy(cur->t\_prc);
+  cur->t\_prc = null;
+}else{
+
+}
+
 
 
 
