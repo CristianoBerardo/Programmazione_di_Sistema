@@ -1018,22 +1018,9 @@ conforme.
     conterrebbe un errore.
 
 
-    Se il metodo \verb|lock()| ha successo, la risposta contiene un \verb|MutexGuard<T>|,
-    uno smart pointer.
-    Tale oggetto implementa il tratto \verb|Deref<T>| e si comporta come uno
-    smart-pointer. Dereferenziandolo, si ottiene un riferimento mutabile al
-    dato T. Quando il MutexGuard<T> esce dallo scope, il mutex nativo viene
-    rilasciato, permettendo ad altri thread di chiederne il possesso.
 
 
-    Un valore di tipo \verb|MutexGuard<T>| deve restare in vita solo per il tempo
-    strettamente necessario. Evitando I/O e computazioni lunghe mentre si
-    possiede il lock.
 
-
-    \begin{tcolorbox}
-      \textbf{Note:} Se un thread panicasse, \textbf{poisoned} verrebbe settato.
-    \end{tcolorbox}
 
 
   \end{minipage}%
@@ -1043,6 +1030,21 @@ conforme.
     \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-28-12-45-09.png}
   \end{minipage}
 \end{flushleft}
+Se il metodo \verb|lock()| ha successo, la risposta contiene un \verb|MutexGuard<T>|,
+uno smart pointer.
+Tale oggetto implementa il tratto \verb|Deref<T>| e si comporta come uno
+smart-pointer. Dereferenziandolo, si ottiene un riferimento mutabile al
+dato T. Quando il MutexGuard<T> esce dallo scope, il mutex nativo viene
+rilasciato, permettendo ad altri thread di chiederne il possesso.
+
+
+Un valore di tipo \verb|MutexGuard<T>| deve restare in vita solo per il tempo
+strettamente necessario. Evitando I/O e computazioni lunghe mentre si
+possiede il lock.
+
+\begin{tcolorbox}
+  \textbf{Note:} Se un thread panicasse, \textbf{poisoned} verrebbe settato.
+\end{tcolorbox}
 
 
 \begin{minted}[breaklines]{rust}
@@ -1124,13 +1126,7 @@ fn main(){
     \verb|Arc<T>| permette di condividere il possesso di un dato, allocandolo nello heap e
     mantenendo un conteggio dei riferimenti esistenti di tipo \textit{thread-safe}.
 
-    È possibile duplicare un oggetto di questo tipo attraverso il metodo \verb|clone()|.
-    Tale metodo si limita a duplicare il puntatore al blocco sullo heap,
-    avendo cura di incrementare, in modo atomico, il contatore dei riferimenti
-    associati al dato.
-    Il dato clonato viene ceduto ad un thread specificando
-    la parola-chiave move di fronte alla funzione lambda che ne descrive la
-    computazione
+
 
   \end{minipage}%
   \hfill
@@ -1139,6 +1135,14 @@ fn main(){
     \includegraphics[width=\linewidth]{content/API_Programming/images/2026-04-28-12-55-39.png}
   \end{minipage}
 \end{center}
+
+È possibile duplicare un oggetto di questo tipo attraverso il metodo \verb|clone()|.
+Tale metodo si limita a duplicare il puntatore al blocco sullo heap,
+avendo cura di incrementare, in modo atomico, il contatore dei riferimenti
+associati al dato.
+Il dato clonato viene ceduto ad un thread specificando
+la parola-chiave move di fronte alla funzione lambda che ne descrive la
+computazione
 
 \paragraph{Condivisione dello stato}
 

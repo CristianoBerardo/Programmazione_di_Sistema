@@ -188,7 +188,7 @@ ma hai tanto da leggere e scrivere.
 \begin{center}
 
 
-  \begin{minipage}{0.75\textwidth}
+  \begin{minipage}{0.55\textwidth}
     \begin{minipage}[h!]{0.47\textwidth}
       \centering
       \includegraphics[width=1\linewidth]{content/OS_Internals/img/dfnsb.png}
@@ -297,12 +297,7 @@ ma hai tanto da leggere e scrivere.
 \section{Metodo di Allocazione}
 
 Un metodo di allocazione definisce come i blocchi del disco vengono assegnati ai file:
-
-\begin{itemize}
-  \item Contigua
-  \item Collegata
-  \item Tabella di Allocazione dei File (FAT)
-\end{itemize}
+Contigua, Collegata, Tabella di Allocazione dei File (FAT)
 
 
 \begin{flushleft}
@@ -399,13 +394,12 @@ Se vogliamo capire dove sta il blocco 1500 dividiamo per (512-1) dato il puntato
 
   L'inizio del volume ha una tabella, indicizzata per numero di blocco. Simile a una lista collegata, ma più veloce su disco e memorizzabile in cache. L'allocazione di nuovi blocchi è semplice.
 
-
+  Struttura che contiene solo il puntatore
 \end{minipage}
 \hfill\
 \begin{minipage}{0.2\textwidth}
   \begin{center}
     \includegraphics[width=\linewidth]{content/OS_Internals/img/nddgndg.png}
-    \captionof{figure}{Struttura che contiene solo il puntatore}
   \end{center}
 \end{minipage}
 
@@ -573,7 +567,7 @@ quanto è O(1) o O(n) ma quanto incide?
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/OS_Internals/images/2026-05-22-10-19-09.png}  \end{minipage}
+    \includegraphics[width=0.4\linewidth]{content/OS_Internals/images/2026-05-22-10-19-09.png}  \end{minipage}
 \end{center}
 
 
@@ -588,7 +582,7 @@ quanto è O(1) o O(n) ma quanto incide?
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=1\linewidth]{content/OS_Internals/images/2026-05-22-10-24-56.png}
+    \includegraphics[width=0.4\linewidth]{content/OS_Internals/images/2026-05-22-10-24-56.png}
   \end{minipage}
 \end{center}
 
@@ -596,7 +590,7 @@ quanto è O(1) o O(n) ma quanto incide?
 \subsection{Recovery}
 
 Avere ridondanza sui file, come i dischi, posso usare i backup.
-Ma tra un backup e l'altro si perde qualcosa. Si può usare quindi 
+Ma tra un backup e l'altro si perde qualcosa. Si può usare quindi
 il \textit{journal}.
 
 \subsection{Log Structured File Systems}
@@ -623,6 +617,7 @@ A partire da Windows NT 3.1, è il file system predefinito della famiglia Window
   \includegraphics[width=0.2\linewidth]{content/OS_Internals/img/dnfga.png}
 \end{figure}
 
+\newpage
 \textbf{FAT}, nota anche come File Allocation Table, è un file system sviluppato per personal computer.
 
 
