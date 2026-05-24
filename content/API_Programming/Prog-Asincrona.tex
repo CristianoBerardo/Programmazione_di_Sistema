@@ -27,22 +27,30 @@ sottosistema in questione fornisca le informazioni attese.
 Normalmente, il sistema operativo rileva la situazione e sposta il thread corrente nello stato
 "\textit{NotRunnable}", sospendendone l'esecuzione fino a che non si verifica la condizione attesa.
 
-Se il programma deve svolgere altri compiti, oltre a quello che ha generato l'attesa,
-si creano tre possibilità:
 
-\begin{itemize}
-  \item Gli altri compiti saranno eseguiti successivamente, dal thread corrente
-  \item Si creano più thread secondari per eseguirli, accollandosi la complessità legata alla loro
-        sincronizzazione
-  \item Si organizza il codice in modo tale da separare la richiesta di eseguire l'operazione dalle operazioni che
-        dovranno essere fatte quando arriverà la risposta, così da non bloccare l'esecuzione del thread
-        corrente, ammesso che vi sia altro da fare
-\end{itemize}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.3\linewidth]{content/API_Programming/images/2026-05-22-20-49-01.png}
-\end{figure}
+\begin{flushleft}
+  \begin{minipage}{0.65\linewidth}
+    \raggedright
+    Se il programma deve svolgere altri compiti, oltre a quello che ha generato l'attesa,
+    si creano tre possibilità:
+
+    \begin{itemize}
+      \item Gli altri compiti saranno eseguiti successivamente, dal thread corrente
+      \item Si creano più thread secondari per eseguirli, accollandosi la complessità legata alla loro
+            sincronizzazione
+      \item Si organizza il codice in modo tale da separare la richiesta di eseguire l'operazione dalle operazioni che
+            dovranno essere fatte quando arriverà la risposta, così da non bloccare l'esecuzione del thread
+            corrente, ammesso che vi sia altro da fare
+    \end{itemize}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-05-22-20-49-01.png}
+  \end{minipage}
+\end{flushleft}
+
 
 \section{Esecuzione asincrona}
 
@@ -83,14 +91,23 @@ Linguaggi diversi offrono soluzioni alternative.
 \end{flushleft}
 
 \section{Continuazioni e callback}
-Un tipico modo per implementare operazioni asincrone è basarsi su API ad eventi.
-Ovvero funzioni che permettono di richiedere ad uno strato soggiacente (come il
-sistema operativo o una piattaforma di esecuzione) l'operazione che si intende
-eseguire, passando una callback che dovrà essere invocata nel momento in cui lo
-strato soggiacente avrà terminato la sua parte di esecuzione.
 
 
-\begin{minted}[breaklines]{rust}
+
+
+\begin{center}
+  \begin{minipage}{0.57\linewidth}
+    Un tipico modo per implementare operazioni asincrone è basarsi su API ad eventi.
+    Ovvero funzioni che permettono di richiedere ad uno strato soggiacente (come il
+    sistema operativo o una piattaforma di esecuzione) l'operazione che si intende
+    eseguire, passando una callback che dovrà essere invocata nel momento in cui lo
+    strato soggiacente avrà terminato la sua parte di esecuzione.
+
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.4\linewidth}
+    \centering
+    \begin{minted}[breaklines]{rust}
 val f1: AsyncRead = …
 val f2: AsyncRead = …
 read_async(f1, vec![], |buffer: &[u8]|{
@@ -100,6 +117,9 @@ read_async(f2, vec![], |buffer: &[u8]|{
   // process buffer from file2
 });
 \end{minted}
+  \end{minipage}
+\end{center}
+
 
 \section{The callback hell}
 
@@ -187,16 +207,24 @@ read_async(h1, &mut buffer)
   \end{minipage}
 \end{center}
 
-Questa forma aiuta a vedere come le operazioni che si intendono eseguire possano
-essere viste come una macchina a stati finiti, che evolve "a strappi".
-Quando raggiunge uno stato intermedio ritorna e, per continuare, sarà necessario riprenderne
-l'esecuzione passando come parametro l'esito dell'operazione asincrona che ha causato la
-sospensione.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.3\linewidth]{content/API_Programming/images/2026-05-22-21-20-19.png}
-\end{figure}
+
+\begin{center}
+  \begin{minipage}{0.65\linewidth}
+
+    Questa forma aiuta a vedere come le operazioni che si intendono eseguire possano
+    essere viste come una macchina a stati finiti, che evolve "a strappi".
+    Quando raggiunge uno stato intermedio ritorna e, per continuare, sarà necessario riprenderne
+    l'esecuzione passando come parametro l'esito dell'operazione asincrona che ha causato la
+    sospensione.
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-05-22-21-20-19.png}
+  \end{minipage}
+\end{center}
+
 
 La macchina a stati finiti può essere implementata da una chiusura.
 Essa racchiude il proprio \textbf{stato} e tutte le \textbf{variabili locali} di cui l'esecuzione ha bisogno.
@@ -312,7 +340,7 @@ Per ciascuno stato individuato, il compilatore sintetizza una struct in cui
 memorizzare le variabili locali necessarie per consentire l'esecuzione.
 
 \begin{center}
-  \begin{minipage}{0.45\linewidth}
+  \begin{minipage}{0.47\linewidth}
     \begin{minted}[breaklines]{rust}
 struct S0 {
   h1: FileHandle,
@@ -325,7 +353,7 @@ struct S2 {
 \end{minted}
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.45\linewidth}
+  \begin{minipage}{0.47\linewidth}
     \begin{minted}[breaklines]{rust}
 struct S1 {
   h2: FileHandle,
@@ -342,7 +370,7 @@ struct S3 {}
 Inoltre genera una enum che racchiude i possibili stati e implementa il tratto Future
 
 \begin{center}
-  \begin{minipage}{0.45\linewidth}
+  \begin{minipage}{0.37\linewidth}
     \begin{minted}[breaklines]{rust}
 enum CopySM {
   s0(S0),
@@ -353,7 +381,7 @@ enum CopySM {
 \end{minted}
   \end{minipage}%
   \hfill
-  \begin{minipage}{0.45\linewidth}
+  \begin{minipage}{0.6\linewidth}
     \begin{minted}[breaklines]{rust}
 impl Future for CopySM {
   type Output = std::io::Result<()>
@@ -481,7 +509,7 @@ devono implementare il tratto \textbf{Send}, mentre i riferimenti devono impleme
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{content/API_Programming/images/2026-05-22-22-14-20.png}
+    \includegraphics[width=0.6\linewidth]{content/API_Programming/images/2026-05-22-22-14-20.png}
   \end{minipage}
 \end{center}
 
@@ -642,13 +670,6 @@ Elapsed
     che venga eseguito in un thread apposito.
     Così da evitare di introdurre latenza nell'elaborazione degli altri task.
     Si utilizza la funzione \mintinline{rust}|tokio::task::spawn_blocking(f: FnOnce()->R)|.
-
-    Occorre evitare di lanciare troppi task di questo tipo. Durante la loro
-    esistenza, infatti, tenderebbero a richiedere l'uso di CPU introducendo contesa
-    con i thread deputati a elaborare le code dei messaggi, aumentando la latenza
-    complessiva del sistema. Può essere opportuno condizionarne l'esecuzione alla
-    disponibilità di risorse globali (usando, ad esempio, un semaforo) o usare
-    esecutori ad hoc, come quelli offerti dalla libreria \textbf{Rayon}.
   \end{minipage}%
   \hfill
   \begin{minipage}{0.3\linewidth}
@@ -657,6 +678,12 @@ Elapsed
   \end{minipage}
 \end{center}
 
+Occorre evitare di lanciare troppi task di questo tipo. Durante la loro
+esistenza, infatti, tenderebbero a richiedere l'uso di CPU introducendo contesa
+con i thread deputati a elaborare le code dei messaggi, aumentando la latenza
+complessiva del sistema. Può essere opportuno condizionarne l'esecuzione alla
+disponibilità di risorse globali (usando, ad esempio, un semaforo) o usare
+esecutori ad hoc, come quelli offerti dalla libreria \textbf{Rayon}.
 \section{Condividere dati tra task}
 
 Se due task hanno bisogno di condividere una struttura dati, questa deve essere
