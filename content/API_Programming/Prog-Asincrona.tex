@@ -883,6 +883,7 @@ let (user, config) = tokio::try_join!(fetch_user(42), fetch_config())?;
 primo che termina. I rami non selezionati vengono \textbf{cancellati} ( viene invocato \textbf{Drop} sul loro \textbf{Future})
 
 La sintassi di ogni ramo simile a quella di \textbf{match}:
+
 \verb|<pattern> = <espressione async> (, if <guard>)? => <gestore>|
 
 La guardia opzionale disattiva un ramo quando una precondizione è falsa
@@ -987,8 +988,6 @@ Quale costrutto, in quale situazione
   \centering
   \begin{tabularx}{\textwidth}{X X}
     \toprule
-    \textbf{}                                             & \textbf{}                                                             \\
-    \midrule
     Il lavoro è CPU intensive ($> \sim 100\mu$s) ?        & $\rightarrow$ Thread o Rayon                                          \\
     Passi di I/O che dipendono l'uno dall'altro?          & $\rightarrow$ \texttt{.await} in sequenza                             \\
     Avviare un'attività indipendente / cancellabile?      & $\rightarrow$ \texttt{tokio::spawn} $\rightarrow$ \texttt{JoinHandle} \\
@@ -1344,6 +1343,7 @@ Spesso è più semplice passare messaggi che condividere memoria
 \end{tcolorbox}
 
 
+\newpage
 \subsection{Comunicare invece di condividere: i canali}
 
 \begin{figure}[h!]
@@ -1673,7 +1673,9 @@ fn copy(h1: FileHandle, h2: FileHandle) ->
 \section{Prestazioni a confronto}
 
 I costi di creazione e cambiamento di contesto tra attività asincrone e thread sono
-analizzati nel sito https://github.com/jimblandy/context-switch.
+analizzati nel sito
+
+https://github.com/jimblandy/context-switch.
 Il sito riporta la metodologia, il codice e i risultati ottenuti su un elaboratore
 specifico, con il relativo sistema operativo. Gli ordini di grandezza sono comunque interessanti.
 
