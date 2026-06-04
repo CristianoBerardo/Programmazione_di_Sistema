@@ -43,7 +43,10 @@ Da implementare: lock, syscall e sistema di memoria virtuale.
 
 \subsection{Debug OS161}
 Aprire due terminali: il primo in ascolto con \verb|sys161 -w kernel| e il secondo lancia
-il debug con \verb|ddd --debugger mips-harvard-os161-gdb kernel|.
+il debug con
+
+
+\verb|ddd --debugger mips-harvard-os161-gdb kernel|.
 
 \subsection{Threads e processi}
 
@@ -51,6 +54,11 @@ il debug con \verb|ddd --debugger mips-harvard-os161-gdb kernel|.
 Con \verb|fork()| si possono creare più istanze dello stesso programma.
 \textbf{Thread} rappresenta un \textbf{flusso di esecuzione} all'interno di un processo. Ha associato un \textbf{stack}, \textbf{PC} e \textbf{registri}.
 
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\linewidth]{content/OS_Internals/images/2026-06-03-13-22-41.png}
+\end{figure}
 
 I thread possono essere di due tipi: \textbf{user thread} e \textbf{kernel thread}.
 Il \textbf{codice} e o \textbf{dati globali} sono condivisi tra thread.
@@ -127,7 +135,7 @@ Gli altri 2GB sono riservati al kernel così mappati:
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.4\linewidth]{content/OS_Internals/images/2026-05-31-15-37-48.png}
+  \includegraphics[width=0.6\linewidth]{content/OS_Internals/images/2026-05-31-15-37-48.png}
 \end{figure}
 
 
@@ -203,7 +211,7 @@ Viene usata:
   \hfill
   \begin{minipage}{0.3\linewidth}
     \centering
-    \includegraphics[width=0.5\linewidth]{content/OS_Internals/images/2026-05-31-16-10-30.png}5  \end{minipage}
+    \includegraphics[width=0.5\linewidth]{content/OS_Internals/images/2026-05-31-16-10-30.png}  \end{minipage}
 \end{flushleft}
 
 Per implementare \verb|freeppages()|, servono alcune strutture dati fondamentali:
